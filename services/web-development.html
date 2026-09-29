@@ -1,0 +1,323 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Web Development & PWA Engineering | Vyomantra Technologies</title>
+  <meta name="description"
+    content="High-performance, conversion-focused custom web applications, React & Next.js architectures, Progressive Web Apps (PWAs), and scalable API backends by Vyomantra Technologies.">
+  <link rel="canonical" href="https://vyomantratech.com/services/web-development.html">
+  <meta property="og:title" content="Custom Web Development | Vyomantra Technologies">
+  <meta property="og:description"
+    content="Fast, scalable web applications engineered with modern React, Next.js, and Node.js architectures.">
+  <link rel="icon" type="image/png" href="../assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="../index.html" class="brand-logo">
+        <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="../index.html" class="nav-link">Home</a></li>
+          <li class="dropdown">
+            <a href="../services.html" class="nav-link active">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="web-development.html" class="dropdown-item">Web Development</a>
+              <a href="mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="software-development.html" class="dropdown-item">Software Development</a>
+              <a href="ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="automation.html" class="dropdown-item">Automation</a>
+              <a href="erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="seo.html" class="dropdown-item">SEO</a>
+              <a href="branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="../solutions.html" class="nav-link">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="../solutions/business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="../solutions/custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="../solutions/erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="../solutions/ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="../solutions/automation.html" class="dropdown-item">Automation</a>
+              <a href="../solutions/saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="../solutions/ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="../products.html" class="nav-link">Products</a></li>
+          <li><a href="../portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="../about.html" class="nav-link">About Us</a></li>
+          <li><a href="../careers.html" class="nav-link">Careers</a></li>
+          <li><a href="../courses.html" class="nav-link">Courses</a></li>
+          <li><a href="../contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="../index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="../services.html" class="mobile-nav-link active">Services</a></li>
+      <li><a href="../solutions.html" class="mobile-nav-link">Solutions</a></li>
+      <li><a href="../products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="../portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="../about.html" class="mobile-nav-link">About Us</a></li>
+      <li><a href="../careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="../courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="../contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <div style="padding: 1.5rem; text-align: center;">
+      <a href="../request-a-quote.html" class="btn btn-primary" style="width: 100%;">Get a Quote</a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero hero-centered" style="padding: 4.5rem 0 3rem 0;">
+    <div class="container">
+      <div class="hero-header-centered">
+        <span class="badge-pill" style="margin-bottom: 1.25rem;">Web Architecture</span>
+        <h1 class="hero-title">
+          Custom Web Development <br>
+          <span class="gradient-text">& Progressive Web Apps</span>
+        </h1>
+        <p class="hero-subtitle">
+          We architect ultra-fast, responsive web applications engineered for speed, search dominance, and high
+          conversions. Built with React, Next.js, Node.js, and modern headless systems.
+        </p>
+        <div class="hero-cta-group" style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+          <a href="../request-a-quote.html" class="btn btn-primary">Start Your Project</a>
+          <a href="../portfolio.html" class="btn btn-outline">View Web Portfolio</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Deliverables Grid -->
+  <section style="padding: 3rem 0 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Core Capabilities</span>
+        <h2 class="section-title">What Our Web Engineering Includes</h2>
+        <p class="section-desc">From single-page web applications to complex enterprise portals, every deliverable is
+          built for extreme performance and scalability.</p>
+      </div>
+
+      <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-code"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Next.js & React</span>
+          <h3>Modern Single-Page & SSR Apps</h3>
+          <p>Server-side rendered (SSR) and statically generated (SSG) architectures that load in milliseconds, maximize
+            Google Core Web Vitals, and deliver flawless fluid user experiences.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> React 18+ & Next.js App Router</li>
+            <li><i class="fas fa-check-circle"></i> Instant sub-second navigation</li>
+            <li><i class="fas fa-check-circle"></i> 95+ Google PageSpeed guaranteed</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-mobile-alt"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">App-Like
+            Web</span>
+          <h3>Progressive Web Apps (PWAs)</h3>
+          <p>Transform your website into an installable application. Users can install your app directly from their
+            browser, use it offline, and receive native push notifications.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Offline-first service worker caching</li>
+            <li><i class="fas fa-check-circle"></i> Web push notification channels</li>
+            <li><i class="fas fa-check-circle"></i> Zero app store friction or fees</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-database"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">API & Backend</span>
+          <h3>Scalable Backends & REST/GraphQL</h3>
+          <p>High-throughput backend services engineered with Node.js, Python FastAPI, and PostgreSQL. Engineered to
+            handle thousands of concurrent users with sub-50ms latency.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Clean REST & GraphQL API endpoints</li>
+            <li><i class="fas fa-check-circle"></i> JWT authentication & role security</li>
+            <li><i class="fas fa-check-circle"></i> Redis caching & database indexing</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-shield-alt"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">Security &
+            DevOps</span>
+          <h3>Enterprise Security & Cloud Deployment</h3>
+          <p>Bank-grade SSL encryption, automated DDoS mitigation, CI/CD automated deployment pipelines, and continuous
+            uptime monitoring on AWS, Google Cloud, or Vercel.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Automated automated GitHub Actions CI/CD</li>
+            <li><i class="fas fa-check-circle"></i> Cloudflare WAF & rate-limiting</li>
+            <li><i class="fas fa-check-circle"></i> 99.99% service availability</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Process & Workflow -->
+  <section style="background: rgba(12, 16, 38, 0.4); padding: 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Engineering Lifecycle</span>
+        <h2 class="section-title">How We Build Your Web Application</h2>
+        <p class="section-desc">A transparent, agile workflow delivering milestone-driven code with continuous testing.
+        </p>
+      </div>
+
+      <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--cyan); margin-bottom:0.75rem;">01 /
+            ARCHITECTURE</div>
+          <h4>Discovery & Tech Blueprint</h4>
+          <p>We analyze user flows, database schemas, API contracts, and define optimal technology stack tailored to
+            your speed and budget.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--purple); margin-bottom:0.75rem;">02 /
+            UI/UX & PROTOTYPE</div>
+          <h4>Figma Design & Wireframing</h4>
+          <p>Interactive high-fidelity prototypes showcasing responsive breakpoints, dark mode styling, and seamless
+            interaction states.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--cyan); margin-bottom:0.75rem;">03 /
+            SPRINTS & CODE</div>
+          <h4>Agile Development</h4>
+          <p>Clean, modular code written in bi-weekly sprints with live staging URLs so you review working features in
+            real time.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--purple); margin-bottom:0.75rem;">04 /
+            LAUNCH & SCALE</div>
+          <h4>QA, SEO & Cloud Launch</h4>
+          <p>Lighthouse audits, cross-device testing, automated security scans, and seamless cloud launch with
+            post-release maintenance.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pre-Footer Conversion Box -->
+  <section style="padding: 4rem 0 6rem 0;">
+    <div class="container">
+      <div class="intro-box" style="border-color: var(--border-cyan); text-align: center;">
+        <h2 style="font-size: 2.2rem; margin-bottom: 1rem;">Ready to Build Your High-Performance Web App?</h2>
+        <p style="font-size: 1.15rem; margin-bottom: 2rem; max-width: 650px; margin-left: auto; margin-right: auto;">
+          Tell us about your project requirements and receive a comprehensive architecture blueprint and transparent
+          milestone quote.
+        </p>
+        <a href="../request-a-quote.html" class="btn btn-primary btn-lg">Request a Project Quote</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand-logo">
+            <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+            <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+          </a>
+          <p>Enterprise software development, custom web architectures, and autonomous AI systems engineered for modern
+            business scale.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="web-development.html">Web Development</a></li>
+            <li><a href="mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="software-development.html">Software Development</a></li>
+            <li><a href="ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="../solutions/business-websites.html">Business Websites</a></li>
+            <li><a href="../solutions/custom-software.html">Custom Software</a></li>
+            <li><a href="../solutions/erp-crm.html">ERP & CRM</a></li>
+            <li><a href="../solutions/ai-solutions.html">AI Solutions</a></li>
+            <li><a href="../products/stockmitra.html">StockMitra</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Dharmapuri, Tamil
+              Nadu, India</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="../request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p><a href="../privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a
+            href="../terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a>
+          <a href="../refund-policy.html" style="color:var(--text-dim);">Refund Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Quick Action Dock -->
+  <div class="floating-dock">
+    <a href="https://wa.me/918122288855" target="_blank" class="dock-btn dock-whatsapp" aria-label="WhatsApp Us">
+      <img src="../assets/icons/whatsapp.png" alt="WhatsApp">
+    </a>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

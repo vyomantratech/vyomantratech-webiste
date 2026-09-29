@@ -1,0 +1,323 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile App Development (iOS & Android) | Vyomantra Technologies</title>
+  <meta name="description"
+    content="High-performance native and cross-platform iOS and Android mobile app development with React Native, Flutter, and Swift by Vyomantra Technologies.">
+  <link rel="canonical" href="https://vyomantratech.com/services/mobile-app-development.html">
+  <meta property="og:title" content="Mobile App Development | Vyomantra Technologies">
+  <meta property="og:description"
+    content="Native and cross-platform mobile apps engineered for speed, intuitive UX, and seamless app store releases.">
+  <link rel="icon" type="image/png" href="../assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="../index.html" class="brand-logo">
+        <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="../index.html" class="nav-link">Home</a></li>
+          <li class="dropdown">
+            <a href="../services.html" class="nav-link active">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="web-development.html" class="dropdown-item">Web Development</a>
+              <a href="mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="software-development.html" class="dropdown-item">Software Development</a>
+              <a href="ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="automation.html" class="dropdown-item">Automation</a>
+              <a href="erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="seo.html" class="dropdown-item">SEO</a>
+              <a href="branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="../solutions.html" class="nav-link">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="../solutions/business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="../solutions/custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="../solutions/erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="../solutions/ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="../solutions/automation.html" class="dropdown-item">Automation</a>
+              <a href="../solutions/saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="../solutions/ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="../products.html" class="nav-link">Products</a></li>
+          <li><a href="../portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="../about.html" class="nav-link">About Us</a></li>
+          <li><a href="../careers.html" class="nav-link">Careers</a></li>
+          <li><a href="../courses.html" class="nav-link">Courses</a></li>
+          <li><a href="../contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="../index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="../services.html" class="mobile-nav-link active">Services</a></li>
+      <li><a href="../solutions.html" class="mobile-nav-link">Solutions</a></li>
+      <li><a href="../products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="../portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="../about.html" class="mobile-nav-link">About Us</a></li>
+      <li><a href="../careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="../courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="../contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <div style="padding: 1.5rem; text-align: center;">
+      <a href="../request-a-quote.html" class="btn btn-primary" style="width: 100%;">Get a Quote</a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero hero-centered" style="padding: 4.5rem 0 3rem 0;">
+    <div class="container">
+      <div class="hero-header-centered">
+        <span class="badge-pill badge-purple" style="margin-bottom: 1.25rem;">iOS & Android Engineering</span>
+        <h1 class="hero-title">
+          Custom Mobile App Development <br>
+          <span class="gradient-text">Built for Scale & 60 FPS Fluidity</span>
+        </h1>
+        <p class="hero-subtitle">
+          Turn your digital vision into an intuitive, high-engagement mobile application. We build native and
+          cross-platform apps using React Native and Flutter with real-time sync, offline storage, and seamless payment
+          flows.
+        </p>
+        <div class="hero-cta-group" style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+          <a href="../request-a-quote.html" class="btn btn-primary">Start Your Mobile Project</a>
+          <a href="../portfolio.html" class="btn btn-outline">Explore Case Studies</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Deliverables Grid -->
+  <section style="padding: 3rem 0 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">App Capabilities</span>
+        <h2 class="section-title">End-to-End Mobile Solutions</h2>
+        <p class="section-desc">From idea validation to Apple App Store and Google Play Store deployment, we handle
+          every stage of native and cross-platform mobile engineering.</p>
+      </div>
+
+      <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fab fa-react"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Cross-Platform</span>
+          <h3>React Native & Flutter Apps</h3>
+          <p>Single codebase delivering 100% native performance on both iOS and Android. Save 40% in engineering and
+            maintenance costs without sacrificing gesture fluidity or platform design standards.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> 60fps native UI rendering & animations</li>
+            <li><i class="fas fa-check-circle"></i> Single unified codebase for iOS & Android</li>
+            <li><i class="fas fa-check-circle"></i> Seamless native device API integrations</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-bell"></i></div>
+          <span class="badge-pill badge-purple"
+            style="align-self: flex-start; margin-bottom: 0.75rem;">Engagement</span>
+          <h3>Push Notifications & Real-Time Sync</h3>
+          <p>Integrate Firebase Cloud Messaging (FCM) and OneSignal to deliver targeted behavioral push alerts,
+            automated re-engagement triggers, and real-time WebSocket state synchronization.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Automated segment-based push campaigns</li>
+            <li><i class="fas fa-check-circle"></i> Real-time chat & location telematics</li>
+            <li><i class="fas fa-check-circle"></i> Offline-first database sync (SQLite/WatermelonDB)</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-credit-card"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Fintech & Commerce</span>
+          <h3>In-App Purchases & UPI Payments</h3>
+          <p>Compliant, secure in-app checkout flows supporting Razorpay SDK, Google Pay, Apple Pay, Stripe, and
+            subscription billing with automated invoice receipting.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Apple In-App Purchase & Google Play Billing</li>
+            <li><i class="fas fa-check-circle"></i> 1-click UPI payments (GPay, PhonePe, Paytm)</li>
+            <li><i class="fas fa-check-circle"></i> PCI-DSS compliant tokenized security</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-upload"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">Store
+            Approvals</span>
+          <h3>App Store & Play Store Publishing</h3>
+          <p>Complete management of store listings, privacy compliance, screenshot generation, certificate signing, test
+            flight releases, and guaranteed approval on Google Play & Apple App Store.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> End-to-end store review management</li>
+            <li><i class="fas fa-check-circle"></i> App Store Optimization (ASO) setup</li>
+            <li><i class="fas fa-check-circle"></i> Crashlytics & Sentry error monitoring</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Process & Workflow -->
+  <section style="background: rgba(12, 16, 38, 0.4); padding: 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Development Lifecycle</span>
+        <h2 class="section-title">How We Build Mobile Products</h2>
+        <p class="section-desc">From interactive Figma prototypes to app store release and continuous post-launch
+          performance monitoring.</p>
+      </div>
+
+      <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--cyan); margin-bottom:0.75rem;">01 /
+            PROTOTYPING</div>
+          <h4>UX & Clickable Wireframes</h4>
+          <p>Native iOS & Android mobile patterns tested on actual devices to ensure thumb-friendly navigation and
+            intuitive user journeys.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--purple); margin-bottom:0.75rem;">02 /
+            BACKEND & API</div>
+          <h4>Cloud API & Data Engine</h4>
+          <p>Secure authentication, database schemas, and microservice APIs built with sub-second response times and
+            robust offline sync.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--cyan); margin-bottom:0.75rem;">03 /
+            CLIENT BUILDS</div>
+          <h4>TestFlight & Beta Testing</h4>
+          <p>Weekly build releases on TestFlight and Google Internal Testing so your stakeholders test features on real
+            devices throughout development.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--purple); margin-bottom:0.75rem;">04 /
+            LAUNCH & ASO</div>
+          <h4>Store Launch & Support</h4>
+          <p>Full publishing to Apple App Store and Google Play with crash monitoring, rating alerts, and long-term OS
+            compatibility updates.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pre-Footer Conversion Box -->
+  <section style="padding: 4rem 0 6rem 0;">
+    <div class="container">
+      <div class="intro-box" style="border-color: var(--border-purple); text-align: center;">
+        <h2 style="font-size: 2.2rem; margin-bottom: 1rem;">Have an App Idea Ready to Build?</h2>
+        <p style="font-size: 1.15rem; margin-bottom: 2rem; max-width: 650px; margin-left: auto; margin-right: auto;">
+          Contact our mobile engineering team for a confidential technical evaluation and estimated delivery schedule.
+        </p>
+        <a href="../request-a-quote.html" class="btn btn-primary btn-lg">Request App Architecture Quote</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand-logo">
+            <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+            <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+          </a>
+          <p>Enterprise software development, custom web architectures, and autonomous AI systems engineered for modern
+            business scale.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="web-development.html">Web Development</a></li>
+            <li><a href="mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="software-development.html">Software Development</a></li>
+            <li><a href="ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="../solutions/business-websites.html">Business Websites</a></li>
+            <li><a href="../solutions/custom-software.html">Custom Software</a></li>
+            <li><a href="../solutions/erp-crm.html">ERP & CRM</a></li>
+            <li><a href="../solutions/ai-solutions.html">AI Solutions</a></li>
+            <li><a href="../products/stockmitra.html">StockMitra</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Dharmapuri, Tamil
+              Nadu, India</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="../request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p><a href="../privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a
+            href="../terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a>
+          <a href="../refund-policy.html" style="color:var(--text-dim);">Refund Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Quick Action Dock -->
+  <div class="floating-dock">
+    <a href="https://wa.me/918122288855" target="_blank" class="dock-btn dock-whatsapp" aria-label="WhatsApp Us">
+      <img src="../assets/icons/whatsapp.png" alt="WhatsApp">
+    </a>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

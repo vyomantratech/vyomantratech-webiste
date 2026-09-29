@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | Vyomantra Technologies | Web Development & AI</title>
+  <meta name="description"
+    content="Discover the story, vision, and elite engineering team behind Vyomantra Technologies in Dharmapuri, Tamil Nadu.">
+  <link rel="icon" type="image/png" href="assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li class="dropdown">
+            <a href="services.html" class="nav-link">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="services/web-development.html" class="dropdown-item">Web Development</a>
+              <a href="services/mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="services/software-development.html" class="dropdown-item">Software Development</a>
+              <a href="services/ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="services/automation.html" class="dropdown-item">Automation</a>
+              <a href="services/erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="services/ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="services/cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="services/digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="services/seo.html" class="dropdown-item">SEO</a>
+              <a href="services/branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="services/it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="solutions.html" class="nav-link">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="solutions/business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="solutions/custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="solutions/erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="solutions/ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="solutions/automation.html" class="dropdown-item">Automation</a>
+              <a href="solutions/saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="solutions/ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="products.html" class="nav-link">Products</a></li>
+          <li><a href="portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="about.html" class="nav-link active">About Us</a></li>
+          <li><a href="careers.html" class="nav-link">Careers</a></li>
+          <li><a href="courses.html" class="nav-link">Courses</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="services.html" class="mobile-nav-link">Services</a></li>
+      <li><a href="solutions.html" class="mobile-nav-link">Solutions</a></li>
+      <li><a href="products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="about.html" class="mobile-nav-link active">About Us</a></li>
+      <li><a href="careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <div style="padding: 1.5rem; text-align: center;">
+      <a href="request-a-quote.html" class="btn btn-primary" style="width: 100%;">Get a Quote</a>
+    </div>
+  </div>
+
+  <!-- Hero Header -->
+  <section class="about-hero" style="padding: 4rem 0 3rem 0; text-align: center;">
+    <div class="container">
+      <span class="badge-pill badge-purple" style="margin-bottom: 1rem;">Who We Are</span>
+      <h1 style="margin-bottom: 1.25rem;">
+        Crafting the Future of Tech with <br>
+        <span class="gradient-text">Purpose, Precision & Code</span>
+      </h1>
+      <p style="max-width: 680px; margin: 0 auto; font-size: 1.15rem;">
+        We bridge the gap between high-level enterprise software development and real-world technology training.
+      </p>
+    </div>
+  </section>
+
+  <!-- Story & Journey Section -->
+  <section class="journey-section" style="padding-top: 1rem;">
+    <div class="container hero-grid" style="align-items: center;">
+      <div>
+        <span class="section-tag">Origin Story</span>
+        <h2 style="font-size: 2.3rem; margin-bottom: 1.25rem;">Our Journey</h2>
+        <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.25rem;">
+          <strong style="color:var(--cyan);">VYOMANTRA TECHNOLOGIES</strong> was born from a simple belief:
+          <em>technology should empower, not overwhelm.</em>
+        </p>
+        <p style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.25rem;">
+          In 2025, <strong>S.B. Sachin</strong> left a high-paying corporate career to architect a modern technology hub
+          combining <u>world-class software development</u> with <u>hands-on tech mentorship</u> — creating high-paying
+          tech careers, mentoring young innovators, and delivering digital solutions that scale.
+        </p>
+        <p style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.25rem;">
+          From a small workspace in Dharmapuri, we've trained <strong>200+ students</strong>, launched <strong>50+
+            enterprise websites</strong>, and helped <strong>20+ businesses</strong> go digital with intelligent
+          automated systems.
+        </p>
+        <p style="font-size: 1.2rem; font-weight: 600; color: var(--purple);">
+          Today, we're not just a company — we're an unstoppable technological movement.
+        </p>
+      </div>
+
+      <div style="position: relative;">
+        <div
+          style="border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-cyan); box-shadow: 0 15px 45px rgba(0,0,0,0.7);">
+          <img src="assets/photos/team_squad.png" alt="Vyomantra Core Engineering Squad"
+            style="width: 100%; height: auto; display: block;">
+        </div>
+        <div
+          style="position: absolute; bottom: -15px; right: -15px; background: rgba(5,7,17,0.9); border: 1px solid var(--border-purple); padding: 0.8rem 1.2rem; border-radius: var(--radius-md); backdrop-filter: blur(10px); font-family: var(--font-mono); font-size: 0.85rem; color: var(--cyan);">
+          <i class="fas fa-users"></i> The Core Engineering Squad
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Foundation: Vision, Mission, Values -->
+  <section class="foundation-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Guiding Principles</span>
+        <h2 class="section-title">Our Foundation</h2>
+        <p class="section-desc">The ideological bedrock that guides every line of code we write and every student we
+          mentor.</p>
+      </div>
+
+      <div class="services-grid">
+        <div class="service-card" style="border-color: rgba(0, 240, 255, 0.3);">
+          <div class="service-icon" style="color: var(--cyan);"><i class="fas fa-eye"></i></div>
+          <h3>Vision</h3>
+          <p>
+            To be the #1 launchpad for India's next <strong>10,000 technology leaders and AI engineers</strong> by 2030,
+            putting regional talent on the global innovation map.
+          </p>
+        </div>
+
+        <div class="service-card" style="border-color: rgba(139, 92, 246, 0.3);">
+          <div class="service-icon" style="color: var(--purple);"><i class="fas fa-rocket"></i></div>
+          <h3>Mission</h3>
+          <p>
+            Deliver job-ready, live-project training and enterprise-grade software solutions with <strong>uncompromising
+              integrity, relentless innovation, and measurable impact</strong>.
+          </p>
+        </div>
+
+        <div class="service-card" style="border-color: rgba(244, 63, 94, 0.3);">
+          <div class="service-icon" style="color: #f43f5e;"><i class="fas fa-heart"></i></div>
+          <h3>Core Values</h3>
+          <p>
+            <strong>Growth</strong> • <strong>Excellence</strong> • <strong>Community</strong> •
+            <strong>Transparency</strong>. We operate with radical honesty and dedication to craft.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- [LOCATION 3: ABOUT PAGE INNOVATION BLUEPRINT 50PX PIXEL ANIMATION] -->
+  <section class="innovation-blueprint"
+    style="background: rgba(10, 14, 34, 0.5); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+    <div class="container">
+      <div class="services-spotlight-wrapper" style="margin-top:0;">
+        <div class="spotlight-content">
+          <span class="badge-pill badge-purple" style="margin-bottom: 1rem;">Architectural Engine</span>
+          <h2 style="font-size: 2.2rem; margin-bottom: 1.25rem;">
+            Algorithmic Engineering & <br><span class="gradient-text">Future-Proof Tech Stack</span>
+          </h2>
+          <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
+            At Vyomantra Technologies, our engineering philosophy unites modern reactive frontends (React, Next.js),
+            robust distributed backends (Python, FastAPI, Node.js), and intelligent neural systems.
+          </p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-microchip"></i> High-performance asynchronous APIs with sub-millisecond execution</li>
+            <li><i class="fas fa-brain"></i> Fine-tuned LLM agents customized for business logic</li>
+            <li><i class="fas fa-lock"></i> Zero-trust cloud security and SOC-2 compliant database hygiene</li>
+          </ul>
+        </div>
+
+        <div class="spotlight-canvas-col">
+          <div class="pixel-canvas-wrapper animate-glow-border" title="Click to flip front / back">
+            <div class="hud-corner hud-tl"></div>
+            <div class="hud-corner hud-tr"></div>
+            <div class="hud-corner hud-bl"></div>
+            <div class="hud-corner hud-br"></div>
+            <div class="hud-badge">
+              <span class="hud-status"></span>
+              <span id="hud-status-3">SENTINEL ACTIVE (100%)</span>
+            </div>
+            <div class="hud-res-counter" id="hud-res-3">RES: 4K DECODED</div>
+
+            <img class="pixel-fallback-img" src="assets/ai/vyomantra_ai_sentinel.jpg" alt="Vyomantra AI Sentinel">
+            <canvas id="aboutCanvas" class="pixel-scroll-canvas" data-pixel-scroll="true" data-max-block="30"
+              data-front-image="assets/ai/vyomantra_ai_sentinel.jpg"
+              data-back-image="assets/ai/vyomantra_ai_lattice.jpg" data-hud-counter="hud-res-3"
+              data-hud-status="hud-status-3">
+            </canvas>
+          </div>
+
+          <div class="pixel-morph-hint">
+            <i class="fas fa-arrows-alt-v"></i> Scroll to morph between Sentinel &amp; Lattice • Click to flip
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Complete Team Roster Section -->
+  <section class="team-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Leadership & Engineers</span>
+        <h2 class="section-title">Meet Our Team</h2>
+        <p class="section-desc">The passionate minds, developers, creators, and advisors powering Vyomantra
+          Technologies.</p>
+      </div>
+
+      <div class="team-grid">
+        <!-- 1. Sachin -->
+        <div class="team-card">
+          <div class="team-avatar-box">
+            <img src="assets/Team/sachin.png" alt="SACHIN S B">
+          </div>
+          <div class="team-info">
+            <h4>SACHIN S B</h4>
+            <span class="team-role">Founder, CEO</span>
+            <p class="team-bio">Enterprise Architecture • AI Strategy • Creative Direction & Technical Engineering</p>
+          </div>
+        </div>
+
+        <!-- 2. Santhosh -->
+        <div class="team-card">
+          <div class="team-avatar-box">
+            <img src="assets/Team/santhosh.png" alt="SANTHOSH KUMAR S">
+          </div>
+          <div class="team-info">
+            <h4>SANTHOSH KUMAR S</h4>
+            <span class="team-role">Co-Founder, Director</span>
+            <p class="team-bio">Strategic Growth • Operations Management • AI & Cyber Architecture</p>
+          </div>
+        </div>
+
+        <!-- 3. Sivaperumalraj -->
+        <div class="team-card">
+          <div class="team-avatar-box">
+            <img src="assets/Team/sivaperumal.png" alt="SIVAPERUMALRAJ G">
+          </div>
+          <div class="team-info">
+            <h4>SIVAPERUMALRAJ G</h4>
+            <span class="team-role">Project Manager</span>
+            <p class="team-bio">Agile Delivery • Product Lifecycle • Client Solutions & Engineering Coordination</p>
+          </div>
+        </div>
+
+        <!-- 4. Rishikumar -->
+        <div class="team-card">
+          <div class="team-avatar-box">
+            <img src="assets/Team/rishi.png" alt="RISHIKUMAR V">
+          </div>
+          <div class="team-info">
+            <h4>RISHIKUMAR V</h4>
+            <span class="team-role">Tester and Backend</span>
+            <p class="team-bio">Automated QA Testing • Backend APIs • Database Architecture & Reliability</p>
+          </div>
+        </div>
+
+        <!-- 5. Punith Balaji -->
+        <div class="team-card">
+          <div class="team-avatar-box">
+            <img src="assets/Team/punith.png" alt="PUNITH BALAJI N">
+          </div>
+          <div class="team-info">
+            <h4>PUNITH BALAJI N</h4>
+            <span class="team-role">Frontend</span>
+            <p class="team-bio">React & Next.js • Responsive UI/UX • Fluid Micro-Interactions & Modern Web</p>
+          </div>
+        </div>
+
+        <!-- 6. Naveen -->
+        <div class="team-card">
+          <div class="team-avatar-box">
+            <img src="assets/Team/naveen.png" alt="NAVEEN">
+          </div>
+          <div class="team-info">
+            <h4>NAVEEN</h4>
+            <span class="team-role">Frontend and Cloud</span>
+            <p class="team-bio">Cloud Deployment • CI/CD Automation • Web Components & Scalable Frontend</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="about-cta"
+    style="background: linear-gradient(180deg, transparent, rgba(13, 18, 42, 0.8)); text-align: center; padding: 5rem 0;">
+    <div class="container">
+      <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Ready to Join the Movement?</h2>
+      <p style="max-width: 600px; margin: 0 auto 2rem auto; font-size: 1.15rem;">
+        Whether you are a student hungry for practical skills, a startup launching your MVP, or an established
+        enterprise scaling operations — let's build something phenomenal together.
+      </p>
+      <a href="contact.html" class="btn btn-primary btn-lg">Connect With Our Team</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo">
+            <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+            <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+          </a>
+          <p>Founded 2025 • CEO: <strong>S.B. Sachin</strong>. Delivering enterprise digital solutions and high-impact
+            technology training.</p>
+          <div class="social-links">
+            <a href="https://wa.me/918122288855" target="_blank" class="social-link" aria-label="WhatsApp"><img
+                src="assets/icons/whatsapp.png" alt="WhatsApp"></a>
+            <a href="https://www.instagram.com/vyomantratech" target="_blank" class="social-link"
+              aria-label="Instagram"><img src="assets/icons/instagram.png" alt="Instagram"></a>
+            <a href="https://www.facebook.com/profile.php?id=61593276075676" target="_blank" class="social-link"
+              aria-label="Facebook"><img src="assets/icons/facebook.png" alt="Facebook"></a>
+            <a href="https://twitter.com/vyomantratech" target="_blank" class="social-link" aria-label="Twitter"><img
+                src="assets/icons/twitter.png" alt="Twitter"></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="services/web-development.html">Web Development</a></li>
+            <li><a href="services/mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="services/software-development.html">Software Development</a></li>
+            <li><a href="services/ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="services/cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="solutions/business-websites.html">Business Websites</a></li>
+            <li><a href="solutions/custom-software.html">Custom Software</a></li>
+            <li><a href="solutions/erp-crm.html">ERP & CRM</a></li>
+            <li><a href="solutions/ecommerce.html">E-commerce</a></li>
+            <li><a href="products/stockmitra.html">StockMitra (POS & Billing)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Gopal Colony,
+              Pidamaneri, Dharmapuri, TN 636701</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p><a href="privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a
+            href="terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a> <a
+            href="refund-policy.html" style="color:var(--text-dim);">Refund Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="js/pixel-scroll.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vyomantra Technologies | Web Development, AI Solutions & Software Engineering</title>
+  <meta name="description"
+    content="Vyomantra Technologies offers expert Web Development, AI Solutions, Custom Software, and Tech Training. 10x your business with our digital architectures.">
+  <link rel="canonical" href="https://vyomantratech.com/">
+  <link rel="icon" type="image/png" href="assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+
+  <!-- Full-Screen 100px Line-by-Line Background Video Canvas -->
+  <canvas id="fullscreenPixelBg"></canvas>
+
+  <!-- Minimalist Cyber Line-by-Line HUD Scanner Badge -->
+  <div id="fullscreenScanHud" class="fullscreen-scan-hud">
+    <span class="hud-pulse-dot"></span>
+    <span>100PX MATRIX STREAM • ROW 01/8 DECODE • 0%</span>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link active">Home</a></li>
+          <li class="dropdown">
+            <a href="services.html" class="nav-link">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="services/web-development.html" class="dropdown-item">Web Development</a>
+              <a href="services/mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="services/software-development.html" class="dropdown-item">Software Development</a>
+              <a href="services/ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="services/automation.html" class="dropdown-item">Automation</a>
+              <a href="services/erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="services/ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="services/cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="services/digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="services/seo.html" class="dropdown-item">SEO</a>
+              <a href="services/branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="services/it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="solutions.html" class="nav-link">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="solutions/business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="solutions/custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="solutions/erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="solutions/ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="solutions/automation.html" class="dropdown-item">Automation</a>
+              <a href="solutions/saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="solutions/ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="products.html" class="nav-link">Products</a></li>
+          <li><a href="portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="careers.html" class="nav-link">Careers</a></li>
+          <li><a href="courses.html" class="nav-link">Courses</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link active">Home</a></li>
+      <li><a href="services.html" class="mobile-nav-link">Services</a></li>
+      <li><a href="solutions.html" class="mobile-nav-link">Solutions</a></li>
+      <li><a href="products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="about.html" class="mobile-nav-link">About Us</a></li>
+      <li><a href="careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <div style="margin-top: 2rem;">
+      <a href="request-a-quote.html" class="btn btn-primary" style="width:100%;">Get a Quote</a>
+    </div>
+  </div>
+
+  <!-- ====================== HERO SECTION (TEXT & IMAGE ON SAME LINE) ====================== -->
+  <section id="home" class="hero">
+    <div class="container hero-grid">
+      <!-- Left Column: Text & CTA Buttons -->
+      <div class="hero-content">
+        <div class="hero-tagline">
+          <span class="indicator-dot"></span>
+          Next-Generation AI &amp; Web Systems
+        </div>
+        <h1 class="hero-title">
+          Empowering Innovation Through <br>
+          <span class="gradient-text">Technology &amp; AI Training</span>
+        </h1>
+        <p class="hero-subtitle">
+          Building tomorrow's tech leaders and intelligent digital platforms, one breakthrough project at a time.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="services.html" class="btn btn-primary btn-lg">Explore Services</a>
+          <a href="courses.html" class="btn btn-outline btn-lg">Explore Courses</a>
+          <a href="portfolio.html" class="btn btn-purple btn-lg">View Portfolio</a>
+        </div>
+      </div>
+
+      <!-- Right Column: AI Focal Viewport (On the EXACT SAME LINE) -->
+      <div class="hero-canvas-col">
+        <div class="pixel-canvas-wrapper animate-glow-border holographic-frame" title="Click to flip front / back">
+          <div class="hud-corner hud-tl"></div>
+          <div class="hud-corner hud-tr"></div>
+          <div class="hud-corner hud-bl"></div>
+          <div class="hud-corner hud-br"></div>
+
+          <div class="hud-badge">
+            <span class="hud-status"></span>
+            <span id="hud-status-1">AI CORE • ACTIVE</span>
+          </div>
+          <div class="hud-res-counter" id="hud-res-1">RES: 4K DECODED</div>
+
+          <img class="pixel-fallback-img" src="assets/ai/vyomantra_ai_core.jpg" alt="Vyomantra AI Core">
+          <canvas id="heroCanvas" class="pixel-scroll-canvas" data-pixel-scroll="true" data-max-block="30"
+            data-front-image="assets/ai/vyomantra_ai_core.jpg" data-back-image="assets/ai/vyomantra_ai_nexus.jpg"
+            data-hud-counter="hud-res-1" data-hud-status="hud-status-1">
+          </canvas>
+        </div>
+
+        <div class="pixel-morph-hint">
+          <i class="fas fa-arrows-alt-v"></i> Scroll to morph between Core &amp; Nexus • Click to flip
+        </div>
+      </div>
+    </div>
+
+    <!-- Below Columns: Festive Special Offer & Stats Row -->
+    <div class="container hero-secondary-container">
+      <div class="hero-secondary-grid">
+        <!-- Festive Offer Banner Card -->
+        <div class="festive-card">
+          <span class="festive-badge">🎉 Special Inaugural Offer</span>
+          <div class="festive-title">Custom Websites + AI Automation Tools</div>
+          <div class="festive-desc">Claim your complimentary architectural demo session with our engineering leads.
+          </div>
+          <a href="https://wa.me/918122288855?text=Hi!%20I%20want%20to%20claim%20the%20Vyomantra%20Special%20Offer"
+            target="_blank" class="festive-cta">
+            WhatsApp Now → +91 8122288855 <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <h4>50+</h4>
+            <p>Projects Delivered</p>
+          </div>
+          <div class="stat-item">
+            <h4>99%</h4>
+            <p>Client Satisfaction</p>
+          </div>
+          <div class="stat-item">
+            <h4>500+</h4>
+            <p>Trained Innovators</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== INTRO SECTION ====================== -->
+  <section class="intro-section" style="padding: 2rem 0;">
+    <div class="container">
+      <div class="intro-box">
+        <p class="intro-text">
+          <strong>VYOMANTRA TECHNOLOGIES</strong> — Founded in 2025 by <em>S.B. Sachin</em> and <em><span
+              style="white-space:nowrap">S. Santhosh Kumar</span></em>, we build innovative software and AI-powered
+          solutions that turn ideas into intelligent, scalable, and impactful digital experiences.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== CORE CAPABILITIES SCROLL EXPERIENCE ====================== -->
+  <style>
+    /* Capabilities Scroll Section */
+    .caps-scroll-section {
+      position: relative;
+      height: 500vh;
+      background: transparent;
+    }
+
+    .caps-sticky-wrap {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .caps-container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 3;
+    }
+
+    .caps-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .caps-header-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--cyan);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .caps-header-label::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--cyan);
+      opacity: 0.7;
+    }
+
+    .caps-main-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 3vw, 2.6rem);
+      font-weight: 800;
+      color: var(--text-highlight);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+
+    .caps-main-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 280px;
+      margin: 0;
+    }
+
+    .caps-counter {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .caps-counter-current {
+      font-family: var(--font-mono);
+      font-size: 3.2rem;
+      font-weight: 600;
+      color: var(--cyan);
+      line-height: 1;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+
+    .caps-counter-sep {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      color: var(--text-dim);
+    }
+
+    .caps-counter-total {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      color: var(--text-dim);
+    }
+
+    .caps-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .caps-progress-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.15rem 0;
+    }
+
+    .caps-progress-track {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 16px;
+    }
+
+    .caps-progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+    }
+
+    .caps-progress-dot.active {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.6), 0 0 20px rgba(0, 240, 255, 0.25);
+      transform: scale(1.4);
+    }
+
+    .caps-progress-dot.passed {
+      background: rgba(0, 240, 255, 0.3);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .caps-progress-line {
+      width: 1px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.07);
+      transition: background 0.4s ease;
+    }
+
+    .caps-progress-line.passed {
+      background: rgba(0, 240, 255, 0.3);
+    }
+
+    .caps-progress-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.4s ease;
+      white-space: nowrap;
+    }
+
+    .caps-progress-item.active .caps-progress-label {
+      color: var(--cyan);
+    }
+
+    .caps-progress-item.passed .caps-progress-label {
+      color: rgba(0, 240, 255, 0.5);
+    }
+
+    /* Card Stack */
+    .caps-right {
+      position: relative;
+      height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cap-card {
+      position: absolute;
+      inset: 0;
+      background: rgba(13, 18, 42, 0.75);
+      border: 1px solid rgba(0, 240, 255, 0.12);
+      border-radius: 22px;
+      padding: 3rem 3.2rem;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.2rem;
+      opacity: 0;
+      transform: translateY(60px) scale(0.93);
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.55s ease, border-color 0.55s ease;
+      pointer-events: none;
+      will-change: transform, opacity;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 rgba(0, 240, 255, 0);
+    }
+
+    .cap-card.ghost-2 {
+      inset: 28px 16px -28px 16px;
+      opacity: 0;
+      transform: translateY(0) scale(0.91);
+      z-index: 0;
+      background: rgba(8, 11, 28, 0.4);
+      border-color: rgba(0, 240, 255, 0.04);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .cap-card.ghost-1 {
+      inset: 16px 8px -16px 8px;
+      opacity: 0;
+      transform: translateY(0) scale(0.95);
+      z-index: 1;
+      background: rgba(10, 14, 34, 0.5);
+      border-color: rgba(0, 240, 255, 0.06);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .cap-card.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: all;
+      z-index: 10;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65), 0 0 40px rgba(0, 240, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border-color: rgba(0, 240, 255, 0.22);
+    }
+
+    .cap-card.exiting {
+      opacity: 0;
+      transform: translateY(-40px) scale(0.96);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .cap-card.upcoming {
+      opacity: 0;
+      transform: translateY(0) scale(1);
+      z-index: 1;
+    }
+
+    .cap-card[data-cap-index="4"].active {
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65), 0 0 60px rgba(139, 92, 246, 0.15),
+        0 0 120px rgba(0, 240, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .cap-card-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: var(--cyan);
+      flex-shrink: 0;
+      transition: all 0.4s ease;
+    }
+
+    .cap-card[data-cap-index="4"] .cap-card-icon-wrap {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: rgba(139, 92, 246, 0.3);
+      color: var(--purple);
+    }
+
+    .cap-card-category {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--cyan);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.75;
+    }
+
+    .cap-card[data-cap-index="4"] .cap-card-category {
+      color: var(--purple);
+    }
+
+    .cap-card-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.55rem, 2.5vw, 2.05rem);
+      font-weight: 800;
+      color: var(--text-highlight);
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      margin: 0;
+    }
+
+    .cap-card-tagline {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin: 0;
+    }
+
+    .cap-card[data-cap-index="4"] .cap-card-tagline {
+      color: #b8a1f8;
+    }
+
+    .cap-card-desc {
+      font-size: 0.975rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin: 0;
+      max-width: 460px;
+    }
+
+    .cap-card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+      padding: 0.65rem 1.5rem;
+      border-radius: 9999px;
+      background: transparent;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--cyan);
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      align-self: flex-start;
+    }
+
+    .cap-card-cta:hover {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.6);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.18);
+      transform: translateX(3px);
+    }
+
+    .cap-card[data-cap-index="4"] .cap-card-cta {
+      border-color: rgba(139, 92, 246, 0.4);
+      color: var(--purple);
+    }
+
+    .cap-card[data-cap-index="4"] .cap-card-cta:hover {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: rgba(139, 92, 246, 0.7);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+    }
+
+    .cap-ai-particles {
+      position: absolute;
+      inset: -20px;
+      pointer-events: none;
+      overflow: hidden;
+      border-radius: 26px;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: 15;
+    }
+
+    .cap-ai-particles.show {
+      opacity: 1;
+    }
+
+    .cap-node {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--purple);
+      box-shadow: 0 0 6px var(--purple);
+      animation: floatNode 4s ease-in-out infinite;
+    }
+
+    @keyframes floatNode {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: translateY(-12px) scale(1.4);
+        opacity: 1;
+      }
+    }
+
+    .caps-sticky-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 65% 50%, rgba(0, 240, 255, 0.04) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 20% 50%, rgba(139, 92, 246, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .caps-scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      opacity: 0.4;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .caps-scroll-hint.hidden {
+      opacity: 0;
+    }
+
+    .caps-scroll-hint span {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .caps-scroll-arrow {
+      width: 18px;
+      height: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .caps-scroll-arrow::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 8px;
+      background: var(--cyan);
+      border-radius: 2px;
+      animation: scrollDrop 1.5s ease-in-out infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes scrollDrop {
+
+      0%,
+      100% {
+        top: 5px;
+        opacity: 0.7;
+      }
+
+      60% {
+        top: 14px;
+        opacity: 0.2;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cap-card {
+        transition: opacity 0.2s ease;
+      }
+
+      .cap-node {
+        animation: none;
+      }
+
+      .caps-scroll-arrow::after {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .caps-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .caps-left {
+        gap: 1rem;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .caps-main-desc {
+        display: none;
+      }
+
+      .caps-progress {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .caps-progress-track {
+        flex-direction: row;
+        width: auto;
+      }
+
+      .caps-progress-line {
+        height: 1px;
+        width: 20px;
+      }
+
+      .caps-progress-label {
+        display: none;
+      }
+
+      .caps-right {
+        height: 430px;
+        width: 100%;
+      }
+
+      .cap-card {
+        padding: 2rem 1.75rem;
+      }
+
+      .cap-card-desc {
+        max-width: 100%;
+      }
+
+      .caps-main-title {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .caps-right {
+        height: 470px;
+      }
+
+      .cap-card {
+        padding: 1.6rem 1.4rem;
+        gap: 0.9rem;
+      }
+
+      .caps-scroll-section {
+        height: 550vh;
+      }
+
+      .cap-card-title {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+
+  <!-- ====================== CORE SERVICES ====================== -->
+  <section id="services" class="caps-scroll-section" aria-label="Our Core Capabilities">
+    <div class="caps-sticky-wrap">
+      <div class="caps-sticky-bg"></div>
+      <div class="caps-container">
+
+        <!-- LEFT panel -->
+        <div class="caps-left">
+          <div class="caps-header-label">What We Deliver</div>
+          <h2 class="caps-main-title">Our Core<br>Capabilities</h2>
+          <p class="caps-main-desc">From blazing-fast web architectures to custom AI agents &mdash; software that scales
+            your enterprise.</p>
+          <div class="caps-counter">
+            <span class="caps-counter-current" id="capsCounterCurrent">01</span>
+            <span class="caps-counter-sep">/</span>
+            <span class="caps-counter-total">05</span>
+          </div>
+          <div class="caps-progress" id="capsProgress" role="list" aria-label="Capabilities progress">
+            <div class="caps-progress-item active" data-idx="0" role="listitem">
+              <div class="caps-progress-track">
+                <div class="caps-progress-dot active"></div>
+                <div class="caps-progress-line"></div>
+              </div>
+              <span class="caps-progress-label">Web Dev</span>
+            </div>
+            <div class="caps-progress-item" data-idx="1" role="listitem">
+              <div class="caps-progress-track">
+                <div class="caps-progress-dot"></div>
+                <div class="caps-progress-line"></div>
+              </div>
+              <span class="caps-progress-label">E-Commerce</span>
+            </div>
+            <div class="caps-progress-item" data-idx="2" role="listitem">
+              <div class="caps-progress-track">
+                <div class="caps-progress-dot"></div>
+                <div class="caps-progress-line"></div>
+              </div>
+              <span class="caps-progress-label">Courses</span>
+            </div>
+            <div class="caps-progress-item" data-idx="3" role="listitem">
+              <div class="caps-progress-track">
+                <div class="caps-progress-dot"></div>
+                <div class="caps-progress-line"></div>
+              </div>
+              <span class="caps-progress-label">Business</span>
+            </div>
+            <div class="caps-progress-item" data-idx="4" role="listitem">
+              <div class="caps-progress-track">
+                <div class="caps-progress-dot"></div>
+                <div class="caps-progress-line" style="visibility:hidden;"></div>
+              </div>
+              <span class="caps-progress-label">AI &amp; Auto</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: card stack -->
+        <div class="caps-right" id="capsRight">
+          <div class="cap-card ghost-2" aria-hidden="true"></div>
+          <div class="cap-card ghost-1" aria-hidden="true"></div>
+
+          <div class="cap-card active" data-cap-index="0" id="capCard0" role="article"
+            aria-label="Capability 1 of 5: Web Development">
+            <div class="cap-card-icon-wrap"><i class="fas fa-laptop-code" aria-hidden="true"></i></div>
+            <span class="cap-card-category">01 &mdash; Service</span>
+            <h3 class="cap-card-title">Web Development</h3>
+            <p class="cap-card-tagline">Launch a website that works as hard as you do.</p>
+            <p class="cap-card-desc">Blazing-fast, mobile-first, React &amp; Node.js powered architectures engineered
+              for ultra-high conversion and Google Lighthouse perfection.</p>
+            <a href="services/web-development.html" class="cap-card-cta">Explore Service <i class="fas fa-arrow-right"
+                aria-hidden="true"></i></a>
+          </div>
+
+          <div class="cap-card" data-cap-index="1" id="capCard1" role="article"
+            aria-label="Capability 2 of 5: E-commerce Websites">
+            <div class="cap-card-icon-wrap"><i class="fas fa-shopping-cart" aria-hidden="true"></i></div>
+            <span class="cap-card-category">02 &mdash; Solution</span>
+            <h3 class="cap-card-title">E-commerce Websites</h3>
+            <p class="cap-card-tagline">Turn browsers into loyal buyers.</p>
+            <p class="cap-card-desc">Secure online stores with seamless Razorpay integration, automated inventory
+              tracking, and lightning-fast customer checkout flows.</p>
+            <a href="solutions/ecommerce.html" class="cap-card-cta">Explore Solution <i class="fas fa-arrow-right"
+                aria-hidden="true"></i></a>
+          </div>
+
+          <div class="cap-card" data-cap-index="2" id="capCard2" role="article"
+            aria-label="Capability 3 of 5: Tech Courses & Mentorship">
+            <div class="cap-card-icon-wrap"><i class="fas fa-graduation-cap" aria-hidden="true"></i></div>
+            <span class="cap-card-category">03 &mdash; Education</span>
+            <h3 class="cap-card-title">Tech Courses &amp; Mentorship</h3>
+            <p class="cap-card-tagline">Master tomorrow's technology today.</p>
+            <p class="cap-card-desc">Intensive live project cohorts, 1-on-1 industry mentorship, resume construction,
+              and globally accredited certifications.</p>
+            <a href="courses.html" class="cap-card-cta">Explore Courses <i class="fas fa-arrow-right"
+                aria-hidden="true"></i></a>
+          </div>
+
+          <div class="cap-card" data-cap-index="3" id="capCard3" role="article"
+            aria-label="Capability 4 of 5: Business Solutions">
+            <div class="cap-card-icon-wrap"><i class="fas fa-briefcase" aria-hidden="true"></i></div>
+            <span class="cap-card-category">04 &mdash; Enterprise</span>
+            <h3 class="cap-card-title">Business Solutions</h3>
+            <p class="cap-card-tagline">Scale smarter, not harder.</p>
+            <p class="cap-card-desc">Custom enterprise CRM, ERP portals, database pipelines, and automated multi-channel
+              communication workflows.</p>
+            <a href="solutions.html" class="cap-card-cta">Explore Solutions <i class="fas fa-arrow-right"
+                aria-hidden="true"></i></a>
+          </div>
+
+          <div class="cap-card" data-cap-index="4" id="capCard4" role="article"
+            aria-label="Capability 5 of 5: AI & Automation">
+            <div class="cap-card-icon-wrap"><i class="fas fa-robot" aria-hidden="true"></i></div>
+            <span class="cap-card-category">05 &mdash; Intelligence</span>
+            <h3 class="cap-card-title">AI &amp; Automation</h3>
+            <p class="cap-card-tagline">Autonomous Intelligence.</p>
+            <p class="cap-card-desc">24/7 intelligent chatbots, automated customer follow-ups, predictive analytics
+              dashboards, and custom LLM integrations.</p>
+            <a href="services/ai-machine-learning.html" class="cap-card-cta">Explore AI Capabilities <i
+                class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          </div>
+
+          <div class="cap-ai-particles" id="capAiParticles" aria-hidden="true">
+            <span class="cap-node" style="left:8%;top:15%;animation-delay:0s;animation-duration:3.8s;"></span>
+            <span class="cap-node" style="left:92%;top:20%;animation-delay:0.6s;animation-duration:4.2s;"></span>
+            <span class="cap-node" style="left:5%;top:75%;animation-delay:1.2s;animation-duration:3.5s;"></span>
+            <span class="cap-node" style="left:95%;top:80%;animation-delay:1.8s;animation-duration:4.6s;"></span>
+            <span class="cap-node"
+              style="left:50%;top:5%;animation-delay:0.3s;animation-duration:5s;background:var(--cyan);"></span>
+            <span class="cap-node"
+              style="left:50%;top:95%;animation-delay:2.4s;animation-duration:3.2s;background:var(--cyan);"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="caps-scroll-hint" id="capsScrollHint">
+        <div class="caps-scroll-arrow"></div>
+        <span>Scroll to explore</span>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      'use strict';
+      var section = document.getElementById('services');
+      var cards = Array.from(document.querySelectorAll('.cap-card[data-cap-index]'));
+      var ghost1 = document.querySelector('.cap-card.ghost-1');
+      var ghost2 = document.querySelector('.cap-card.ghost-2');
+      var progressItems = Array.from(document.querySelectorAll('.caps-progress-item'));
+      var progressDots = Array.from(document.querySelectorAll('.caps-progress-dot'));
+      var progressLines = Array.from(document.querySelectorAll('.caps-progress-line:not([style*="hidden"])'));
+      var counterEl = document.getElementById('capsCounterCurrent');
+      var aiParticles = document.getElementById('capAiParticles');
+      var scrollHint = document.getElementById('capsScrollHint');
+      var N = cards.length;
+      var prevActive = 0;
+      var hintHidden = false;
+      function padTwo(n) { return n < 10 ? '0' + n : '' + n; }
+      function setActive(idx) {
+        if (idx === prevActive && cards[idx].classList.contains('active')) return;
+        var prev = prevActive; prevActive = idx;
+        counterEl.textContent = padTwo(idx + 1);
+        progressItems.forEach(function (item, i) {
+          item.classList.remove('active', 'passed');
+          progressDots[i].classList.remove('active', 'passed');
+          if (i < idx) { item.classList.add('passed'); progressDots[i].classList.add('passed'); }
+          else if (i === idx) { item.classList.add('active'); progressDots[i].classList.add('active'); }
+        });
+        // update lines
+        var lines = document.querySelectorAll('.caps-progress-line');
+        lines.forEach(function (l, i) { l.classList.remove('passed'); if (i < idx) l.classList.add('passed'); });
+        cards.forEach(function (card, i) {
+          card.classList.remove('active', 'exiting', 'upcoming');
+          if (i === idx) { card.classList.add('active'); }
+          else if (i === prev && prev !== idx) { card.classList.add('exiting'); setTimeout(function () { card.classList.remove('exiting'); }, 600); }
+          else if (i === idx + 1) { card.classList.add('upcoming'); }
+        });
+        if (ghost1 && ghost2) {
+          if (idx < N - 1) { ghost1.style.opacity = '0.35'; ghost2.style.opacity = '0.18'; }
+          else { ghost1.style.opacity = '0'; ghost2.style.opacity = '0'; }
+        }
+        if (aiParticles) {
+          if (idx === N - 1) { aiParticles.classList.add('show'); }
+          else { aiParticles.classList.remove('show'); }
+        }
+      }
+      function onScroll() {
+        if (!section) return;
+        var rect = section.getBoundingClientRect();
+        var totalH = section.offsetHeight - window.innerHeight;
+        var scrolled = -rect.top;
+        if (!hintHidden && scrolled > 80) { hintHidden = true; if (scrollHint) scrollHint.classList.add('hidden'); }
+        if (scrolled < 0) { setActive(0); return; }
+        if (scrolled >= totalH) { setActive(N - 1); return; }
+        var progress = scrolled / totalH;
+        var idx = Math.min(Math.floor(progress * N), N - 1);
+        setActive(idx);
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (mq && mq.matches) { cards.forEach(function (c) { c.style.transition = 'none'; }); }
+    })();
+  </script>
+
+  <!-- AI Spotlight + Canvas (preserved from original) -->
+  <div id="spotlight" style="padding: 5rem 0; position:relative; z-index:2; background: rgba(12,16,38,0.3);">
+    <div class="container">
+      <div class="services-spotlight-wrapper">
+        <div class="spotlight-content">
+          <span class="badge-pill badge-purple" style="margin-bottom:1rem;">Spotlight Architecture</span>
+          <h3 style="font-size:2.1rem;margin-bottom:1rem;">Autonomous AI Integration &amp; <br><span
+              class="gradient-text">Predictive Workflows</span></h3>
+          <p style="font-size:1.05rem;line-height:1.7;margin-bottom:1.5rem;">We engineer autonomous AI pipelines that
+            eliminate manual operational bottlenecks. Whether processing leads, generating reports, or interfacing
+            customer queries via natural language, our systems unlock 10x leverage.</p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-check-circle"></i> Custom AI Assistant integration with WhatsApp &amp; Web</li>
+            <li><i class="fas fa-check-circle"></i> End-to-end data security and sub-second response times</li>
+            <li><i class="fas fa-check-circle"></i> Seamless connection to your existing CRM and database</li>
+          </ul>
+          <a href="solutions/ai-solutions.html" class="btn btn-primary" style="margin-top:1rem;">Explore AI Solutions <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="spotlight-canvas-col">
+          <div class="pixel-canvas-wrapper" title="Click to flip front / back">
+            <div class="hud-corner hud-tl"></div>
+            <div class="hud-corner hud-tr"></div>
+            <div class="hud-corner hud-bl"></div>
+            <div class="hud-corner hud-br"></div>
+            <div class="hud-badge"><span class="hud-status"></span><span id="hud-status-2">SERVICES DECRYPTOR</span>
+            </div>
+            <div class="hud-res-counter" id="hud-res-2">BLOCK: 30px</div>
+            <img class="pixel-fallback-img" src="assets/ai/vyomantra_ai_nexus.jpg" alt="Vyomantra AI Nexus">
+            <canvas id="servicesCanvas" class="pixel-scroll-canvas" data-pixel-scroll="true" data-max-block="30"
+              data-front-image="assets/ai/vyomantra_ai_nexus.jpg" data-back-image="assets/ai/vyomantra_ai_sentinel.jpg"
+              data-hud-counter="hud-res-2" data-hud-status="hud-status-2"></canvas>
+          </div>
+          <div class="pixel-morph-hint"><i class="fas fa-arrows-alt-v"></i> Scroll to morph between Nexus &amp; Sentinel
+            &mdash; Click to flip</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ====================== RECENT PROJECTS ====================== -->
+  <section id="projects" style="background: rgba(12, 16, 38, 0.4);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Case Studies</span>
+        <h2 class="section-title">Our Recent Work</h2>
+        <p class="section-desc">Inspect real-world client platforms built with reliability, performance, and user joy at
+          their heart.</p>
+      </div>
+
+      <!-- Project Switcher Tabs -->
+      <div class="portfolio-tabs">
+
+        <button class="tab-btn active" data-project="project-crm">AI-CRM System</button><button class="tab-btn"
+          data-project="project-garden">Garden Woods Resort</button><button class="tab-btn"
+          data-project="project-vintage">Vintage Hides</button><button class="tab-btn"
+          data-project="project-vevaha">Vevaha Matrimony</button><button class="tab-btn"
+          data-project="project-yarm">Yarm Sports Clinic</button><button class="tab-btn" data-project="project-h2h">H2H
+          Packers and Movers</button><button class="tab-btn" data-project="project-ecl">Equestrian Champions</button>
+      </div>
+
+
+      <!-- Project 2: AI-CRM System -->
+      <div class="project-display active" id="project-crm">
+        <div class="project-gallery-carousel">
+          <div class="project-slides">
+            <div class="project-slide active">
+              <img src="assets/photos/crm/crm_1.png?v=5" alt="AI CRM Dashboard Overview">
+            </div>
+            <div class="project-slide">
+              <img src="assets/photos/crm/crm_2.png?v=5" alt="AI CRM Analytics & Pipelines">
+            </div>
+            <div class="project-slide">
+              <img src="assets/photos/crm/crm_3.png?v=5" alt="AI CRM Lead Intelligence">
+            </div>
+            <div class="project-slide">
+              <img src="assets/photos/crm/crm_4.png?v=5" alt="AI CRM Automated Reports">
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="project-details">
+          <div class="project-meta-pills">
+            <span class="badge-pill">Enterprise SaaS</span>
+            <span class="badge-pill badge-purple">AI Automation</span>
+            <span class="badge-pill">Analytics</span>
+          </div>
+          <h3>AI-CRM Enterprise System</h3>
+          <p>
+            An intelligent customer relationship management ecosystem designed to centralize incoming leads, score
+            prospective clients with AI algorithms, and generate executive reports on demand.
+          </p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-robot"></i> Automated lead qualification & auto-routing</li>
+            <li><i class="fas fa-chart-line"></i> Real-time visual metrics and revenue tracking</li>
+            <li><i class="fas fa-sync"></i> Automated follow-up dispatching reducing churn by 35%</li>
+          </ul>
+          <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+            <a href="portfolio/ai-crm.html" class="btn btn-primary">Read Full Case Study <i
+                class="fas fa-arrow-right"></i></a>
+            <a href="portfolio.html" class="btn btn-outline">View All Projects</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Garden Woods Resort -->
+      <div class="project-display" id="project-garden">
+        <div class="project-gallery-carousel">
+          <div class="project-slides">
+            <div class="project-slide active"><img src="assets/photos/garden_woods/garden_woods_1.png?v=5"
+                alt="Garden Woods Resort"></div>
+            <div class="project-slide"><img src="assets/photos/garden_woods/garden_woods_2.png?v=5"
+                alt="Garden Woods Cottages"></div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="project-details">
+          <div class="project-meta-pills"><span class="badge-pill">Hospitality</span><span
+              class="badge-pill badge-purple">Resort Website</span><span class="badge-pill">Booking System</span></div>
+          <h3>Garden Woods Resort &mdash; Yercaud</h3>
+          <p>Premium nature resort website for a luxury destination in Yercaud, Tamil Nadu. Immersive visuals, room
+            booking, gallery and local attraction guides.</p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-leaf"></i> Nature-first design with forest green palette</li>
+            <li><i class="fas fa-calendar-check"></i> Room booking and availability system</li>
+            <li><i class="fas fa-mobile-alt"></i> Fully responsive for mobile guests</li>
+          </ul>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+            <a href="https://gardenwoodsyercaud.com" target="_blank" class="btn btn-primary">Visit Live Site <i
+                class="fas fa-external-link-alt"></i></a>
+            <a href="portfolio.html" class="btn btn-outline">View All Projects</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vintage Hides -->
+      <div class="project-display" id="project-vintage">
+        <div class="project-gallery-carousel">
+          <div class="project-slides">
+            <div class="project-slide active"><img src="assets/photos/vintage_hides/vintage_hides_1.png?v=5"
+                alt="Vintage Hides Store"></div>
+            <div class="project-slide"><img src="assets/photos/vintage_hides/vintage_hides_2.png?v=5"
+                alt="Vintage Hides Products"></div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="project-details">
+          <div class="project-meta-pills"><span class="badge-pill">E-Commerce</span><span
+              class="badge-pill badge-purple">Premium Fashion</span><span class="badge-pill">Leather Goods</span></div>
+          <h3>Vintage Hides &mdash; Premium Leather Store</h3>
+          <p>High-end e-commerce for VINTAGE HIDES&reg;, specialising in full-grain LWG-certified leather crossbody bags
+            for women. Clean editorial design with smooth shopping experience.</p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-shopping-bag"></i> Full product catalogue with variant selection</li>
+            <li><i class="fas fa-certificate"></i> LWG-certified leather brand integration</li>
+            <li><i class="fas fa-credit-card"></i> Secure multi-currency checkout flow</li>
+          </ul>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+            <a href="https://vintagehides.com" target="_blank" class="btn btn-primary">Visit Live Site <i
+                class="fas fa-external-link-alt"></i></a>
+            <a href="portfolio.html" class="btn btn-outline">View All Projects</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vevaha Matrimony -->
+      <div class="project-display" id="project-vevaha">
+        <div class="project-gallery-carousel">
+          <div class="project-slides">
+            <div class="project-slide active"><img src="assets/photos/vevaha/vevaha_1.png?v=5"
+                alt="Vevaha Matrimony Portal"></div>
+            <div class="project-slide"><img src="assets/photos/vevaha/vevaha_2.png?v=5" alt="Vevaha Matchmaking"></div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="project-details">
+          <div class="project-meta-pills"><span class="badge-pill">Matrimonial Portal</span><span
+              class="badge-pill badge-purple">Web App</span><span class="badge-pill">Matchmaking</span></div>
+          <h3>Vevaha Matrimony</h3>
+          <p>Modern matrimonial portal helping users find their perfect life partner. Features profile creation, smart
+            filters, secure messaging and community-driven design.</p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-heart"></i> Smart profile matching and search filters</li>
+            <li><i class="fas fa-lock"></i> Privacy-first secure profile management</li>
+            <li><i class="fas fa-users"></i> Community-driven UX design</li>
+          </ul>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+            <a href="https://vevahamatrimony.com" target="_blank" class="btn btn-primary">Visit Live Site <i
+                class="fas fa-external-link-alt"></i></a>
+            <a href="portfolio.html" class="btn btn-outline">View All Projects</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yarm Sports and Physiotherapy Clinic -->
+      <div class="project-display" id="project-yarm">
+        <div class="project-gallery-carousel">
+          <div class="project-slides">
+            <div class="project-slide active"><img src="assets/photos/yarm_sports/yarm_1.png?v=5"
+                alt="Yarm Sports and Physiotherapy Clinic"></div>
+            <div class="project-slide"><img src="assets/photos/yarm_sports/yarm_2.png?v=5" alt="Yarm Sports Services"></div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="project-details">
+          <div class="project-meta-pills"><span class="badge-pill">Healthcare</span><span
+              class="badge-pill badge-purple">Clinic Website</span><span class="badge-pill">UK</span></div>
+          <h3>Yarm Sports &amp; Physiotherapy Clinic</h3>
+          <p>UK-based sports and musculoskeletal physiotherapy clinic. Trust-building design with service listings,
+            appointment booking, and expert team profiles.</p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-user-md"></i> Expert physiotherapist profiles and credentials</li>
+            <li><i class="fas fa-calendar-alt"></i> Online appointment booking integration</li>
+            <li><i class="fas fa-map-marker-alt"></i> Local SEO optimised for Yarm, UK</li>
+          </ul>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+            <a href="https://yarmsportphysioclinic.co.uk" target="_blank" class="btn btn-primary">Visit Live Site <i
+                class="fas fa-external-link-alt"></i></a>
+            <a href="portfolio.html" class="btn btn-outline">View All Projects</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- H2H Packers and Movers -->
+      <div class="project-display" id="project-h2h">
+        <div class="project-gallery-carousel">
+          <div class="project-slides">
+            <div class="project-slide active"><img src="assets/photos/h2h_packers/h2h_1.png?v=5"
+                alt="H2H Packers and Movers"></div>
+            <div class="project-slide"><img src="assets/photos/h2h_packers/h2h_2.png?v=5" alt="H2H Services"></div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="project-details">
+          <div class="project-meta-pills"><span class="badge-pill">Logistics</span><span
+              class="badge-pill badge-purple">Business Website</span><span class="badge-pill">Multi-City SEO</span>
+          </div>
+          <h3>House 2 House Packers &amp; Movers</h3>
+          <p>High-converting business website for a Salem-based relocation company. Multi-city service pages, lead
+            generation forms, testimonials, and local SEO architecture.</p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-truck"></i> Multi-city pages for regional SEO dominance</li>
+            <li><i class="fas fa-file-alt"></i> Instant quote and lead capture system</li>
+            <li><i class="fas fa-star"></i> Customer review integration and trust signals</li>
+          </ul>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+            <a href="https://h2hpackersandmovers.com" target="_blank" class="btn btn-primary">Visit Live Site <i
+                class="fas fa-external-link-alt"></i></a>
+            <a href="portfolio.html" class="btn btn-outline">View All Projects</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Equestrian Champions League -->
+      <div class="project-display" id="project-ecl">
+        <div class="project-gallery-carousel">
+          <div class="project-slides">
+            <div class="project-slide active"><img src="assets/photos/ecl/ecl_1.png?v=5" alt="Equestrian Champions League">
+            </div>
+            <div class="project-slide"><img src="assets/photos/ecl/ecl_2.png?v=5" alt="ECL Interactive Experience"></div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn prev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="project-details">
+          <div class="project-meta-pills"><span class="badge-pill">Interactive</span><span
+              class="badge-pill badge-purple">3D Web Experience</span><span class="badge-pill">Gaming</span></div>
+          <h3>Equestrian Champions League</h3>
+          <p>Immersive 3D interactive web experience for ECL &mdash; a gamified horse jump challenge campaign with
+            real-time gameplay and event ticket promotion.</p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-gamepad"></i> 3D browser-based horse jump game</li>
+            <li><i class="fas fa-ticket-alt"></i> Gamified event ticket promotion campaign</li>
+            <li><i class="fas fa-paint-brush"></i> Premium royal gold and deep purple branding</li>
+          </ul>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+            <a href="https://equestrianchampionsleague.in" target="_blank" class="btn btn-primary">Visit Live Site <i
+                class="fas fa-external-link-alt"></i></a>
+            <a href="portfolio.html" class="btn btn-outline">View All Projects</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ====================== TESTIMONIALS (MODERN REFERENCE DESIGN) ====================== -->
+  <section id="testimonials">
+    <div class="container">
+      <div class="testimonials-header-split">
+        <div class="testimonials-header-left">
+          <span class="testimonials-subheading">Read some of</span>
+          <h2 class="testimonials-main-title">What Our Clients Say</h2>
+        </div>
+        <div class="testimonials-header-right">
+          <p class="testimonials-side-desc">Real feedback from founders and engineering leaders who build with Vyomantra.</p>
+          <div class="testimonials-nav-btns">
+            <button type="button" class="testi-nav-btn prev" id="testiPrevBtn" aria-label="Previous Testimonials">
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <button type="button" class="testi-nav-btn next" id="testiNextBtn" aria-label="Next Testimonials">
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonials-slider-wrapper" id="testimonialsSliderWrapper">
+        <div class="testimonials-slider-track" id="testimonialsTrack">
+        <!-- Card 1 -->
+        <div class="testimonial-card-v2">
+          <div class="stars-rating-purple">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-quote-v2">
+            "We're a small team competing with companies three times our size. Vyomantra's engineering speed and architecture are a big reason why that's possible."
+          </p>
+          <div class="testimonial-author-row-v2">
+            <div class="author-meta-v2">
+              <h5 class="author-name-v2">Tom Whitfield</h5>
+              <span class="author-role-v2">CEO, Draftly</span>
+            </div>
+            <div class="author-avatar-box-v2">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" alt="Tom Whitfield" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="author-avatar-fallback" style="display: none;">TW</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="testimonial-card-v2">
+          <div class="stars-rating-purple">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-quote-v2">
+            "Vyomantra cut our deployment and onboarding pipeline from three days to a few hours. It sounds like an exaggeration until you're actually watching it happen."
+          </p>
+          <div class="testimonial-author-row-v2">
+            <div class="author-meta-v2">
+              <h5 class="author-name-v2">Marcus Hale</h5>
+              <span class="author-role-v2">Head of Operations, Finova</span>
+            </div>
+            <div class="author-avatar-box-v2">
+              <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80" alt="Marcus Hale" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="author-avatar-fallback" style="display: none;">MH</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="testimonial-card-v2">
+          <div class="stars-rating-purple">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-quote-v2">
+            "We replaced four fragmented tools with a custom platform engineered by Vyomantra. Our team stopped asking 'who's handling that?' because the system just handles it."
+          </p>
+          <div class="testimonial-author-row-v2">
+            <div class="author-meta-v2">
+              <h5 class="author-name-v2">James Okafor</h5>
+              <span class="author-role-v2">Co-founder, Stackline</span>
+            </div>
+            <div class="author-avatar-box-v2">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80" alt="James Okafor" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="author-avatar-fallback" style="display: none;">JO</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="testimonial-card-v2">
+          <div class="stars-rating-purple">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-quote-v2">
+            "I was skeptical about finding an engineering partner that truly understood modern AI workflows. Vyomantra changed my mind in the first week. They build with precision."
+          </p>
+          <div class="testimonial-author-row-v2">
+            <div class="author-meta-v2">
+              <h5 class="author-name-v2">Daniel Suh</h5>
+              <span class="author-role-v2">Product Manager, Loopfield</span>
+            </div>
+            <div class="author-avatar-box-v2">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80" alt="Daniel Suh" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="author-avatar-fallback" style="display: none;">DS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="testimonial-card-v2">
+          <div class="stars-rating-purple">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-quote-v2">
+            "The custom analytics and automation dashboards they built saved us over 20 hours weekly. The ROI on operational efficiency paid for the project ten times over."
+          </p>
+          <div class="testimonial-author-row-v2">
+            <div class="author-meta-v2">
+              <h5 class="author-name-v2">Ryan Castellano</h5>
+              <span class="author-role-v2">Director of Growth, Merkle</span>
+            </div>
+            <div class="author-avatar-box-v2">
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80" alt="Ryan Castellano" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="author-avatar-fallback" style="display: none;">RC</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="testimonial-card-v2">
+          <div class="stars-rating-purple">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-quote-v2">
+            "Setup and transition were surprisingly painless. We had our first enterprise workflow running in under 24 hours and haven't looked back."
+          </p>
+          <div class="testimonial-author-row-v2">
+            <div class="author-meta-v2">
+              <h5 class="author-name-v2">Ethan Brooks</h5>
+              <span class="author-role-v2">Engineering Lead, Coreshift</span>
+            </div>
+            <div class="author-avatar-box-v2">
+              <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop&q=80" alt="Ethan Brooks" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="author-avatar-fallback" style="display: none;">EB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonials-dots" id="testimonialsDots"></div>
+  </div>
+</section>
+
+  <!-- ====================== [LOCATION 4: PRE-FOOTER CTA 50PX PIXEL ANIMATION] ====================== -->
+  <section class="cta-gateway-section" style="padding: 5rem 0; border-top: 1px solid var(--border-subtle);">
+    <div class="container">
+      <div class="services-spotlight-wrapper"
+        style="margin-top: 0; background: linear-gradient(135deg, rgba(20, 10, 45, 0.9), rgba(7, 9, 21, 0.95)); border-color: var(--border-purple);">
+        <div class="spotlight-content">
+          <span class="badge-pill badge-purple" style="margin-bottom: 1rem;">Future-Ready Innovation</span>
+          <h2 style="font-size: 2.3rem; margin-bottom: 1.25rem;">
+            Ready to Scale Your Business <br><span class="gradient-text">with AI & Web Tech?</span>
+          </h2>
+          <p style="font-size: 1.1rem; line-height: 1.7; margin-bottom: 2rem;">
+            Request a comprehensive software architecture proposal or consultation with our engineering team today.
+          </p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="request-a-quote.html" class="btn btn-primary btn-lg">
+              <i class="fas fa-file-invoice"></i> Request a Quote
+            </a>
+            <a href="courses.html" class="btn btn-outline btn-lg">Explore Courses</a>
+          </div>
+        </div>
+
+        <div class="spotlight-canvas-col">
+          <div class="pixel-canvas-wrapper animate-glow-border" title="Click to flip front / back">
+            <div class="hud-corner hud-tl"></div>
+            <div class="hud-corner hud-tr"></div>
+            <div class="hud-corner hud-bl"></div>
+            <div class="hud-corner hud-br"></div>
+            <div class="hud-badge">
+              <span class="hud-status"></span>
+              <span id="hud-status-4">PORTAL ACTIVE (100%)</span>
+            </div>
+            <div class="hud-res-counter" id="hud-res-4">RES: 4K DECODED</div>
+
+            <img class="pixel-fallback-img" src="assets/ai/vyomantra_ai_sentinel.jpg" alt="Vyomantra AI Sentinel">
+            <canvas id="ctaCanvas" class="pixel-scroll-canvas" data-pixel-scroll="true" data-max-block="30"
+              data-front-image="assets/ai/vyomantra_ai_sentinel.jpg"
+              data-back-image="assets/ai/vyomantra_ai_lattice.jpg" data-hud-counter="hud-res-4"
+              data-hud-status="hud-status-4">
+            </canvas>
+          </div>
+
+          <div class="pixel-morph-hint">
+            <i class="fas fa-arrows-alt-v"></i> Scroll to morph between Sentinel &amp; Lattice • Click to flip
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== FOOTER ====================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo">
+            <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+            <div>
+              VYOMANTRA
+              <span>TECHNOLOGIES</span>
+            </div>
+          </a>
+          <p>
+            Shaping the future of digital software and technology leaders through high-performance web development and
+            industry-leading AI education.
+          </p>
+          <div class="social-links">
+            <a href="https://wa.me/918122288855" target="_blank" class="social-link" aria-label="WhatsApp"><img
+                src="assets/icons/whatsapp.png" alt="WhatsApp"></a>
+            <a href="https://www.instagram.com/vyomantratech" target="_blank" class="social-link"
+              aria-label="Instagram"><img src="assets/icons/instagram.png" alt="Instagram"></a>
+            <a href="https://www.facebook.com/profile.php?id=61593276075676" target="_blank" class="social-link"
+              aria-label="Facebook"><img src="assets/icons/facebook.png" alt="Facebook"></a>
+            <a href="https://twitter.com/vyomantratech" target="_blank" class="social-link" aria-label="Twitter"><img
+                src="assets/icons/twitter.png" alt="Twitter"></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="services/web-development.html">Web Development</a></li>
+            <li><a href="services/mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="services/software-development.html">Software Development</a></li>
+            <li><a href="services/ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="services/cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="solutions/business-websites.html">Business Websites</a></li>
+            <li><a href="solutions/custom-software.html">Custom Software</a></li>
+            <li><a href="solutions/erp-crm.html">ERP & CRM</a></li>
+            <li><a href="solutions/ecommerce.html">E-commerce</a></li>
+            <li><a href="products/stockmitra.html">StockMitra (POS & Billing)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Dharmapuri, Tamil
+              Nadu, India</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p>
+          <a href="privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a>
+          <a href="terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a>
+          <a href="refund-policy.html" style="color:var(--text-dim); margin-right:1rem;">Refund Policy</a>
+          <a href="admin/index.html" style="color:var(--text-dim); opacity: 0.6; transition: opacity 0.2s;" title="Staff &amp; Admin Access"><i class="fas fa-lock" style="font-size:0.7rem; margin-right:4px;"></i>Admin</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Quick Action Dock -->
+  <div class="floating-dock">
+    <a href="https://wa.me/918122288855" target="_blank" class="dock-btn dock-whatsapp" aria-label="WhatsApp Us">
+      <img src="assets/icons/whatsapp.png" alt="WhatsApp">
+    </a>
+    <button class="dock-btn dock-top" aria-label="Scroll to top">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+  </div>
+
+  <!-- Core Scripts -->
+  <script src="js/pixel-scroll.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

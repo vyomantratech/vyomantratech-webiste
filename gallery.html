@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery | Vyomantra Technologies | Events & Projects</title>
+  <meta name="description"
+    content="Explore photos from Vyomantra Technologies bootcamps, AI workshops, hackathons, and team milestones in Dharmapuri.">
+  <link rel="icon" type="image/png" href="assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    .gallery-filter-tabs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .gallery-filter-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.55rem 1.4rem;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .gallery-filter-btn.active,
+    .gallery-filter-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .gallery-masonry {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      aspect-ratio: 4 / 3;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-6px);
+      border-color: var(--border-cyan);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px var(--cyan-glow);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-smooth);
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.08);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(5, 7, 17, 0.95) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+      opacity: 0.9;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gallery-overlay h4 {
+      font-size: 1.25rem;
+      color: var(--text-highlight);
+      margin-bottom: 0.25rem;
+    }
+
+    .gallery-overlay span {
+      font-size: 0.85rem;
+      color: var(--cyan);
+      font-family: var(--font-mono);
+    }
+
+    .lightbox-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 3, 8, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .lightbox-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox-content {
+      max-width: 900px;
+      max-height: 80vh;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-cyan);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+    }
+
+    .lightbox-content img {
+      width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+    }
+
+    .lightbox-caption {
+      color: var(--text-main);
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li class="dropdown">
+            <a href="services.html" class="nav-link">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="services/web-development.html" class="dropdown-item">Web Development</a>
+              <a href="services/mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="services/software-development.html" class="dropdown-item">Software Development</a>
+              <a href="services/ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="services/automation.html" class="dropdown-item">Automation</a>
+              <a href="services/erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="services/ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="services/cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="services/digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="services/seo.html" class="dropdown-item">SEO</a>
+              <a href="services/branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="services/it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="solutions.html" class="nav-link">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="solutions/business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="solutions/custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="solutions/erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="solutions/ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="solutions/automation.html" class="dropdown-item">Automation</a>
+              <a href="solutions/saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="solutions/ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="products.html" class="nav-link">Products</a></li>
+          <li><a href="portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="careers.html" class="nav-link">Careers</a></li>
+          <li><a href="courses.html" class="nav-link">Courses</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="services.html" class="mobile-nav-link">Services</a></li>
+      <li><a href="solutions.html" class="mobile-nav-link">Solutions</a></li>
+      <li><a href="products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="about.html" class="mobile-nav-link">About Us</a></li>
+      <li><a href="careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <a href="request-a-quote.html" class="btn btn-primary" style="width: 100%;">Get a Quote</a>
+  </div>
+  </div>
+
+  <!-- Page Header -->
+  <section style="padding: 4rem 0 2rem 0; text-align: center;">
+    <div class="container">
+      <span class="badge-pill badge-purple" style="margin-bottom: 1rem;">Milestones & Community</span>
+      <h1 style="margin-bottom: 1.25rem;">
+        Our Journey in <span class="gradient-text">Pictures</span>
+      </h1>
+      <p style="max-width: 650px; margin: 0 auto; font-size: 1.15rem;">
+        Snapshots from our hackathons, interactive student bootcamps, client partnerships, and team celebrations.
+      </p>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section style="padding-top: 1rem; padding-bottom: 6rem;">
+    <div class="container">
+      <!-- Filter Tabs -->
+      <div class="gallery-filter-tabs">
+        <button class="gallery-filter-btn active" data-filter="all">All Photos</button>
+        <button class="gallery-filter-btn" data-filter="training">Bootcamps & Training</button>
+        <button class="gallery-filter-btn" data-filter="clients">Client Collaborations</button>
+        <button class="gallery-filter-btn" data-filter="team">Team & Events</button>
+      </div>
+
+      <!-- Masonry Grid -->
+      <div class="gallery-masonry">
+        <!-- 1. Python Bootcamp -->
+        <div class="gallery-item" data-category="training">
+          <img src="https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?q=80&w=800" alt="Python Bootcamp 2025">
+          <div class="gallery-overlay">
+            <h4>Python Bootcamp 2025</h4>
+            <span>Interactive Live Training Session</span>
+          </div>
+        </div>
+
+        <!-- 2. AI Certification -->
+        <div class="gallery-item" data-category="training">
+          <img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=800" alt="AI & Automation">
+          <div class="gallery-overlay">
+            <h4>AI & Automation Workshop</h4>
+            <span>Hands-On Agent Architecture</span>
+          </div>
+        </div>
+
+        <!-- 3. Arjun Stores -->
+        <div class="gallery-item" data-category="clients">
+          <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800" alt="Arjun Stores">
+          <div class="gallery-overlay">
+            <h4>Arjun Stores Partnership</h4>
+            <span>Client Architecture Review</span>
+          </div>
+        </div>
+
+        <!-- 4. New Partnership -->
+        <div class="gallery-item" data-category="clients">
+          <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=800" alt="New Partnership">
+          <div class="gallery-overlay">
+            <h4>Enterprise Partnership</h4>
+            <span>Collaborative Contract Signing</span>
+          </div>
+        </div>
+
+        <!-- 5. React Masterclass -->
+        <div class="gallery-item" data-category="training">
+          <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800" alt="React Masterclass">
+          <div class="gallery-overlay">
+            <h4>React Masterclass</h4>
+            <span>Frontend Performance Engineering</span>
+          </div>
+        </div>
+
+        <!-- 6. Hackathon -->
+        <div class="gallery-item" data-category="team">
+          <img src="https://images.unsplash.com/photo-1505373877841-8d25f771d0b7?q=80&w=800" alt="24-Hour Hackathon">
+          <div class="gallery-overlay">
+            <h4>24-Hour Hackathon</h4>
+            <span>Sprint Coding Challenge</span>
+          </div>
+        </div>
+
+        <!-- 7. Team Photo -->
+        <div class="gallery-item" data-category="team">
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800" alt="VYOMANTRA Team">
+          <div class="gallery-overlay">
+            <h4>VYOMANTRA Team</h4>
+            <span>Core Engineering Squad</span>
+          </div>
+        </div>
+
+        <!-- 8. 1st Anniversary -->
+        <div class="gallery-item" data-category="team">
+          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800" alt="1st Anniversary">
+          <div class="gallery-overlay">
+            <h4>Company Milestones</h4>
+            <span>Celebration & Awards Ceremony</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox-modal" id="galleryLightbox">
+    <button class="modal-close" id="lightboxClose">&times;</button>
+    <div class="lightbox-content">
+      <img src="" alt="" id="lightboxImg">
+    </div>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo">
+            <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+            <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+          </a>
+          <p>Inspiring, mentoring, and constructing software solutions that move industries forward.</p>
+          <div class="social-links">
+            <a href="https://wa.me/918122288855" target="_blank" class="social-link" aria-label="WhatsApp"><img
+                src="assets/icons/whatsapp.png" alt="WhatsApp"></a>
+            <a href="https://www.instagram.com/vyomantratech" target="_blank" class="social-link"
+              aria-label="Instagram"><img src="assets/icons/instagram.png" alt="Instagram"></a>
+            <a href="https://www.facebook.com/profile.php?id=61593276075676" target="_blank" class="social-link"
+              aria-label="Facebook"><img src="assets/icons/facebook.png" alt="Facebook"></a>
+            <a href="https://twitter.com/vyomantratech" target="_blank" class="social-link" aria-label="Twitter"><img
+                src="assets/icons/twitter.png" alt="Twitter"></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="services/web-development.html">Web Development</a></li>
+            <li><a href="services/mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="services/software-development.html">Software Development</a></li>
+            <li><a href="services/ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="services/cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="solutions/business-websites.html">Business Websites</a></li>
+            <li><a href="solutions/custom-software.html">Custom Software</a></li>
+            <li><a href="solutions/erp-crm.html">ERP & CRM</a></li>
+            <li><a href="solutions/ecommerce.html">E-commerce</a></li>
+            <li><a href="products/stockmitra.html">StockMitra (POS & Billing)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Dharmapuri, Tamil
+              Nadu, India</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p><a href="privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a
+            href="terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a> <a
+            href="refund-policy.html" style="color:var(--text-dim);">Refund Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/pixel-scroll.js"></script>
+  <script src="js/gallery.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

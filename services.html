@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Services & AI Solutions | Vyomantra Technologies</title>
+  <meta name="description"
+    content="Explore enterprise web development, custom AI automation, CRM pipelines, and digital software engineering services from Vyomantra Technologies.">
+  <link rel="icon" type="image/png" href="assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li class="dropdown">
+            <a href="services.html" class="nav-link active">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="services/web-development.html" class="dropdown-item">Web Development</a>
+              <a href="services/mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="services/software-development.html" class="dropdown-item">Software Development</a>
+              <a href="services/ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="services/automation.html" class="dropdown-item">Automation</a>
+              <a href="services/erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="services/ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="services/cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="services/digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="services/seo.html" class="dropdown-item">SEO</a>
+              <a href="services/branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="services/it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="solutions.html" class="nav-link">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="solutions/business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="solutions/custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="solutions/erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="solutions/ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="solutions/automation.html" class="dropdown-item">Automation</a>
+              <a href="solutions/saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="solutions/ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="products.html" class="nav-link">Products</a></li>
+          <li><a href="portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="careers.html" class="nav-link">Careers</a></li>
+          <li><a href="courses.html" class="nav-link">Courses</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="services.html" class="mobile-nav-link active">Services</a></li>
+      <li><a href="solutions.html" class="mobile-nav-link">Solutions</a></li>
+      <li><a href="products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="about.html" class="mobile-nav-link">About Us</a></li>
+      <li><a href="careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <div style="padding: 1.5rem; text-align: center;">
+      <a href="request-a-quote.html" class="btn btn-primary" style="width: 100%;">Get a Quote</a>
+    </div>
+  </div>
+ 
+  <!-- ====================== SERVICES HERO ====================== -->
+  <section class="hero hero-centered">
+    <div class="container">
+      <div class="hero-header-centered">
+        <span class="badge-pill badge-purple" style="margin-bottom: 1.25rem;">Enterprise Engineering</span>
+        <h1 class="hero-title">
+          Scalable Digital Services <br>
+          <span class="gradient-text">Engineered for Exponential Growth</span>
+        </h1>
+        <p class="hero-subtitle">
+          From lightning-fast web applications to autonomous AI workflows and enterprise CRM pipelines, we architect
+          mission-critical software built for speed, conversion, and long-term durability.
+        </p>
+        <div class="hero-cta-group" style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+          <a href="contact.html" class="btn btn-primary">Schedule a Consultation</a>
+          <a href="projects.html" class="btn btn-outline">Explore Case Studies</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== CORE SERVICES GRID ====================== -->
+  <section id="services-grid-section" style="padding: 3rem 0 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">What We Deliver</span>
+        <h2 class="section-title">Our Comprehensive Capabilities</h2>
+        <p class="section-desc">Modular, enterprise-grade capabilities crafted to solve real operational bottlenecks and
+          elevate customer experiences.</p>
+      </div>
+
+      <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+
+        <!-- Service 1: Web Development -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-laptop-code"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Web Architecture</span>
+          <h3>Web Development</h3>
+          <p>
+            Ultra-fast, conversion-focused web applications engineered with modern React, Next.js, and Node.js.
+            Sub-second load times and 95+ Google PageSpeed guaranteed.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> React 18+ & Next.js App Router</li>
+            <li><i class="fas fa-check-circle"></i> Progressive Web Apps (PWAs)</li>
+            <li><i class="fas fa-check-circle"></i> Scalable serverless microservices</li>
+          </ul>
+          <a href="services/web-development.html" class="btn btn-outline" style="width: 100%;">Explore Web Development
+            <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 2: Mobile App Development -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-mobile-alt"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">iOS &
+            Android</span>
+          <h3>Mobile App Development</h3>
+          <p>
+            Native and cross-platform mobile apps built with React Native and Flutter. 60 FPS fluid gestures, real-time
+            push alerts, and seamless app store releases.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Unified iOS & Android codebases</li>
+            <li><i class="fas fa-check-circle"></i> 1-click UPI & in-app purchases</li>
+            <li><i class="fas fa-check-circle"></i> App Store & Play Store publishing</li>
+          </ul>
+          <a href="services/mobile-app-development.html" class="btn btn-outline" style="width: 100%;">Explore Mobile
+            Apps <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 3: Software Development -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-cubes"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Enterprise Systems</span>
+          <h3>Software Development</h3>
+          <p>
+            Bespoke software platforms engineered for mission-critical operations. Distributed microservices, enterprise
+            RBAC access security, and high-throughput data processing.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Python & Node.js microservices</li>
+            <li><i class="fas fa-check-circle"></i> Legacy database migrations & APIs</li>
+            <li><i class="fas fa-check-circle"></i> Automated test-driven CI/CD</li>
+          </ul>
+          <a href="services/software-development.html" class="btn btn-outline" style="width: 100%;">Explore Software Dev
+            <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 4: AI & Machine Learning -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-brain"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">Next-Gen
+            AI</span>
+          <h3>AI & Machine Learning</h3>
+          <p>
+            Autonomous AI workflows, custom fine-tuned foundation models, private RAG knowledge retrieval, and
+            predictive machine learning models built for measurable commercial ROI.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Private vector search knowledge engines</li>
+            <li><i class="fas fa-check-circle"></i> 24/7 autonomous WhatsApp AI agents</li>
+            <li><i class="fas fa-check-circle"></i> Predictive sales & stock forecasting</li>
+          </ul>
+          <a href="services/ai-machine-learning.html" class="btn btn-outline" style="width: 100%;">Explore AI & ML <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 5: Automation & RPA -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-robot"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Process RPA</span>
+          <h3>Automation</h3>
+          <p>
+            Zero-touch digital operations. Eliminate manual copy-pasting and human delays with automated multi-app
+            webhooks, automated document parsing, and WhatsApp pipelines.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Official WhatsApp Business Cloud API</li>
+            <li><i class="fas fa-check-circle"></i> Multi-app webhook event listeners</li>
+            <li><i class="fas fa-check-circle"></i> Automated GST invoicing & billing</li>
+          </ul>
+          <a href="services/automation.html" class="btn btn-outline" style="width: 100%;">Explore Automation <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 6: ERP & CRM Solutions -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-briefcase"></i></div>
+          <span class="badge-pill badge-purple"
+            style="align-self: flex-start; margin-bottom: 0.75rem;">Operations</span>
+          <h3>ERP & CRM Solutions</h3>
+          <p>
+            Centralize your entire enterprise under one owned platform. Multi-stage lead management, real-time inventory
+            tracking, staff payroll, and executive business telemetry.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Kanban multi-channel lead pipelines</li>
+            <li><i class="fas fa-check-circle"></i> Multi-warehouse inventory tracking</li>
+            <li><i class="fas fa-check-circle"></i> Real-time executive P&L dashboards</li>
+          </ul>
+          <a href="services/erp-crm.html" class="btn btn-outline" style="width: 100%;">Explore ERP & CRM <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 7: UI/UX Design -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-palette"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">User Experience</span>
+          <h3>UI/UX Design</h3>
+          <p>
+            Human-centered digital product design. Interactive Figma prototypes, scalable design systems, user journey
+            mapping, and conversion-optimized mobile interfaces.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Clickable high-fidelity Figma prototypes</li>
+            <li><i class="fas fa-check-circle"></i> Complete design system tokens</li>
+            <li><i class="fas fa-check-circle"></i> WCAG 2.1 AA accessibility compliance</li>
+          </ul>
+          <a href="services/ui-ux-design.html" class="btn btn-outline" style="width: 100%;">Explore UI/UX Design <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 8: Cloud & DevOps -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-cloud"></i></div>
+          <span class="badge-pill badge-purple"
+            style="align-self: flex-start; margin-bottom: 0.75rem;">Infrastructure</span>
+          <h3>Cloud & DevOps</h3>
+          <p>
+            Bulletproof uptime and automated deployment. AWS & Google Cloud environments, Docker containerization,
+            Kubernetes autoscaling, and automated CI/CD pipelines.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> 99.99% server availability SLA</li>
+            <li><i class="fas fa-check-circle"></i> GitHub Actions automated CI/CD</li>
+            <li><i class="fas fa-check-circle"></i> Cloudflare Enterprise WAF defense</li>
+          </ul>
+          <a href="services/cloud-devops.html" class="btn btn-outline" style="width: 100%;">Explore Cloud & DevOps <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 9: Digital Marketing -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-bullhorn"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Customer Growth</span>
+          <h3>Digital Marketing</h3>
+          <p>
+            Data-backed performance marketing engineered for real commercial return. High-intent Google Search ads,
+            creative Meta Instagram campaigns, and CRO optimization.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> High commercial-intent Google Ads</li>
+            <li><i class="fas fa-check-circle"></i> Direct WhatsApp lead generation campaigns</li>
+            <li><i class="fas fa-check-circle"></i> Server-side Meta CAPI conversion tracking</li>
+          </ul>
+          <a href="services/digital-marketing.html" class="btn btn-outline" style="width: 100%;">Explore Digital
+            Marketing <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 10: SEO -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-search"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">Organic
+            Search</span>
+          <h3>SEO (Search Engine Optimization)</h3>
+          <p>
+            Dominate Google search results with technical SEO engineered into your source code. Sub-second Core Web
+            Vitals, JSON-LD schema graphs, and local Top-3 map rankings.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Google Core Web Vitals 95+ score</li>
+            <li><i class="fas fa-check-circle"></i> JSON-LD schema rich snippet markup</li>
+            <li><i class="fas fa-check-circle"></i> Google Maps Top-3 local pack ranking</li>
+          </ul>
+          <a href="services/seo.html" class="btn btn-outline" style="width: 100%;">Explore SEO Services <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 11: Branding & Creative -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-gem"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Identity</span>
+          <h3>Branding & Creative</h3>
+          <p>
+            Build brand authority with memorable visual identities. Vector logo marks, curated digital color tokens,
+            typography bibles, corporate stationery, and social kits.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Infinite scalable SVG logo exports</li>
+            <li><i class="fas fa-check-circle"></i> Comprehensive PDF brand guidelines</li>
+            <li><i class="fas fa-check-circle"></i> Print-ready CMYK corporate collateral</li>
+          </ul>
+          <a href="services/branding.html" class="btn btn-outline" style="width: 100%;">Explore Branding <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <!-- Service 12: IT Consulting -->
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-handshake"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">Strategic
+            Advisory</span>
+          <h3>IT Consulting</h3>
+          <p>
+            Make confident technology investments. Independent code audits, technology stack evaluations, digital
+            transformation blueprints, and cloud modernization advisory.
+          </p>
+          <ul class="project-features-list" style="margin-top: 1rem; margin-bottom: 1.25rem;">
+            <li><i class="fas fa-check-circle"></i> Rigorous security & code hygiene audits</li>
+            <li><i class="fas fa-check-circle"></i> Multi-phase modernization blueprints</li>
+            <li><i class="fas fa-check-circle"></i> Objective vendor & stack selection</li>
+          </ul>
+          <a href="services/it-consulting.html" class="btn btn-outline" style="width: 100%;">Explore IT Consulting <i
+              class="fas fa-arrow-right"></i></a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== SPOTLIGHT ARCHITECTURE ====================== -->
+  <section style="background: rgba(12, 16, 38, 0.4); padding: 5rem 0;">
+    <div class="container">
+      <div id="spotlight" class="services-spotlight-wrapper">
+        <div class="spotlight-content">
+          <span class="badge-pill badge-purple" style="margin-bottom: 1rem;">Spotlight Architecture</span>
+          <h2 style="font-size: 2.2rem; margin-bottom: 1rem;">
+            Autonomous AI Integration & <br><span class="gradient-text">Predictive Workflows</span>
+          </h2>
+          <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
+            We engineer autonomous AI pipelines that eliminate manual operational bottlenecks. Whether processing leads,
+            generating reports, or interfacing customer queries via natural language, our systems unlock 10x leverage
+            for forward-thinking organizations.
+          </p>
+          <ul class="project-features-list">
+            <li><i class="fas fa-check-circle"></i> Custom AI Assistant integration with WhatsApp & Web</li>
+            <li><i class="fas fa-check-circle"></i> End-to-end data security and sub-second response times</li>
+            <li><i class="fas fa-check-circle"></i> Seamless connection to your existing CRM and database</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary" style="margin-top: 1rem;">Request Architecture Demo</a>
+        </div>
+
+        <div class="spotlight-canvas-col">
+          <div class="pixel-canvas-wrapper" title="Click to flip front / back">
+            <div class="hud-corner hud-tl"></div>
+            <div class="hud-corner hud-tr"></div>
+            <div class="hud-corner hud-bl"></div>
+            <div class="hud-corner hud-br"></div>
+            <div class="hud-badge">
+              <span class="hud-status"></span>
+              <span id="hud-status-services">SERVICES DECRYPTOR</span>
+            </div>
+            <div class="hud-res-counter" id="hud-res-services">RES: 4K DECODED</div>
+
+            <img class="pixel-fallback-img" src="assets/ai/vyomantra_ai_nexus.jpg" alt="Vyomantra AI Nexus">
+            <canvas id="servicesPageCanvas" class="pixel-scroll-canvas" data-pixel-scroll="true" data-max-block="30"
+              data-front-image="assets/ai/vyomantra_ai_nexus.jpg" data-back-image="assets/ai/vyomantra_ai_sentinel.jpg"
+              data-hud-counter="hud-res-services" data-hud-status="hud-status-services">
+            </canvas>
+          </div>
+
+          <div class="pixel-morph-hint">
+            <i class="fas fa-arrows-alt-v"></i> Scroll to morph between Nexus &amp; Sentinel • Click to flip
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== HOW WE WORK (4-STEP PROCESS) ====================== -->
+  <section style="padding: 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Our Methodology</span>
+        <h2 class="section-title">The Engineering Lifecycle</h2>
+        <p class="section-desc">A transparent, battle-tested 4-phase delivery system ensuring predictability and
+          quality.</p>
+      </div>
+
+      <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 3rem;">
+
+        <div
+          style="background: rgba(10, 14, 35, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; position: relative;">
+          <div
+            style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 800; color: var(--cyan); margin-bottom: 0.75rem; opacity: 0.8;">
+            01</div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Discovery & Blueprint</h3>
+          <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6;">
+            We audit your workflows, identify leverage points, architect system schemas, and establish clear technical
+            roadmaps with fixed milestones.
+          </p>
+        </div>
+
+        <div
+          style="background: rgba(10, 14, 35, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; position: relative;">
+          <div
+            style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 800; color: var(--purple-light); margin-bottom: 0.75rem; opacity: 0.8;">
+            02</div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Agile Development</h3>
+          <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6;">
+            Weekly sprint demos, modular code architectures, continuous integration, and early prototype deployments for
+            rapid feedback loops.
+          </p>
+        </div>
+
+        <div
+          style="background: rgba(10, 14, 35, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; position: relative;">
+          <div
+            style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 800; color: var(--cyan); margin-bottom: 0.75rem; opacity: 0.8;">
+            03</div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Security & QA Hardening</h3>
+          <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6;">
+            Rigorous automated unit testing, end-to-end user journeys, OWASP vulnerability scans, and sub-second
+            performance benchmarking.
+          </p>
+        </div>
+
+        <div
+          style="background: rgba(10, 14, 35, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; position: relative;">
+          <div
+            style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 800; color: var(--purple-light); margin-bottom: 0.75rem; opacity: 0.8;">
+            04</div>
+          <h3 style="font-size: 1.35rem; margin-bottom: 0.75rem;">Launch & Evolution</h3>
+          <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6;">
+            Zero-downtime deployment, automated DNS & SSL configuration, 24/7 telemetry monitoring, and ongoing feature
+            enhancement cycles.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== CTA SECTION ====================== -->
+  <section style="padding: 4rem 0 6rem 0;">
+    <div class="container">
+      <div
+        style="background: linear-gradient(135deg, rgba(13, 18, 45, 0.9), rgba(28, 16, 56, 0.9)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-xl); padding: 3.5rem 2rem; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.4);">
+        <span class="badge-pill badge-purple" style="margin-bottom: 1rem;">Let's Collaborate</span>
+        <h2 style="font-size: clamp(2rem, 4vw, 2.8rem); margin-bottom: 1rem;">
+          Ready to Build an Unfair Technological Advantage?
+        </h2>
+        <p style="max-width: 650px; margin: 0 auto 2rem auto; font-size: 1.1rem; color: var(--text-main);">
+          Share your project vision with our engineering team today and receive a detailed feasibility plan and
+          fixed-price quote within 24 hours.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="contact.html" class="btn btn-primary" style="padding: 0.85rem 2rem; font-size: 1rem;">Get a Project
+            Quote</a>
+          <a href="https://wa.me/918122288855" target="_blank" class="btn btn-outline"
+            style="padding: 0.85rem 2rem; font-size: 1rem;">
+            <i class="fab fa-whatsapp" style="margin-right: 8px; color: #25D366;"></i> WhatsApp Us
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== FOOTER ====================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo">
+            <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+            <div>
+              VYOMANTRA
+              <span>TECHNOLOGIES</span>
+            </div>
+          </a>
+          <p>Founded 2025 • CEO: <strong>S.B. Sachin</strong>. Delivering enterprise digital solutions, autonomous AI
+            workflows, and high-impact technology training.</p>
+          <div class="social-links">
+            <a href="https://wa.me/918122288855" target="_blank" class="social-link" aria-label="WhatsApp"><img
+                src="assets/icons/whatsapp.png" alt="WhatsApp"></a>
+            <a href="#" class="social-link" aria-label="Instagram"><img src="assets/icons/instagram.png"
+                alt="Instagram"></a>
+            <a href="https://www.facebook.com/profile.php?id=61593276075676" target="_blank" class="social-link" aria-label="Facebook"><img src="assets/icons/facebook.png"
+                alt="Facebook"></a>
+            <a href="#" class="social-link" aria-label="Twitter"><img src="assets/icons/twitter.png" alt="Twitter"></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="services/web-development.html">Web Development</a></li>
+            <li><a href="services/mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="services/software-development.html">Software Development</a></li>
+            <li><a href="services/ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="services/cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="solutions/business-websites.html">Business Websites</a></li>
+            <li><a href="solutions/custom-software.html">Custom Software</a></li>
+            <li><a href="solutions/erp-crm.html">ERP & CRM</a></li>
+            <li><a href="solutions/ecommerce.html">E-commerce</a></li>
+            <li><a href="products/stockmitra.html">StockMitra (POS & Billing)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Dharmapuri, Tamil
+              Nadu, India</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p>
+          <a href="privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a>
+          <a href="terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a>
+          <a href="refund-policy.html" style="color:var(--text-dim); margin-right:1rem;">Refund Policy</a>
+          <a href="admin/index.html" style="color:var(--text-dim); opacity: 0.6; transition: opacity 0.2s;" title="Staff &amp; Admin Access"><i class="fas fa-lock" style="font-size:0.7rem; margin-right:4px;"></i>Admin</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Quick Action Dock -->
+  <div class="floating-dock">
+    <a href="https://wa.me/918122288855" target="_blank" class="dock-btn dock-whatsapp" aria-label="WhatsApp Us">
+      <img src="assets/icons/whatsapp.png" alt="WhatsApp">
+    </a>
+    <button class="dock-btn dock-top" aria-label="Scroll to top">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+  </div>
+
+  <!-- Core Scripts -->
+  <script src="js/pixel-scroll.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

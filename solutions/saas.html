@@ -1,0 +1,321 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Product Engineering Solutions | Vyomantra Technologies</title>
+  <meta name="description"
+    content="End-to-end Software-as-a-Service (SaaS) product development: multi-tenant cloud architecture, recurring subscription billing, self-serve onboarding, and scalable microservices.">
+  <link rel="canonical" href="https://vyomantratech.com/solutions/saas.html">
+  <meta property="og:title" content="SaaS Product Engineering Solutions | Vyomantra Technologies">
+  <meta property="og:description"
+    content="Turn software concepts into scalable, revenue-generating SaaS platforms with production-grade multi-tenancy.">
+  <link rel="icon" type="image/png" href="../assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/animations.css">
+</head>
+
+<body>
+
+  <!-- Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="../index.html" class="brand-logo">
+        <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="../index.html" class="nav-link">Home</a></li>
+          <li class="dropdown">
+            <a href="../services.html" class="nav-link">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="../services/web-development.html" class="dropdown-item">Web Development</a>
+              <a href="../services/mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="../services/software-development.html" class="dropdown-item">Software Development</a>
+              <a href="../services/ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="../services/automation.html" class="dropdown-item">Automation</a>
+              <a href="../services/erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="../services/ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="../services/cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="../services/digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="../services/seo.html" class="dropdown-item">SEO</a>
+              <a href="../services/branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="../services/it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="../solutions.html" class="nav-link active">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="automation.html" class="dropdown-item">Automation</a>
+              <a href="saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="../products.html" class="nav-link">Products</a></li>
+          <li><a href="../portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="../about.html" class="nav-link">About Us</a></li>
+          <li><a href="../careers.html" class="nav-link">Careers</a></li>
+          <li><a href="../courses.html" class="nav-link">Courses</a></li>
+          <li><a href="../contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="../request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="../index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="../services.html" class="mobile-nav-link">Services</a></li>
+      <li><a href="../solutions.html" class="mobile-nav-link active">Solutions</a></li>
+      <li><a href="../products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="../portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="../about.html" class="mobile-nav-link">About Us</a></li>
+      <li><a href="../careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="../courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="../contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <div style="padding: 1.5rem; text-align: center;">
+      <a href="../request-a-quote.html" class="btn btn-primary" style="width: 100%;">Get a Quote</a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero hero-centered" style="padding: 4.5rem 0 3rem 0;">
+    <div class="container">
+      <div class="hero-header-centered">
+        <span class="badge-pill" style="margin-bottom: 1.25rem;">Cloud Product Engineering</span>
+        <h1 class="hero-title">
+          SaaS Product Solutions <br>
+          <span class="gradient-text">Engineered for Rapid User Growth & Multi-Tenant Scale</span>
+        </h1>
+        <p class="hero-subtitle">
+          Building a B2B or B2C SaaS product requires more than UI screens. Vyomantra provides full-stack engineering
+          for multi-tenant data isolation, automated recurring billing, self-serve onboarding, seat management, and
+          auto-scaling containerized cloud infrastructure.
+        </p>
+        <div class="hero-cta-group" style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+          <a href="../request-a-quote.html" class="btn btn-primary">Scope Your SaaS MVP</a>
+          <a href="../products/stockmitra.html" class="btn btn-outline">See Our SaaS: StockMitra</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Pillars Grid -->
+  <section style="padding: 3rem 0 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">SaaS Foundations</span>
+        <h2 class="section-title">Critical Architecture Every Modern SaaS Needs</h2>
+        <p class="section-desc">We build production-ready software foundations that eliminate costly architectural
+          rewrites down the road.</p>
+      </div>
+
+      <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-layer-group"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Multi-Tenancy</span>
+          <h3>Secure Tenant Data Isolation</h3>
+          <p>Strict schema-level or row-level tenant separation ensuring zero risk of cross-tenant data leakage, paired
+            with custom subdomains (tenant.yourdomain.com) and custom CNAME support.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Row-level security (RLS) enforcement</li>
+            <li><i class="fas fa-check-circle"></i> White-label custom domain mapping</li>
+            <li><i class="fas fa-check-circle"></i> Automatic tenant provisioning hooks</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-credit-card"></i></div>
+          <span class="badge-pill badge-purple"
+            style="align-self: flex-start; margin-bottom: 0.75rem;">Monetization</span>
+          <h3>Subscription Billing & Metering</h3>
+          <p>Integrated recurring billing with Stripe, Lemon Squeezy, or Razorpay Subscriptions. Support for free
+            trials, tiered feature gates, usage-based metering, and self-serve invoice downloads.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Automated proration and plan upgrades</li>
+            <li><i class="fas fa-check-circle"></i> Smart dunning & card expiry emails</li>
+            <li><i class="fas fa-check-circle"></i> GST tax handling & compliant invoices</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-user-lock"></i></div>
+          <span class="badge-pill" style="align-self: flex-start; margin-bottom: 0.75rem;">Security & Auth</span>
+          <h3>Enterprise Authentication & Teams</h3>
+          <p>Modern authentication supporting social login (Google, GitHub), passwordless magic links, multi-factor
+            authentication (MFA/2FA), and team seat management with role permissions.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> Team seat invites & permissions</li>
+            <li><i class="fas fa-check-circle"></i> Session management & audit logging</li>
+            <li><i class="fas fa-check-circle"></i> SAML/SSO enterprise readiness</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-tachometer-alt"></i></div>
+          <span class="badge-pill badge-purple" style="align-self: flex-start; margin-bottom: 0.75rem;">DevOps</span>
+          <h3>Auto-Scaling Cloud & Telemetry</h3>
+          <p>Containerized Docker/Kubernetes deployment on AWS or DigitalOcean with automated horizontal pod
+            autoscaling, health checks, Redis caching, and Datadog/Sentry error monitoring.</p>
+          <ul class="project-features-list" style="margin-top: 1rem;">
+            <li><i class="fas fa-check-circle"></i> 99.9% uptime SLA configuration</li>
+            <li><i class="fas fa-check-circle"></i> Real-time error alerting & logs</li>
+            <li><i class="fas fa-check-circle"></i> Cost-optimized infrastructure sizing</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Process & Workflow -->
+  <section style="background: rgba(12, 16, 38, 0.4); padding: 5rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Roadmap</span>
+        <h2 class="section-title">MVP to Scale: Accelerated SaaS Timeline</h2>
+        <p class="section-desc">A structured methodology that gets your commercial product into beta customers' hands
+          fast.</p>
+      </div>
+
+      <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--cyan); margin-bottom:0.75rem;">MONTH
+            01</div>
+          <h4>Product Specs & UX Wireframes</h4>
+          <p>User journey mapping, database schemas, interactive Figma click-through prototypes, and architecture
+            design.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--purple); margin-bottom:0.75rem;">MONTH
+            02</div>
+          <h4>Core Feature Sprints</h4>
+          <p>Auth, team management, primary problem-solving engine, API design, and initial UI implementation.</p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--cyan); margin-bottom:0.75rem;">MONTH
+            03</div>
+          <h4>Billing & Beta Launch</h4>
+          <p>Payment gateway webhooks, email notifications, onboarding tours, and invitation-only customer beta rollout.
+          </p>
+        </div>
+        <div class="service-card">
+          <div style="font-family:var(--font-mono); font-size:1.5rem; color:var(--purple); margin-bottom:0.75rem;">MONTH
+            04+</div>
+          <h4>Scale & Feature Iteration</h4>
+          <p>Feedback iteration, performance tuning, analytics telemetry, and continuous feature deployment.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pre-Footer Conversion Box -->
+  <section style="padding: 4rem 0 6rem 0;">
+    <div class="container">
+      <div class="intro-box" style="border-color: var(--border-cyan); text-align: center;">
+        <h2 style="font-size: 2.2rem; margin-bottom: 1rem;">Ready to Build Your SaaS Product?</h2>
+        <p style="font-size: 1.15rem; margin-bottom: 2rem; max-width: 650px; margin-left: auto; margin-right: auto;">
+          Whether you are a founder building a new venture or an established business productizing internal software,
+          our engineering team can bring it to life.
+        </p>
+        <a href="../request-a-quote.html" class="btn btn-primary btn-lg">Request SaaS Architecture Proposal</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand-logo">
+            <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+            <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+          </a>
+          <p>Enterprise software development, custom web architectures, and autonomous AI systems engineered for modern
+            business scale.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="../services/web-development.html">Web Development</a></li>
+            <li><a href="../services/mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="../services/software-development.html">Software Development</a></li>
+            <li><a href="../services/ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="../services/cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="business-websites.html">Business Websites</a></li>
+            <li><a href="custom-software.html">Custom Software</a></li>
+            <li><a href="erp-crm.html">ERP & CRM</a></li>
+            <li><a href="ai-solutions.html">AI Solutions</a></li>
+            <li><a href="../products/stockmitra.html">StockMitra</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Dharmapuri, Tamil
+              Nadu, India</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="../request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p><a href="../privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a
+            href="../terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a>
+          <a href="../refund-policy.html" style="color:var(--text-dim);">Refund Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Quick Action Dock -->
+  <div class="floating-dock">
+    <a href="https://wa.me/918122288855" target="_blank" class="dock-btn dock-whatsapp" aria-label="WhatsApp Us">
+      <img src="../assets/icons/whatsapp.png" alt="WhatsApp">
+    </a>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+
+</html>

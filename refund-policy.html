@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancellation & Refund Policy | Vyomantra Technologies</title>
+  <meta name="description"
+    content="Transparent cancellation and refund policy for software engineering, training cohorts, and SaaS products at Vyomantra Technologies.">
+  <link rel="canonical" href="https://vyomantratech.com/refund-policy.html">
+  <link rel="icon" type="image/png" href="assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    .legal-content-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 3.5rem 3rem;
+      margin: 2rem auto 6rem auto;
+      max-width: 900px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      line-height: 1.8;
+      color: #cbd5e1;
+    }
+
+    .legal-content-box h1,
+    .legal-content-box h2,
+    .legal-content-box h3 {
+      color: var(--text-highlight);
+      margin: 2rem 0 1rem 0;
+    }
+
+    .legal-content-box h1 {
+      font-size: 2.2rem;
+      border-bottom: 1px solid var(--border-cyan);
+      padding-bottom: 1rem;
+      margin-top: 0;
+    }
+
+    .legal-content-box h2 {
+      font-size: 1.5rem;
+      color: var(--cyan);
+    }
+
+    .legal-content-box ul,
+    .legal-content-box ol {
+      margin: 1rem 0 1.5rem 2rem;
+    }
+
+    .legal-content-box a {
+      color: var(--cyan);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Technologies Logo">
+        <div>
+          VYOMANTRA
+          <span>TECHNOLOGIES</span>
+        </div>
+      </a>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li class="dropdown">
+            <a href="services.html" class="nav-link">Services <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="services/web-development.html" class="dropdown-item">Web Development</a>
+              <a href="services/mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+              <a href="services/software-development.html" class="dropdown-item">Software Development</a>
+              <a href="services/ai-machine-learning.html" class="dropdown-item">AI & Machine Learning</a>
+              <a href="services/automation.html" class="dropdown-item">Automation</a>
+              <a href="services/erp-crm.html" class="dropdown-item">ERP & CRM Solutions</a>
+              <a href="services/ui-ux-design.html" class="dropdown-item">UI/UX Design</a>
+              <a href="services/cloud-devops.html" class="dropdown-item">Cloud & DevOps</a>
+              <a href="services/digital-marketing.html" class="dropdown-item">Digital Marketing</a>
+              <a href="services/seo.html" class="dropdown-item">SEO</a>
+              <a href="services/branding.html" class="dropdown-item">Branding & Creative</a>
+              <a href="services/it-consulting.html" class="dropdown-item">IT Consulting</a>
+            </div>
+          </li>
+          <li class="dropdown">
+            <a href="solutions.html" class="nav-link">Solutions <i class="fas fa-chevron-down"
+                style="font-size:0.75rem;"></i></a>
+            <div class="dropdown-menu">
+              <a href="solutions/business-websites.html" class="dropdown-item">Business Websites</a>
+              <a href="solutions/custom-software.html" class="dropdown-item">Custom Software</a>
+              <a href="solutions/erp-crm.html" class="dropdown-item">ERP & CRM</a>
+              <a href="solutions/ai-solutions.html" class="dropdown-item">AI Solutions</a>
+              <a href="solutions/automation.html" class="dropdown-item">Automation</a>
+              <a href="solutions/saas.html" class="dropdown-item">SaaS Products</a>
+              <a href="solutions/ecommerce.html" class="dropdown-item">E-commerce</a>
+            </div>
+          </li>
+          <li><a href="products.html" class="nav-link">Products</a></li>
+          <li><a href="portfolio.html" class="nav-link">Portfolio</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="careers.html" class="nav-link">Careers</a></li>
+          <li><a href="courses.html" class="nav-link">Courses</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <a href="request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo">
+        <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+        <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+      </div>
+      <button class="modal-close" id="closeMenu" style="position:static;">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="services.html" class="mobile-nav-link">Services</a></li>
+      <li><a href="solutions.html" class="mobile-nav-link">Solutions</a></li>
+      <li><a href="products.html" class="mobile-nav-link">Products</a></li>
+      <li><a href="portfolio.html" class="mobile-nav-link">Portfolio</a></li>
+      <li><a href="about.html" class="mobile-nav-link">About Us</a></li>
+      <li><a href="careers.html" class="mobile-nav-link">Careers</a></li>
+      <li><a href="courses.html" class="mobile-nav-link">Courses</a></li>
+      <li><a href="contact.html" class="mobile-nav-link">Contact</a></li>
+    </ul>
+    <div style="padding: 1.5rem; text-align: center;">
+      <a href="request-a-quote.html" class="btn btn-primary" style="width: 100%;">Get a Quote</a>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  <div class="container">
+    <div class="legal-content-box">
+      <h1>Cancellation & Refund Policy</h1>
+      <p><em>Last Updated: January 2026</em></p>
+
+      <p>
+        At <strong>Vyomantra Technologies</strong>, we are committed to delivering exceptional engineering quality,
+        transparent commercial agreements, and customer satisfaction across all our custom development, SaaS products,
+        and educational training cohorts.
+      </p>
+
+      <h2>1. Custom Software & Engineering Services</h2>
+      <p>
+        Custom web development, mobile application builds, artificial intelligence integrations, and bespoke enterprise
+        software are contracted under milestone-based Statements of Work (SOW):
+      </p>
+      <ul>
+        <li><strong>Milestone Payments:</strong> Payments made upon the completion and client sign-off of specific
+          project milestones cover dedicated engineering hours and are non-refundable.</li>
+        <li><strong>Project Cancellation:</strong> If a client decides to terminate a project prior to milestone
+          completion, billing is prorated based on recorded development hours and code commits. Any unutilized retainer
+          or advance funds will be refunded within 14 business days.</li>
+        <li><strong>Warranty Period:</strong> All custom software includes a standard 30-day post-launch warranty period
+          during which any technical defects or bugs adhering to agreed specifications are remediated at zero additional
+          charge.</li>
+      </ul>
+
+      <h2>2. Live Online Cohorts & Training Programs</h2>
+      <p>
+        For our cohort programs, such as the <em>Python Programming with AI Tools</em> training:
+      </p>
+      <ul>
+        <li><strong>Pre-Batch Cancellation:</strong> You may cancel your enrollment and receive a 100% full refund if
+          requested at least 24 hours prior to the scheduled first live batch orientation session.</li>
+        <li><strong>Post-Commencement:</strong> Once live classes commence and proprietary learning materials, code
+          repositories, or mentor sessions are accessed, enrollment fees become non-refundable.</li>
+        <li><strong>Batch Rescheduling:</strong> If unexpected personal circumstances arise, students may request to
+          transfer their seat to the subsequent monthly cohort at no extra fee.</li>
+      </ul>
+
+      <h2>3. SaaS Products & StockMitra Subscriptions</h2>
+      <p>
+        For recurring subscription software, including StockMitra:
+      </p>
+      <ul>
+        <li><strong>Monthly Billing:</strong> Subscriptions can be canceled at any time from your account settings or by
+          notifying support. Cancellation takes effect at the end of the current billing cycle.</li>
+        <li><strong>Annual Subscriptions:</strong> Refund requests submitted within the first 7 days of annual license
+          provisioning will be considered on a pro-rata basis minus transactional gateway fees.</li>
+      </ul>
+
+      <h2>4. Refund Processing Timeframe</h2>
+      <p>
+        Approved refunds are issued back to the original method of payment (UPI, Netbanking, Credit/Debit Card) within
+        <strong>7 to 10 business days</strong> depending on your banking institution.
+      </p>
+
+      <h2>5. Contact Support</h2>
+      <p>
+        To initiate a refund or cancellation inquiry, please reach out to our billing team:
+      </p>
+      <ul>
+        <li><strong>Email:</strong> <a href="mailto:vyomantratech@gmail.com">vyomantratech@gmail.com</a></li>
+        <li><strong>WhatsApp / Phone:</strong> <a href="tel:+918122288855">+91 81222 88855</a></li>
+        <li><strong>Registered Address:</strong> Vyomantra Technologies, Gopal Colony, Pidamaneri, Dharmapuri, Tamil
+          Nadu, India – 636701.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo">
+            <img src="assets/icons/vyomantra_logo.png" alt="Vyomantra Logo">
+            <div>VYOMANTRA<span>TECHNOLOGIES</span></div>
+          </a>
+          <p>Enterprise software development, custom web architectures, and autonomous AI systems engineered for modern
+            business scale.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="services/web-development.html">Web Development</a></li>
+            <li><a href="services/mobile-app-development.html">Mobile App Development</a></li>
+            <li><a href="services/software-development.html">Software Development</a></li>
+            <li><a href="services/ai-machine-learning.html">AI & Machine Learning</a></li>
+            <li><a href="services/cloud-devops.html">Cloud & DevOps</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <ul class="footer-links">
+            <li><a href="solutions/business-websites.html">Business Websites</a></li>
+            <li><a href="solutions/custom-software.html">Custom Software</a></li>
+            <li><a href="solutions/erp-crm.html">ERP & CRM</a></li>
+            <li><a href="solutions/ecommerce.html">E-commerce</a></li>
+            <li><a href="products/stockmitra.html">StockMitra</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul class="footer-links">
+            <li><i class="fas fa-map-marker-alt" style="color:var(--cyan); margin-right:6px;"></i> Dharmapuri, Tamil
+              Nadu, India</li>
+            <li><i class="fas fa-phone-alt" style="color:var(--cyan); margin-right:6px;"></i> +91 8122288855</li>
+            <li><i class="fas fa-envelope" style="color:var(--cyan); margin-right:6px;"></i> vyomantratech@gmail.com
+            </li>
+            <li><a href="request-a-quote.html" style="color:var(--cyan); font-weight:600;"><i
+                  class="fas fa-file-invoice" style="margin-right:6px;"></i> Request a Quote</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
+        <p><a href="privacy-policy.html" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a
+            href="terms-and-conditions.html" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a> <a
+            href="refund-policy.html" style="color:var(--text-dim);">Refund Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Quick Action Dock -->
+  <div class="floating-dock">
+    <a href="https://wa.me/918122288855" target="_blank" class="dock-btn dock-whatsapp" aria-label="WhatsApp Us">
+      <img src="assets/icons/whatsapp.png" alt="WhatsApp">
+    </a>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>

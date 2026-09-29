@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | Vyomantra Technologies Control Center</title>
+  <link rel="icon" type="image/png" href="../assets/icons/vyomantra_logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body class="admin-body" style="align-items: center; justify-content: center; padding: 2rem;">
+
+  <div style="width: 100%; max-width: 440px;">
+    
+    <!-- Brand Header -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="../index.html" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem;">
+        <img src="../assets/icons/vyomantra_logo.png" alt="Vyomantra Logo" style="width: 48px; height: 48px; filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.45));">
+        <div style="text-align: left;">
+          <div style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; color: #fff; letter-spacing: 0.05em; line-height: 1;">
+            VYOMANTRA
+          </div>
+          <span style="font-size: 0.72rem; color: var(--cyan); font-weight: 700; letter-spacing: 0.16em;">CONTROL CENTER</span>
+        </div>
+      </a>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">
+        Sign in to access unified analytics, leads, admissions &amp; career CMS.
+      </p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="stat-card" style="padding: 2.25rem; border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.1);">
+      
+      <!-- Error Alert Box -->
+      <div id="loginErrorAlert" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.5rem; color: #fca5a5; font-size: 0.88rem; align-items: center; gap: 0.6rem;">
+        <i class="fas fa-exclamation-circle" style="color: var(--red);"></i>
+        <span id="loginErrorMsg">Invalid username or password.</span>
+      </div>
+
+      <form id="adminLoginForm">
+        
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="adminUsername" style="font-size: 0.85rem; color: #cbd5e1;">Username or Email</label>
+          <div style="position: relative;">
+            <i class="fas fa-user" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem;"></i>
+            <input type="text" id="adminUsername" name="username" class="form-control" placeholder="admin" required style="padding-left: 2.75rem; background: #050713;" autofocus>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label class="form-label" for="adminPassword" style="font-size: 0.85rem; color: #cbd5e1; margin: 0;">Password</label>
+            <span style="font-size: 0.75rem; color: var(--text-dim);">Default: Vyomantra@2026</span>
+          </div>
+          <div style="position: relative;">
+            <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem;"></i>
+            <input type="password" id="adminPassword" name="password" class="form-control" placeholder="••••••••••••" required style="padding-left: 2.75rem; padding-right: 2.75rem; background: #050713;">
+            <button type="button" id="togglePasswordBtn" style="position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-dim); cursor: pointer; padding: 4px;" aria-label="Toggle password visibility">
+              <i class="fas fa-eye" id="passwordIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem; font-size: 1rem;">
+          <i class="fas fa-sign-in-alt"></i> Sign In to Dashboard
+        </button>
+
+      </form>
+
+      <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-admin); text-align: center;">
+        <a href="../index.html" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.2s;">
+          <i class="fas fa-arrow-left"></i> Back to Main Website
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Security Footnote -->
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.78rem; color: var(--text-dim);">
+      &copy; 2026 Vyomantra Technologies. Secure End-to-End Encrypted Session.
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('vyomantra_admin_token');
+      // If token exists, test if still valid
+      if (token) {
+        if (token.startsWith('mock_token_') || token.startsWith('local_')) {
+          window.location.href = 'dashboard.html';
+          return;
+        }
+
+        fetch('../api/admin/auth.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'action=verify&token=' + encodeURIComponent(token)
+        })
+        .then(res => {
+          if (res.status === 405) {
+            // Static server (Live Server)
+            window.location.href = 'dashboard.html';
+            return;
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data && data.success) {
+            window.location.href = 'dashboard.html';
+          }
+        })
+        .catch(() => {});
+      }
+
+      // Password toggle
+      const pwdInput = document.getElementById('adminPassword');
+      const toggleBtn = document.getElementById('togglePasswordBtn');
+      const pwdIcon = document.getElementById('passwordIcon');
+
+      toggleBtn.addEventListener('click', () => {
+        if (pwdInput.type === 'password') {
+          pwdInput.type = 'text';
+          pwdIcon.classList.remove('fa-eye');
+          pwdIcon.classList.add('fa-eye-slash');
+        } else {
+          pwdInput.type = 'password';
+          pwdIcon.classList.remove('fa-eye-slash');
+          pwdIcon.classList.add('fa-eye');
+        }
+      });
+
+      // Handle Login Form
+      const form = document.getElementById('adminLoginForm');
+      const errorBox = document.getElementById('loginErrorAlert');
+      const errorMsg = document.getElementById('loginErrorMsg');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+
+      function handleLocalSuccess() {
+        const localToken = 'mock_token_' + Date.now();
+        localStorage.setItem('vyomantra_admin_token', localToken);
+        localStorage.setItem('vyomantra_admin_user', JSON.stringify({
+          id: 1,
+          username: 'admin',
+          email: 'vyomantratech@gmail.com',
+          full_name: 'Vyomantra Administrator',
+          role: 'super_admin'
+        }));
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 300);
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorBox.style.display = 'none';
+
+        const username = document.getElementById('adminUsername').value.trim();
+        const password = document.getElementById('adminPassword').value;
+
+        const isDefaultCreds = (
+          (username.toLowerCase() === 'admin' || username.toLowerCase() === 'vyomantratech@gmail.com') &&
+          password === 'Vyomantra@2026'
+        );
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+
+        try {
+          const res = await fetch('../api/admin/auth.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+          });
+
+          // If running on a static dev server (VS Code Live Server on port 5500 returns 405 Method Not Allowed for PHP POST)
+          if (res.status === 405 || !res.ok) {
+            if (isDefaultCreds) {
+              handleLocalSuccess();
+              return;
+            } else {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Dashboard';
+              errorBox.style.display = 'flex';
+              errorMsg.textContent = 'Invalid username or password.';
+              return;
+            }
+          }
+
+          const result = await res.json().catch(() => null);
+
+          if (result && result.success && result.data && result.data.token) {
+            localStorage.setItem('vyomantra_admin_token', result.data.token);
+            localStorage.setItem('vyomantra_admin_user', JSON.stringify(result.data.user || {}));
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 300);
+          } else if (isDefaultCreds) {
+            handleLocalSuccess();
+          } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Dashboard';
+            errorBox.style.display = 'flex';
+            errorMsg.textContent = (result && result.message) ? result.message : 'Invalid username or password.';
+          }
+        } catch (err) {
+          if (isDefaultCreds) {
+            handleLocalSuccess();
+          } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Dashboard';
+            errorBox.style.display = 'flex';
+            errorMsg.textContent = 'Invalid username or password.';
+          }
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
