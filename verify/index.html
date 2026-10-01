@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Official Certificate Verification | VYOMANTRA TECHNOLOGIES</title>
+  <meta name="description" content="Verify the authenticity and credential status of certificates issued by VYOMANTRA TECHNOLOGIES.">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="theme-color" content="#050711">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="../assets/icons/favicon.png">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/certificate.css">
+
+  <!-- Vendor Libraries for QR and PDF Generation -->
+  <script src="../js/vendor/qrcode.min.js"></script>
+  <script src="../js/vendor/html2pdf.bundle.min.js"></script>
+
+  <style>
+    /* Public Verification Page Specific Styling */
+    .verify-page {
+      background: radial-gradient(circle at 50% 0%, #0d122b 0%, #050711 60%, #020307 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: var(--text-main);
+    }
+
+    .verify-header {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(5, 7, 17, 0.85);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .verify-brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .verify-brand-link img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+
+    .verify-brand-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.08em;
+    }
+
+    .verify-brand-text span {
+      display: block;
+      font-size: 0.65rem;
+      color: var(--cyan);
+      letter-spacing: 0.18em;
+      font-weight: 600;
+    }
+
+    .verify-hero-container {
+      max-width: 1180px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* Search Box Card */
+    .search-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-cyan);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 240, 255, 0.08);
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .search-card::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 250px;
+      height: 100px;
+      background: radial-gradient(ellipse, rgba(0, 240, 255, 0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .search-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .search-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .verify-search-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .search-input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-group i {
+      position: absolute;
+      left: 1.25rem;
+      color: var(--cyan);
+      font-size: 1.2rem;
+    }
+
+    .verify-input {
+      width: 100%;
+      padding: 1.1rem 1.25rem 1.1rem 3.25rem;
+      background: #040610;
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.15rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+
+    .verify-input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
+      background: #060918;
+    }
+
+    .verify-submit-btn {
+      background: linear-gradient(135deg, var(--cyan) 0%, #0077ff 100%);
+      color: #030712;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      border: none;
+      border-radius: 12px;
+      padding: 1.1rem 2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.3);
+    }
+
+    .verify-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 240, 255, 0.5);
+      filter: brightness(1.1);
+    }
+
+    /* Demo Quick Chips */
+    .quick-test-section {
+      margin-top: 1.75rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .quick-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-chip:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+
+    /* -------------------------------------------------------------
+       Verified Result Card
+       ------------------------------------------------------------- */
+    .result-section {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-banner {
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .status-banner.valid {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 78, 59, 0.3) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.2);
+    }
+
+    .status-banner.revoked {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(127, 29, 29, 0.3) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.2);
+    }
+
+    .status-banner.expired {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(120, 53, 15, 0.3) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.2);
+    }
+
+    .status-banner.not_found {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(69, 10, 10, 0.35) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .status-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .status-icon-bubble {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+    }
+
+    .status-banner.valid .status-icon-bubble {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 2px solid #10b981;
+    }
+
+    .status-banner.revoked .status-icon-bubble {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 2px solid #ef4444;
+    }
+
+    .status-banner.expired .status-icon-bubble {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 2px solid #f59e0b;
+    }
+
+    .status-banner.not_found .status-icon-bubble {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 2px solid #ef4444;
+    }
+
+    .status-info h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin: 0 0 0.25rem 0;
+      color: #fff;
+    }
+
+    .status-info p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Key Details Grid */
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .detail-item-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 1.25rem;
+    }
+
+    .detail-item-label {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .detail-item-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .detail-item-value.mono {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--cyan);
+    }
+
+    /* Verification Actions Bar */
+    .verify-actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .btn-action-primary {
+      background: linear-gradient(135deg, var(--cyan) 0%, #0077ff 100%);
+      color: #030712;
+      font-weight: 700;
+      padding: 0.85rem 1.6rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.25);
+    }
+
+    .btn-action-primary:hover {
+      filter: brightness(1.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-action-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.85rem 1.4rem;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .btn-action-secondary:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+
+    /* Loading Spinner */
+    .verify-loader {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .loader-ring {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(0, 240, 255, 0.2);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loader-text {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Verification Footer */
+    .verify-footer {
+      padding: 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      background: #03040a;
+    }
+
+    @media (max-width: 768px) {
+      .search-card {
+        padding: 2rem 1.25rem;
+      }
+      .status-banner {
+        flex-direction: column;
+        text-align: center;
+      }
+      .status-banner-left {
+        flex-direction: column;
+      }
+      .verify-actions-bar {
+        flex-direction: column;
+      }
+      .btn-action-primary, .btn-action-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body class="verify-page">
+
+  <!-- =========================================================================
+       HEADER
+       ========================================================================= -->
+  <header class="verify-header">
+    <a href="../index.html" class="verify-brand-link" title="Return to Vyomantra Technologies">
+      <img src="../assets/icons/vyomantra_logo.webp" alt="Vyomantra Logo" decoding="async" width="1024" height="1024">
+      <div class="verify-brand-text">
+        VYOMANTRA
+        <span>CREDENTIAL REGISTRY</span>
+      </div>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <a href="../index.html" class="btn-action-secondary" style="padding: 0.5rem 0.9rem; font-size: 0.82rem;">
+        <i class="fas fa-home"></i> Home
+      </a>
+      <a href="../courses.html" class="btn-action-secondary" style="padding: 0.5rem 0.9rem; font-size: 0.82rem;">
+        <i class="fas fa-graduation-cap"></i> Courses
+      </a>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       MAIN VERIFICATION CONTAINER
+       ========================================================================= -->
+  <main class="verify-hero-container">
+
+    <!-- 1. SEARCH FORM (Active when no ID specified or searching another) -->
+    <div id="searchViewSection">
+      <div class="search-card">
+        <i class="fas fa-award" style="font-size: 2.75rem; color: var(--cyan); margin-bottom: 1rem; filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.4));"></i>
+        <h1 class="search-title">Certificate Verification</h1>
+        <p class="search-subtitle">
+          Official authentication portal for course, training, internship, and workshop credentials issued by VYOMANTRA TECHNOLOGIES.
+        </p>
+
+        <form id="verifySearchForm" class="verify-search-form" onsubmit="event.preventDefault(); handleManualSearch();">
+          <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="certInputId" class="verify-input" placeholder="e.g. VYOM-PY-2026-00001" required autocomplete="off" spellcheck="false">
+          </div>
+          <button type="submit" id="btnVerifySubmit" class="verify-submit-btn">
+            <i class="fas fa-shield-alt"></i> VERIFY CREDENTIAL
+          </button>
+        </form>
+
+        <!-- Quick Demo Chips -->
+        <div class="quick-test-section">
+          <span>Quick Sample Credentials to Test:</span>
+          <div class="quick-chips">
+            <span class="quick-chip" onclick="quickFill('VYOM-PY-2026-00001')" title="Python Course - VALID">
+              <i class="fas fa-check-circle" style="color:#10b981;"></i> VYOM-PY-2026-00001
+            </span>
+            <span class="quick-chip" onclick="quickFill('VYOM-INT-2026-00002')" title="Internship - VALID">
+              <i class="fas fa-briefcase" style="color:#00f0ff;"></i> VYOM-INT-2026-00002
+            </span>
+            <span class="quick-chip" onclick="quickFill('VYOM-WKS-2026-00004')" title="Workshop - REVOKED">
+              <i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> VYOM-WKS-2026-00004 (Revoked)
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. LOADING STATE -->
+    <div id="verifyLoadingSection" class="verify-loader">
+      <div class="loader-ring"></div>
+      <div class="loader-text">Querying Vyomantra Cryptographic Registry...</div>
+    </div>
+
+    <!-- 3. VERIFIED RESULT VIEW (Shown after verification) -->
+    <div id="verifyResultSection" class="result-section">
+      
+      <!-- Status Banner -->
+      <div id="statusBanner" class="status-banner valid">
+        <div class="status-banner-left">
+          <div class="status-icon-bubble" id="statusBubble">
+            <i class="fas fa-check" id="statusIcon"></i>
+          </div>
+          <div class="status-info">
+            <h3 id="statusHeadline">Certificate Verified</h3>
+            <p id="statusDescription">This certificate was officially issued by VYOMANTRA TECHNOLOGIES and is authentic &amp; active.</p>
+          </div>
+        </div>
+        <div id="statusBadgeRight">
+          <span style="font-family:'JetBrains Mono', monospace; font-size:0.85rem; font-weight:700; background:rgba(0,0,0,0.4); padding:6px 14px; border-radius:20px; border:1px solid currentColor;" id="statusPill">
+            VALID
+          </span>
+        </div>
+      </div>
+
+      <!-- Key Details Summary Grid -->
+      <div class="details-grid">
+        <div class="detail-item-box">
+          <div class="detail-item-label"><i class="fas fa-id-card"></i> Certificate ID</div>
+          <div class="detail-item-value mono" id="resCertId">--</div>
+        </div>
+        <div class="detail-item-box">
+          <div class="detail-item-label"><i class="fas fa-user"></i> Recipient Name</div>
+          <div class="detail-item-value" id="resRecipientName">--</div>
+        </div>
+        <div class="detail-item-box">
+          <div class="detail-item-label"><i class="fas fa-certificate"></i> Credential Type</div>
+          <div class="detail-item-value" id="resCertType">--</div>
+        </div>
+        <div class="detail-item-box">
+          <div class="detail-item-label"><i class="fas fa-graduation-cap"></i> Program / Course</div>
+          <div class="detail-item-value" id="resCourseName">--</div>
+        </div>
+        <div class="detail-item-box">
+          <div class="detail-item-label"><i class="fas fa-calendar-check"></i> Issue Date</div>
+          <div class="detail-item-value" id="resIssueDate">--</div>
+        </div>
+        <div class="detail-item-box">
+          <div class="detail-item-label"><i class="fas fa-building"></i> Issuing Authority</div>
+          <div class="detail-item-value" id="resIssuedBy">VYOMANTRA TECHNOLOGIES</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="verify-actions-bar">
+        <button type="button" class="btn-action-primary" onclick="downloadCertificatePdf()">
+          <i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)
+        </button>
+        <button type="button" class="btn-action-secondary" onclick="printCertificateDoc()">
+          <i class="fas fa-print"></i> Print Certificate
+        </button>
+        <button type="button" class="btn-action-secondary" onclick="copyVerificationShareUrl()">
+          <i class="fas fa-share-alt"></i> Share Verification Link
+        </button>
+        <button type="button" class="btn-action-secondary" onclick="showSearchView()">
+          <i class="fas fa-search"></i> Verify Another Certificate
+        </button>
+      </div>
+
+      <!-- A4 Landscape Live Certificate Preview Container -->
+      <div class="certificate-preview-container" id="certPreviewContainer">
+        
+        <div class="vyom-certificate" id="certRenderDoc">
+          <!-- Borders & Security Pattern -->
+          <div class="cert-outer-border"></div>
+          <div class="cert-inner-border"></div>
+          <div class="cert-corner cert-corner-tl"></div>
+          <div class="cert-corner cert-corner-tr"></div>
+          <div class="cert-corner cert-corner-bl"></div>
+          <div class="cert-corner cert-corner-br"></div>
+          <div class="cert-security-pattern"></div>
+          <div class="cert-watermark">VYOMANTRA</div>
+
+          <!-- Status Ribbon if Revoked or Expired -->
+          <div id="certRibbon" class="cert-status-ribbon revoked" style="display: none;">REVOKED</div>
+
+          <!-- Certificate Header -->
+          <div class="cert-header">
+            <div class="cert-brand">
+              <img src="../assets/icons/vyomantra_logo.webp" alt="Vyomantra Logo" class="cert-logo" decoding="async">
+              <div class="cert-brand-text">
+                <h2>VYOMANTRA TECHNOLOGIES</h2>
+                <span>RESEARCH, SOFTWARE &amp; AI INNOVATION LABS</span>
+              </div>
+            </div>
+            <div class="cert-badge-secure">
+              <i class="fas fa-shield-alt"></i>
+              <div class="cert-badge-secure-text">
+                <div class="top">Official Credential</div>
+                <div class="bot" id="certBadgeId">VYOM-PY-2026-00001</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certificate Body -->
+          <div class="cert-body">
+            <div class="cert-title-label" id="certDocTypeLabel">OFFICIAL ACCREDITATION</div>
+            <h1 class="cert-title-main" id="certDocTitle">CERTIFICATE OF COMPLETION</h1>
+            <div class="cert-presented-to">THIS IS PROUDLY PRESENTED TO</div>
+            <div class="cert-recipient-name" id="certDocRecipient">Recipient Full Name</div>
+
+            <p class="cert-statement">
+              for successfully mastering the curriculum, hands-on industrial projects, and demonstrating technical distinction in
+              <span class="cert-course-highlight" id="certDocCourse">Course / Program Name</span>.
+            </p>
+
+            <p class="cert-description-sub" id="certDocDescription">
+              Successfully demonstrated proficiency in modern software engineering principles and architectural excellence.
+            </p>
+          </div>
+
+          <!-- Certificate Footer -->
+          <div class="cert-footer">
+            
+            <!-- Left Signature -->
+            <div class="cert-sign-col">
+              <div class="cert-sign-img-placeholder" id="certDocTrainerSign">Santhosh S.</div>
+              <div class="cert-sign-line"></div>
+              <div class="cert-sign-name" id="certDocTrainerName">Santhosh S</div>
+              <div class="cert-sign-title" id="certDocTrainerTitle">Lead Technical Instructor</div>
+            </div>
+
+            <!-- Center QR Code Block -->
+            <div class="cert-qr-center">
+              <div class="cert-qr-box" id="certDocQrBox" title="Scan to verify online">
+                <!-- Dynamic QR Canvas will be injected here -->
+              </div>
+              <div class="cert-qr-caption"><i class="fas fa-qrcode"></i> Scan to Verify</div>
+              <div class="cert-meta-tagline" id="certDocMetaId">VYOM-PY-2026-00001</div>
+            </div>
+
+            <!-- Right Signature -->
+            <div class="cert-sign-col">
+              <div class="cert-sign-img-placeholder" id="certDocCeoSign" style="color: #e5b85a;">S.B. Sachin</div>
+              <div class="cert-sign-line"></div>
+              <div class="cert-sign-name" id="certDocSignatoryName">S.B. Sachin</div>
+              <div class="cert-sign-title" id="certDocSignatoryTitle">Founder &amp; CEO</div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Footer Bar -->
+          <div class="cert-bottom-bar">
+            <span>Issue Date: <strong id="certDocIssueDate" style="color:#cbd5e1;">--</strong></span>
+            <span>Verify at: <strong id="certDocVerifyDomain" style="color:var(--cyan);">vyomantratech.com/verify</strong></span>
+            <span>Security Hash: <strong id="certDocSecurityToken" style="font-family:'JetBrains Mono', monospace; color:#cbd5e1;">--</strong></span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- =========================================================================
+       FOOTER
+       ========================================================================= -->
+  <footer class="verify-footer">
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>&copy; 2026 VYOMANTRA TECHNOLOGIES. All rights reserved. Secure Credential Authority.</div>
+      <div style="display: flex; gap: 1.5rem;">
+        <a href="../privacy.html" style="color: var(--text-dim); text-decoration: none;">Privacy Policy</a>
+        <a href="../terms.html" style="color: var(--text-dim); text-decoration: none;">Terms of Service</a>
+        <a href="../contact.html" style="color: var(--text-dim); text-decoration: none;">Contact Registry</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="verifyToast" style="display:none; position:fixed; bottom:2rem; right:2rem; background:rgba(6,9,24,0.95); border:1px solid var(--cyan); border-radius:12px; padding:1rem 1.5rem; color:#fff; z-index:9999; box-shadow:0 10px 30px rgba(0,0,0,0.8); font-size:0.9rem; align-items:center; gap:10px;">
+    <i class="fas fa-check-circle" style="color:var(--cyan);"></i>
+    <span id="verifyToastText">Action completed successfully</span>
+  </div>
+
+  <!-- Verification Engine Script -->
+  <script src="verify.js"></script>
+</body>
+
+</html>

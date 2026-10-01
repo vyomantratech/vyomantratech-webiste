@@ -16,9 +16,10 @@ $stats = [
     'contacts' => ['total' => 0, 'new' => 0, 'contacted' => 0, 'resolved' => 0],
     'quotes'   => ['total' => 0, 'new' => 0, 'proposal_sent' => 0, 'closed' => 0],
     'courses'  => ['total' => 0, 'verified' => 0, 'pending' => 0, 'total_revenue' => 0],
-    'careers'  => ['total_applicants' => 0, 'applied' => 0, 'interview' => 0, 'offered' => 0],
-    'jobs'     => ['total_postings' => 6, 'active' => 6],
-    'activity' => [],
+    'careers'      => ['total_applicants' => 0, 'applied' => 0, 'interview' => 0, 'offered' => 0],
+    'jobs'         => ['total_postings' => 6, 'active' => 6],
+    'certificates' => ['total' => 0, 'valid' => 0, 'revoked' => 0, 'expired' => 0, 'this_month' => 0, 'verifications' => 0],
+    'activity'     => [],
     'charts'   => [
         'monthly' => ['labels' => [], 'inquiries' => [], 'courses' => [], 'quotes' => []],
         'courses_breakdown' => [],
@@ -77,6 +78,20 @@ if ($pdo) {
             $stats['jobs']['active'] = (int)($jRow['active'] ?? 0);
         }
 
+        // Certificates Count
+        $stmt = $pdo->query("SELECT status, COUNT(*) as cnt FROM certificates GROUP BY status");
+        while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $st = strtolower($r['status']);
+            if (isset($stats['certificates'][$st])) $stats['certificates'][$st] = (int)$r['cnt'];
+            $stats['certificates']['total'] += (int)$r['cnt'];
+        }
+        $currentMonth = date('Y-m');
+        $stmt = $pdo->query("SELECT COUNT(*) FROM certificates WHERE issue_date LIKE '$currentMonth%'");
+        $stats['certificates']['this_month'] = (int)$stmt->fetchColumn();
+
+        $stmt = $pdo->query("SELECT COUNT(*) FROM certificate_logs");
+        $stats['certificates']['verifications'] = (int)$stmt->fetchColumn();
+
         // Recent Activity Feed (Union of recent events)
         $actStmt = $pdo->query("
             (SELECT 'contact' as type, name as title, email as subtitle, status, created_at FROM contact_messages ORDER BY created_at DESC LIMIT 5)
@@ -86,6 +101,8 @@ if ($pdo) {
             (SELECT 'course' as type, student_name as title, CONCAT(course_name, ' (₹', amount_paid, ')') as subtitle, payment_status as status, created_at FROM course_registrations ORDER BY created_at DESC LIMIT 5)
             UNION ALL
             (SELECT 'career' as type, name as title, role_applied as subtitle, status, created_at FROM job_applications ORDER BY created_at DESC LIMIT 5)
+            UNION ALL
+            (SELECT 'certificate' as type, recipient_name as title, CONCAT(certificate_id, ' - ', course_name) as subtitle, status, created_at FROM certificates ORDER BY created_at DESC LIMIT 5)
             ORDER BY created_at DESC LIMIT 10
         ");
         $stats['activity'] = $actStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -104,6 +121,24 @@ if ($pdo) {
             if (($j['status'] ?? 'active') === 'active') $activeCnt++;
         }
         $stats['jobs']['active'] = $activeCnt;
+    }
+
+    // Read fallback counts from data/certificates.json
+    $certFile = __DIR__ . '/../../data/certificates.json';
+    if (file_exists($certFile)) {
+        $certs = json_decode(file_get_contents($certFile), true) ?: [];
+        $stats['certificates']['total'] = count($certs);
+        $curMonth = date('Y-m');
+        foreach ($certs as $c) {
+            $st = strtolower($c['status'] ?? 'valid');
+            if (isset($stats['certificates'][$st])) $stats['certificates'][$st]++;
+            if (strpos($c['issue_date'] ?? '', $curMonth) === 0) $stats['certificates']['this_month']++;
+        }
+    }
+    $logFile = __DIR__ . '/../../data/certificate_logs.json';
+    if (file_exists($logFile)) {
+        $logs = json_decode(file_get_contents($logFile), true) ?: [];
+        $stats['certificates']['verifications'] = count($logs);
     }
 }
 

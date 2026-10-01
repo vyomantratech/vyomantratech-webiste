@@ -1,0 +1,458 @@
+/* ===================================================================
+   VYOMANTRA TECHNOLOGIES - MASTER CERTIFICATE & VERIFICATION STYLES
+   A4 Landscape Luxury Corporate Architecture (297mm x 210mm / 1.414 Aspect)
+   =================================================================== */
+
+:root {
+  --cert-gold: #e5b85a;
+  --cert-gold-light: #fbe39d;
+  --cert-gold-dark: #b8860b;
+  --cert-gold-glow: rgba(229, 184, 90, 0.35);
+  --cert-cyan: #00f0ff;
+  --cert-cyan-glow: rgba(0, 240, 255, 0.4);
+  --cert-purple: #8b5cf6;
+  --cert-bg: #060814;
+  --cert-bg-inner: #090d20;
+  --cert-border-gold: linear-gradient(135deg, #d4af37 0%, #f9e498 50%, #aa771c 100%);
+  --cert-font-serif: 'Plus Jakarta Sans', Georgia, serif;
+}
+
+/* -------------------------------------------------------------
+   1. A4 Landscape Certificate Canvas Wrapper
+   ------------------------------------------------------------- */
+.certificate-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  overflow-x: auto;
+}
+
+.vyom-certificate {
+  width: 1040px;
+  min-width: 1040px;
+  height: 735px;
+  background: radial-gradient(circle at 50% 20%, #0d1430 0%, #060814 75%, #03040a 100%);
+  color: #f8fafc;
+  position: relative;
+  box-sizing: border-box;
+  padding: 38px 45px;
+  border-radius: 12px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 240, 255, 0.12), inset 0 0 0 2px rgba(229, 184, 90, 0.4);
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  overflow: hidden;
+  user-select: text;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Certificate Outer Decorative Borders & Corner Accents */
+.cert-outer-border {
+  position: absolute;
+  inset: 12px;
+  border: 2px solid rgba(229, 184, 90, 0.35);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.cert-inner-border {
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Corner Flourishes */
+.cert-corner {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  border-color: #e5b85a;
+  border-style: solid;
+}
+.cert-corner-tl { top: 22px; left: 22px; border-width: 3px 0 0 3px; }
+.cert-corner-tr { top: 22px; right: 22px; border-width: 3px 3px 0 0; }
+.cert-corner-bl { bottom: 22px; left: 22px; border-width: 0 0 3px 3px; }
+.cert-corner-br { bottom: 22px; right: 22px; border-width: 0 3px 3px 0; }
+
+/* Background Security Holographic Guilloche Effect */
+.cert-security-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.03) 0%, transparent 60%),
+    linear-gradient(45deg, rgba(229, 184, 90, 0.02) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(229, 184, 90, 0.02) 25%, transparent 25%);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.cert-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-25deg);
+  font-size: 6.5rem;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.02);
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------
+   2. Certificate Header
+   ------------------------------------------------------------- */
+.cert-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(229, 184, 90, 0.2);
+  padding-bottom: 16px;
+}
+
+.cert-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cert-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
+}
+
+.cert-brand-text h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 30%, #00f0ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cert-brand-text span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #e5b85a;
+  letter-spacing: 0.22em;
+  display: block;
+  margin-top: 2px;
+}
+
+.cert-badge-secure {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(13, 20, 48, 0.75);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  padding: 6px 14px;
+  border-radius: 30px;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+}
+
+.cert-badge-secure i {
+  color: #00f0ff;
+  font-size: 1.1rem;
+}
+
+.cert-badge-secure-text {
+  text-align: right;
+  line-height: 1.15;
+}
+
+.cert-badge-secure-text .top {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cert-badge-secure-text .bot {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #00f0ff;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* -------------------------------------------------------------
+   3. Certificate Main Body
+   ------------------------------------------------------------- */
+.cert-body {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 12px 20px;
+}
+
+.cert-title-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e5b85a;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.cert-title-main {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.15rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #ffffff 20%, #e5b85a 65%, #ffd700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(229, 184, 90, 0.2));
+}
+
+.cert-presented-to {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.cert-recipient-name {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px 0;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.45);
+  border-bottom: 2px solid transparent;
+  display: inline-block;
+  padding: 0 25px 6px 25px;
+  border-image: linear-gradient(90deg, transparent 0%, #e5b85a 30%, #00f0ff 70%, transparent 100%) 1;
+}
+
+.cert-statement {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #cbd5e1;
+  max-width: 820px;
+  margin: 10px auto 0 auto;
+}
+
+.cert-course-highlight {
+  font-weight: 700;
+  color: #00f0ff;
+  font-size: 1.08rem;
+}
+
+.cert-description-sub {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #94a3b8;
+  max-width: 780px;
+  margin: 8px auto 0 auto;
+  font-style: italic;
+}
+
+/* -------------------------------------------------------------
+   4. Certificate Footer (Details, QR, Signatures)
+   ------------------------------------------------------------- */
+.cert-footer {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: flex-end;
+  padding-top: 15px;
+  border-top: 1px solid rgba(229, 184, 90, 0.2);
+}
+
+.cert-sign-col {
+  text-align: center;
+}
+
+.cert-sign-img-placeholder {
+  font-family: 'Cinzel', 'Brush Script MT', 'Dancing Script', cursive, sans-serif;
+  font-size: 1.7rem;
+  color: #f1f5f9;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.cert-sign-line {
+  width: 170px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e5b85a, transparent);
+  margin: 4px auto 6px auto;
+}
+
+.cert-sign-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.cert-sign-title {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Center QR Code Block */
+.cert-qr-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cert-qr-box {
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 240, 255, 0.25);
+  display: inline-block;
+}
+
+.cert-qr-box img,
+.cert-qr-box canvas {
+  display: block;
+  width: 76px !important;
+  height: 76px !important;
+}
+
+.cert-qr-caption {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #e5b85a;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+.cert-meta-tagline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #00f0ff;
+  margin-top: 2px;
+  letter-spacing: 0.05em;
+}
+
+/* Bottom Bar within Certificate */
+.cert-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  margin-top: 10px;
+  font-size: 0.7rem;
+  color: #64748b;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.cert-bottom-bar a {
+  color: #00f0ff;
+  text-decoration: none;
+}
+
+/* -------------------------------------------------------------
+   5. Status Watermark / Ribbon (Revoked, Expired)
+   ------------------------------------------------------------- */
+.cert-status-ribbon {
+  position: absolute;
+  top: 40px;
+  right: -55px;
+  transform: rotate(45deg);
+  width: 220px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cert-status-ribbon.revoked {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  border: 1px solid #f87171;
+}
+
+.cert-status-ribbon.expired {
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+  border: 1px solid #fbbf24;
+}
+
+/* -------------------------------------------------------------
+   6. Native Print & PDF Media Styles
+   ------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  html, body {
+    background: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .vyom-certificate,
+  .vyom-certificate * {
+    visibility: visible;
+  }
+
+  .vyom-certificate {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 297mm !important;
+    height: 210mm !important;
+    max-width: 297mm !important;
+    max-height: 210mm !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  .certificate-preview-container {
+    padding: 0 !important;
+    background: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

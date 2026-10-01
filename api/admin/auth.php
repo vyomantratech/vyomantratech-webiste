@@ -62,10 +62,19 @@ function checkAdminAuth() {
     sendResponse(false, 'Unauthorized. Session expired.', [], 401);
 }
 
-// If this file is called directly as an endpoint:
-$action = trim($_POST['action'] ?? $_GET['action'] ?? '');
+// If this file is called directly as an endpoint (and not included by another script):
+$isDirectEndpoint = false;
+$scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? '';
+if (!empty($scriptFile) && realpath(__FILE__) === realpath($scriptFile)) {
+    $isDirectEndpoint = true;
+} elseif (!empty($_SERVER['PHP_SELF']) && basename($_SERVER['PHP_SELF']) === 'auth.php') {
+    $isDirectEndpoint = true;
+}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($isDirectEndpoint) {
+    $action = trim($_POST['action'] ?? $_GET['action'] ?? '');
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 1. LOGIN
     if ($action === 'login') {
@@ -176,4 +185,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-sendResponse(false, 'Invalid authentication action.', [], 400);
+    sendResponse(false, 'Invalid authentication action.', [], 400);
+}

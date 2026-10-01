@@ -25,6 +25,22 @@ define('DB_USER', 'vyomantra_user');    // e.g. u123456789_admin
 define('DB_PASS', 'your_db_password');  // Your database password
 define('DB_CHARSET', 'utf8mb4');
 
+// -------------------------------------------------------------
+// Site URL Configuration (for QR Codes, Verification URLs, etc.)
+// -------------------------------------------------------------
+if (!defined('SITE_URL')) {
+    $envSiteUrl = getenv('SITE_URL') ?: getenv('NEXT_PUBLIC_SITE_URL');
+    if ($envSiteUrl) {
+        define('SITE_URL', rtrim($envSiteUrl, '/'));
+    } else {
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+        $protocol = $isHttps ? "https://" : "http://";
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        define('SITE_URL', $protocol . $host);
+    }
+}
+
+
 /**
  * Returns a PDO connection or null if credentials are not configured yet
  */

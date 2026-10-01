@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initQuotesFilters();
   initApplicantsFilters();
   initJobsCMS();
+  initCertificatesManager();
 
   // Load initial tab data
   loadCurrentTab();
@@ -168,7 +169,8 @@ function switchTab(tabId) {
     'quotes': { title: '<i class="fas fa-file-invoice-dollar" style="color:var(--cyan);"></i> Project Quotations', subtitle: 'Track custom software scopes, budgets, and pipeline status.' },
     'courses': { title: '<i class="fas fa-user-graduate" style="color:var(--cyan);"></i> Course Admissions & Payments', subtitle: 'Verify student UPI/QR payment proofs and manage enrollment access.' },
     'applicants': { title: '<i class="fas fa-users-cog" style="color:var(--cyan);"></i> Job & Internship Applicants', subtitle: 'Review candidate resumes, portfolios, and interview pipelines.' },
-    'jobs': { title: '<i class="fas fa-briefcase" style="color:var(--cyan);"></i> Job Postings & CMS', subtitle: 'Publish new roles, update active openings, and generate subpages.' }
+    'jobs': { title: '<i class="fas fa-briefcase" style="color:var(--cyan);"></i> Job Postings & CMS', subtitle: 'Publish new roles, update active openings, and generate subpages.' },
+    'certificates': { title: '<i class="fas fa-certificate" style="color:var(--cyan);"></i> Credential &amp; Certificate Authority', subtitle: 'Issue, verify, revoke, and manage authentic company certificates with QR verification &amp; PDF generation.' }
   };
 
   const info = titles[tabId] || titles['stats'];
@@ -192,6 +194,8 @@ function loadCurrentTab() {
       return fetchApplicants();
     case 'jobs':
       return fetchJobs();
+    case 'certificates':
+      return fetchCertificates();
     default:
       return Promise.resolve();
   }
@@ -244,6 +248,17 @@ function updateStatsUI(data) {
 
   document.getElementById('statJobsActive').textContent = data.jobs.active || 6;
 
+  if (data.certificates) {
+    const certTotal = document.getElementById('statCertsTotal');
+    const certValid = document.getElementById('statCertsValid');
+    const certMonth = document.getElementById('statCertsThisMonth');
+    const certBadge = document.getElementById('countBadgeCertificates');
+    if (certTotal) certTotal.textContent = data.certificates.total || 0;
+    if (certValid) certValid.textContent = (data.certificates.valid || 0) + ' Valid';
+    if (certMonth) certMonth.textContent = (data.certificates.this_month || 0) + ' this month';
+    if (certBadge) certBadge.textContent = data.certificates.total || 0;
+  }
+
   document.getElementById('countBadgeContacts').textContent = data.contacts.new || 0;
   document.getElementById('countBadgeQuotes').textContent = data.quotes.new || 0;
   document.getElementById('countBadgeCourses').textContent = data.courses.pending || 0;
@@ -261,6 +276,7 @@ function renderLocalStats() {
   const courses = getLocalData('courses');
   const applicants = getLocalData('applicants');
   const jobs = getLocalData('jobs');
+  const certs = getLocalData('certificates');
 
   let revenue = 0;
   courses.forEach(c => {
@@ -274,6 +290,9 @@ function renderLocalStats() {
   const coursesPending = courses.filter(c => c.payment_status === 'pending_verification').length;
   const applicantsApplied = applicants.filter(a => a.status === 'applied').length;
   const jobsActive = jobs.filter(j => (j.status || 'active') === 'active').length;
+  const certsValid = certs.filter(c => (c.status || 'valid') === 'valid').length;
+  const curMonth = new Date().toISOString().substring(0, 7);
+  const certsMonth = certs.filter(c => (c.issue_date || '').startsWith(curMonth)).length;
 
   const data = {
     contacts: { total: contacts.length, new: contactsNew },
@@ -281,6 +300,7 @@ function renderLocalStats() {
     courses: { total: courses.length, pending: coursesPending, total_revenue: revenue },
     careers: { total_applicants: applicants.length, applied: applicantsApplied },
     jobs: { total_postings: jobs.length, active: jobsActive },
+    certificates: { total: certs.length, valid: certsValid, this_month: certsMonth, verifications: 0 },
     charts: {
       monthly: {
         labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep 2026'],
@@ -1679,6 +1699,30 @@ function initLocalSeedData() {
       })
       .catch(() => {});
   }
+
+  // Pre-load certificates from ../data/certificates.json if not present
+  if (!localStorage.getItem('vyomantra_admin_certificates')) {
+    fetch('../data/certificates.json')
+      .then(res => res.json())
+      .then(certs => {
+        if (Array.isArray(certs) && certs.length > 0) {
+          saveLocalData('certificates', certs);
+        }
+      })
+      .catch(() => {});
+  }
+
+  // Pre-load certificate logs from ../data/certificate_logs.json if not present
+  if (!localStorage.getItem('vyomantra_admin_certificate_logs')) {
+    fetch('../data/certificate_logs.json')
+      .then(res => res.json())
+      .then(logs => {
+        if (Array.isArray(logs) && logs.length > 0) {
+          saveLocalData('certificate_logs', logs);
+        }
+      })
+      .catch(() => {});
+  }
 }
 
 function getLocalData(key) {
@@ -1747,12 +1791,16 @@ function getStatusBadgeClass(status) {
     case 'contacted': return 'badge-contacted';
     case 'resolved':
     case 'verified':
+    case 'valid':
     case 'active':
     case 'offered': return 'badge-verified';
     case 'pending_verification':
     case 'reviewing': return 'badge-pending';
+    case 'expired': return 'badge-expired';
     case 'rejected':
-    case 'closed': return 'badge-rejected';
+    case 'closed':
+    case 'revoked': return 'badge-rejected';
+    case 'draft': return 'badge-draft';
     default: return 'badge-new';
   }
 }
@@ -1773,4 +1821,958 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
+}
+
+// =========================================================================
+// 11. TAB 7: CREDENTIAL & CERTIFICATE AUTHORITY ENGINE
+// =========================================================================
+let certCurrentPage = 0;
+const CERTS_PAGE_SIZE = 25;
+let certPreviewCurrent = null;
+let certRevokeTargetId = null;
+
+function initCertificatesManager() {
+  const statusFilter = document.getElementById('filterCertStatus');
+  const typeFilter   = document.getElementById('filterCertType');
+  const sortSelect   = document.getElementById('sortCerts');
+  const searchInput  = document.getElementById('searchCerts');
+
+  if (statusFilter) statusFilter.addEventListener('change', () => { certCurrentPage = 0; fetchCertificates(); });
+  if (typeFilter)   typeFilter.addEventListener('change', () => { certCurrentPage = 0; fetchCertificates(); });
+  if (sortSelect)   sortSelect.addEventListener('change', () => { certCurrentPage = 0; fetchCertificates(); });
+  if (searchInput)  searchInput.addEventListener('input', debounce(() => { certCurrentPage = 0; fetchCertificates(); }, 300));
+
+  // Pagination buttons
+  const prevBtn = document.getElementById('btnPrevCertPage');
+  const nextBtn = document.getElementById('btnNextCertPage');
+  if (prevBtn) prevBtn.addEventListener('click', () => {
+    if (certCurrentPage > 0) {
+      certCurrentPage--;
+      fetchCertificates();
+    }
+  });
+  if (nextBtn) nextBtn.addEventListener('click', () => {
+    certCurrentPage++;
+    fetchCertificates();
+  });
+
+  // Modal Open Buttons
+  const createBtn = document.getElementById('btnOpenCreateCertModal');
+  if (createBtn) createBtn.addEventListener('click', openCertificateCreateModal);
+
+  const bulkBtn = document.getElementById('btnOpenBulkCertModal');
+  if (bulkBtn) bulkBtn.addEventListener('click', () => openAdminModal('certificateBulkModal'));
+
+  // Form Save
+  const saveBtn = document.getElementById('btnSaveCertificate');
+  if (saveBtn) saveBtn.addEventListener('click', saveCertificate);
+
+  // Dynamic live ID preview on prefix / date change
+  const prefixSelect = document.getElementById('certPrefix');
+  const issueDateInput = document.getElementById('certIssueDate');
+  if (prefixSelect) prefixSelect.addEventListener('change', updateLiveCertIdPreview);
+  if (issueDateInput) issueDateInput.addEventListener('change', updateLiveCertIdPreview);
+
+  // Revocation Confirm
+  const revokeBtn = document.getElementById('btnConfirmRevocation');
+  if (revokeBtn) revokeBtn.addEventListener('click', confirmCertificateRevocation);
+
+  // Bulk Import Submit
+  const executeBulkBtn = document.getElementById('btnExecuteBulkImport');
+  if (executeBulkBtn) executeBulkBtn.addEventListener('click', executeBulkImport);
+}
+
+function updateLiveCertIdPreview() {
+  const prefix = document.getElementById('certPrefix')?.value || 'VYOM-CRT';
+  const issueDate = document.getElementById('certIssueDate')?.value || new Date().toISOString();
+  const year = new Date(issueDate).getFullYear() || 2026;
+  const editId = document.getElementById('certEditId')?.value;
+  const actualId = document.getElementById('certEditActualId')?.value;
+
+  const previewEl = document.getElementById('liveGeneratedIdPreview');
+  if (!previewEl) return;
+
+  if (editId && editId !== '0' && actualId) {
+    previewEl.textContent = actualId;
+  } else {
+    previewEl.textContent = `${prefix}-${year}-XXXXX (Auto-sequenced)`;
+  }
+}
+
+async function fetchCertificates() {
+  const tbody = document.getElementById('certificatesTableBody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-dim);"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i> Loading credential registry...</td></tr>';
+
+  const status = document.getElementById('filterCertStatus')?.value || 'all';
+  const type   = document.getElementById('filterCertType')?.value || 'all';
+  const sort   = document.getElementById('sortCerts')?.value || 'newest';
+  const search = document.getElementById('searchCerts')?.value.trim() || '';
+
+  const offset = certCurrentPage * CERTS_PAGE_SIZE;
+
+  if (isDevStaticMode) {
+    let all = getLocalData('certificates');
+    if (!all || all.length === 0) {
+      all = JSON.parse(localStorage.getItem('vyomantra_certificates') || '[]');
+    }
+
+    // Filter
+    let filtered = all.filter(c => {
+      if (status !== 'all' && (c.status || 'valid') !== status) return false;
+      if (type !== 'all' && (c.certificate_type || '') !== type) return false;
+      if (search) {
+        const needle = search.toLowerCase();
+        const haystack = `${c.certificate_id} ${c.recipient_name} ${c.recipient_email} ${c.course_name}`.toLowerCase();
+        if (!haystack.includes(needle)) return false;
+      }
+      return true;
+    });
+
+    // Sort
+    filtered.sort((a, b) => {
+      if (sort === 'oldest') return (a.created_at || '').localeCompare(b.created_at || '');
+      if (sort === 'name') return (a.recipient_name || '').localeCompare(b.recipient_name || '');
+      if (sort === 'id') return (b.certificate_id || '').localeCompare(a.certificate_id || '');
+      return (b.created_at || '').localeCompare(a.created_at || '');
+    });
+
+    const pageSlice = filtered.slice(offset, offset + CERTS_PAGE_SIZE);
+    renderCertificatesTable(pageSlice, filtered.length);
+    updateCertPagination(filtered.length);
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({
+      action: 'list',
+      status,
+      type,
+      sort,
+      search,
+      limit: CERTS_PAGE_SIZE,
+      offset
+    });
+
+    const res = await fetch(`../api/admin/certificates.php?${params.toString()}`, {
+      headers: { 'Authorization': 'Bearer ' + authToken }
+    });
+
+    if (res.status === 405 || !res.ok) {
+      isDevStaticMode = true;
+      fetchCertificates();
+      return;
+    }
+
+    const result = await res.json();
+    if (result && result.success && result.data) {
+      const list = result.data.certificates || [];
+      const total = result.data.total || 0;
+      renderCertificatesTable(list, total);
+      updateCertPagination(total);
+
+      if (result.data.counts) {
+        const badge = document.getElementById('countBadgeCertificates');
+        if (badge) badge.textContent = result.data.counts.total || 0;
+      }
+    } else {
+      renderCertificatesTable([], 0);
+    }
+  } catch (err) {
+    isDevStaticMode = true;
+    fetchCertificates();
+  }
+}
+
+function renderCertificatesTable(certs, totalCount) {
+  const tbody = document.getElementById('certificatesTableBody');
+  if (!tbody) return;
+
+  if (!certs || certs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 3.5rem 1rem; color: var(--text-dim);">
+          <i class="fas fa-certificate" style="font-size: 2.2rem; margin-bottom: 0.75rem; display: block; opacity: 0.35;"></i>
+          No certificates matching current filters. Click "Issue New Certificate" to create one.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  tbody.innerHTML = certs.map(c => {
+    const status = (c.status || 'valid').toLowerCase();
+    let badgeClass = 'badge-valid';
+    let statusLabel = 'VALID';
+    if (status === 'revoked') { badgeClass = 'badge-rejected'; statusLabel = 'REVOKED'; }
+    else if (status === 'expired') { badgeClass = 'badge-pending'; statusLabel = 'EXPIRED'; }
+    else if (status === 'draft') { badgeClass = 'badge-draft'; statusLabel = 'DRAFT'; }
+
+    const formattedDate = formatDate(c.issue_date);
+    const siteOrigin = window.location.origin;
+    const vUrl = c.verification_url || `${siteOrigin}/verify/?id=${encodeURIComponent(c.certificate_id)}`;
+
+    return `
+      <tr>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="font-family:'JetBrains Mono', monospace; color:var(--cyan); font-size:0.92rem;">${escapeHtml(c.certificate_id)}</strong>
+            <button type="button" class="btn-action-icon" style="padding:2px 6px; font-size:0.75rem;" onclick="adminCopyCertId('${escapeHtml(c.certificate_id)}')" title="Copy Certificate ID">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+          <span style="font-size:0.72rem; color:var(--text-dim); display:block; margin-top:2px;">Token: ${escapeHtml((c.verification_token || '').substring(0, 10))}...</span>
+        </td>
+        <td>
+          <div style="font-weight:700; color:#fff; font-size:0.95rem;">${escapeHtml(c.recipient_name)}</div>
+          <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(c.recipient_email || 'No email specified')}</div>
+        </td>
+        <td>
+          <span style="font-size:0.74rem; font-weight:700; text-transform:uppercase; color:#e5b85a; letter-spacing:0.04em;">${escapeHtml(c.certificate_type || 'Course Completion')}</span>
+          <div style="font-size:0.85rem; color:#cbd5e1; font-weight:500;">${escapeHtml(c.course_name)}</div>
+          <span style="font-size:0.72rem; color:var(--text-dim);">${escapeHtml(c.course_duration || '3 Months')}</span>
+        </td>
+        <td>
+          <div style="font-size:0.88rem; color:#fff;">${formattedDate}</div>
+          ${c.completion_date ? `<span style="font-size:0.72rem; color:var(--text-dim);">Completed: ${formatDate(c.completion_date)}</span>` : ''}
+        </td>
+        <td>
+          <span class="status-badge ${badgeClass}">${statusLabel}</span>
+          ${status === 'revoked' && c.revocation_reason ? `<div style="font-size:0.72rem; color:#ef4444; margin-top:4px; max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(c.revocation_reason)}">${escapeHtml(c.revocation_reason)}</div>` : ''}
+        </td>
+        <td>
+          <button type="button" class="btn-action-icon" style="padding:6px 8px;" onclick="openCertificatePreview('${escapeHtml(c.certificate_id)}')" title="Preview Certificate &amp; QR">
+            <i class="fas fa-qrcode" style="color:var(--cyan); font-size:1.1rem;"></i>
+          </button>
+        </td>
+        <td style="text-align: right; white-space: nowrap;">
+          <button type="button" class="btn btn-outline btn-sm" style="padding:0.35rem 0.65rem; font-size:0.78rem; margin-right:4px;" onclick="openCertificatePreview('${escapeHtml(c.certificate_id)}')" title="Preview Official Certificate">
+            <i class="fas fa-eye"></i> View
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:0.35rem 0.65rem; font-size:0.78rem; margin-right:4px;" onclick="adminDownloadCertPdf('${escapeHtml(c.certificate_id)}')" title="Download PDF Certificate">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button type="button" class="btn-action-icon" onclick="openCertificateEditModal('${escapeHtml(c.certificate_id)}')" title="Edit Certificate">
+            <i class="fas fa-edit"></i>
+          </button>
+          ${status === 'revoked' ? `
+            <button type="button" class="btn-action-icon" style="color:var(--green);" onclick="restoreCertificate('${escapeHtml(c.certificate_id)}')" title="Restore to Valid">
+              <i class="fas fa-undo"></i>
+            </button>
+          ` : `
+            <button type="button" class="btn-action-icon danger" onclick="openCertificateRevokeModal('${escapeHtml(c.certificate_id)}')" title="Revoke Certificate">
+              <i class="fas fa-ban"></i>
+            </button>
+          `}
+          <button type="button" class="btn-action-icon danger" onclick="deleteCertificate('${escapeHtml(c.certificate_id)}')" title="Delete Certificate">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function updateCertPagination(total) {
+  const summaryEl = document.getElementById('certsPaginationSummary');
+  const prevBtn = document.getElementById('btnPrevCertPage');
+  const nextBtn = document.getElementById('btnNextCertPage');
+
+  const start = total === 0 ? 0 : certCurrentPage * CERTS_PAGE_SIZE + 1;
+  const end = Math.min((certCurrentPage + 1) * CERTS_PAGE_SIZE, total);
+
+  if (summaryEl) summaryEl.textContent = `Showing ${start} to ${end} of ${total} certificates`;
+  if (prevBtn) prevBtn.disabled = (certCurrentPage === 0);
+  if (nextBtn) nextBtn.disabled = (end >= total);
+}
+
+// -------------------------------------------------------------
+// CREATE & EDIT MODAL
+// -------------------------------------------------------------
+function openCertificateCreateModal() {
+  document.getElementById('certificateEditorForm').reset();
+  document.getElementById('certEditId').value = '0';
+  document.getElementById('certEditActualId').value = '';
+  document.getElementById('certModalTitle').innerHTML = '<i class="fas fa-certificate" style="color: var(--cyan);"></i> Issue New Certificate';
+
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('certIssueDate').value = today;
+  document.getElementById('certCompletionDate').value = today;
+  document.getElementById('certTrainerName').value = 'Santhosh S';
+  document.getElementById('certTrainerDesignation').value = 'Lead Technical Instructor';
+  document.getElementById('certSignatoryName').value = 'S.B. Sachin';
+  document.getElementById('certSignatoryDesignation').value = 'Founder & CEO';
+  document.getElementById('certStatus').value = 'valid';
+
+  updateLiveCertIdPreview();
+  openAdminModal('certificateEditorModal');
+}
+
+async function openCertificateEditModal(id) {
+  let cert = null;
+  if (!isDevStaticMode) {
+    try {
+      const res = await fetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
+        headers: { 'Authorization': 'Bearer ' + authToken }
+      });
+      const result = await res.json();
+      if (result && result.success && result.data) {
+        cert = result.data.certificate;
+      }
+    } catch (e) {}
+  }
+
+  if (!cert) {
+    const all = getLocalData('certificates');
+    cert = all.find(c => c.id == id || c.certificate_id === id);
+  }
+
+  if (!cert) {
+    showToast('Certificate record not found', true);
+    return;
+  }
+
+  document.getElementById('certEditId').value = cert.id || '1';
+  document.getElementById('certEditActualId').value = cert.certificate_id;
+  document.getElementById('certModalTitle').innerHTML = `<i class="fas fa-edit" style="color: var(--cyan);"></i> Edit Certificate: ${escapeHtml(cert.certificate_id)}`;
+
+  document.getElementById('certType').value = cert.certificate_type || 'Course Completion';
+  document.getElementById('certPrefix').value = cert.prefix || 'VYOM-CRT';
+  document.getElementById('certRecipientName').value = cert.recipient_name || '';
+  document.getElementById('certRecipientEmail').value = cert.recipient_email || '';
+  document.getElementById('certCourseName').value = cert.course_name || '';
+  document.getElementById('certCourseDuration').value = cert.course_duration || '3 Months';
+  document.getElementById('certIssueDate').value = cert.issue_date || '';
+  document.getElementById('certCompletionDate').value = cert.completion_date || '';
+  document.getElementById('certExpiryDate').value = cert.expiry_date || '';
+  document.getElementById('certTrainerName').value = cert.trainer_name || 'Santhosh S';
+  document.getElementById('certTrainerDesignation').value = cert.trainer_designation || 'Lead Technical Instructor';
+  document.getElementById('certSignatoryName').value = cert.signatory_name || 'S.B. Sachin';
+  document.getElementById('certSignatoryDesignation').value = cert.signatory_designation || 'Founder & CEO';
+  document.getElementById('certStatus').value = cert.status || 'valid';
+  document.getElementById('certDescription').value = cert.description || '';
+  document.getElementById('certPrivateNotes').value = cert.private_notes || '';
+
+  updateLiveCertIdPreview();
+  openAdminModal('certificateEditorModal');
+}
+
+async function saveCertificate() {
+  const form = document.getElementById('certificateEditorForm');
+  const recipientName = document.getElementById('certRecipientName').value.trim();
+  const courseName = document.getElementById('certCourseName').value.trim();
+
+  if (!recipientName || !courseName) {
+    showToast('Please provide Recipient Full Name and Course/Program Name', true);
+    return;
+  }
+
+  const formData = new FormData(form);
+  const editId = document.getElementById('certEditId').value;
+  const isEdit = (editId && editId !== '0');
+  formData.append('action', isEdit ? 'update' : 'create');
+
+  if (isDevStaticMode) {
+    let all = getLocalData('certificates');
+    if (isEdit) {
+      const idx = all.findIndex(c => c.id == editId || c.certificate_id === document.getElementById('certEditActualId').value);
+      if (idx !== -1) {
+        all[idx] = {
+          ...all[idx],
+          certificate_type: formData.get('certificate_type'),
+          recipient_name: formData.get('recipient_name'),
+          recipient_email: formData.get('recipient_email'),
+          course_name: formData.get('course_name'),
+          course_duration: formData.get('course_duration'),
+          issue_date: formData.get('issue_date'),
+          completion_date: formData.get('completion_date'),
+          expiry_date: formData.get('expiry_date') || null,
+          trainer_name: formData.get('trainer_name'),
+          trainer_designation: formData.get('trainer_designation'),
+          signatory_name: formData.get('signatory_name'),
+          signatory_designation: formData.get('signatory_designation'),
+          description: formData.get('description'),
+          private_notes: formData.get('private_notes'),
+          status: formData.get('status') || 'valid',
+          updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        };
+      }
+      showToast('Certificate updated successfully');
+    } else {
+      const prefix = formData.get('prefix') || 'VYOM-CRT';
+      const year = new Date(formData.get('issue_date')).getFullYear() || 2026;
+      const nextSeq = all.length + 1;
+      const newCertId = `${prefix}-${year}-${String(nextSeq).padStart(5, '0')}`;
+      const token = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+      const newRecord = {
+        id: nextSeq,
+        certificate_id: newCertId,
+        certificate_type: formData.get('certificate_type'),
+        prefix: prefix,
+        recipient_name: formData.get('recipient_name'),
+        recipient_email: formData.get('recipient_email'),
+        course_name: formData.get('course_name'),
+        course_duration: formData.get('course_duration'),
+        issue_date: formData.get('issue_date'),
+        completion_date: formData.get('completion_date'),
+        expiry_date: formData.get('expiry_date') || null,
+        trainer_name: formData.get('trainer_name'),
+        trainer_designation: formData.get('trainer_designation'),
+        signatory_name: formData.get('signatory_name'),
+        signatory_designation: formData.get('signatory_designation'),
+        description: formData.get('description'),
+        private_notes: formData.get('private_notes'),
+        status: formData.get('status') || 'valid',
+        verification_token: token,
+        verification_url: `${window.location.origin}/verify/?id=${encodeURIComponent(newCertId)}`,
+        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      };
+      all.unshift(newRecord);
+      showToast(`Certificate ${newCertId} issued successfully!`);
+    }
+
+    saveLocalData('certificates', all);
+    closeAdminModal('certificateEditorModal');
+    fetchCertificates();
+    fetchDashboardStats();
+    return;
+  }
+
+  try {
+    const res = await fetch('../api/admin/certificates.php', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + authToken },
+      body: new URLSearchParams(formData)
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      showToast(result.message);
+      closeAdminModal('certificateEditorModal');
+      fetchCertificates();
+      fetchDashboardStats();
+    } else {
+      showToast(result.message || 'Failed to save certificate', true);
+    }
+  } catch (err) {
+    showToast('Network error while saving certificate', true);
+  }
+}
+
+// -------------------------------------------------------------
+// LIVE PREVIEW & AUDIT LOGS MODAL
+// -------------------------------------------------------------
+async function openCertificatePreview(id) {
+  let cert = null;
+  let logs = [];
+
+  if (!isDevStaticMode) {
+    try {
+      const res = await fetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
+        headers: { 'Authorization': 'Bearer ' + authToken }
+      });
+      const result = await res.json();
+      if (result && result.success && result.data) {
+        cert = result.data.certificate;
+        logs = result.data.logs || [];
+      }
+    } catch (e) {}
+  }
+
+  if (!cert) {
+    const all = getLocalData('certificates');
+    cert = all.find(c => c.id == id || c.certificate_id === id);
+    const allLogs = getLocalData('certificate_logs');
+    if (cert) {
+      logs = allLogs.filter(l => l.certificate_id === cert.certificate_id);
+    }
+  }
+
+  if (!cert) {
+    showToast('Certificate not found', true);
+    return;
+  }
+
+  certPreviewCurrent = cert;
+  renderAdminCertPreviewDoc(cert, logs);
+  openAdminModal('certificatePreviewModal');
+}
+
+function renderAdminCertPreviewDoc(cert, logs = []) {
+  document.getElementById('previewCertIdLabel').textContent = cert.certificate_id || '--';
+  document.getElementById('adminCertBadgeId').textContent = cert.certificate_id || '--';
+  document.getElementById('adminCertDocTypeLabel').textContent = (cert.certificate_type || 'CREDENTIAL').toUpperCase();
+  document.getElementById('adminCertDocTitle').textContent = `CERTIFICATE OF ${(cert.certificate_type || 'COMPLETION').toUpperCase()}`;
+  document.getElementById('adminCertDocRecipient').textContent = cert.recipient_name || '--';
+  document.getElementById('adminCertDocCourse').textContent = cert.course_name || '--';
+  document.getElementById('adminCertDocDescription').textContent = cert.description || 'Successfully demonstrated proficiency in modern software engineering principles and architectural excellence.';
+
+  document.getElementById('adminCertDocTrainerName').textContent = cert.trainer_name || 'Santhosh S';
+  document.getElementById('adminCertDocTrainerTitle').textContent = cert.trainer_designation || 'Lead Technical Instructor';
+  document.getElementById('adminCertDocTrainerSign').textContent = (cert.trainer_name || 'Santhosh S.').replace(/ [A-Z]$/, ' S.');
+
+  document.getElementById('adminCertDocSignatoryName').textContent = cert.signatory_name || 'S.B. Sachin';
+  document.getElementById('adminCertDocSignatoryTitle').textContent = cert.signatory_designation || 'Founder & CEO';
+  document.getElementById('adminCertDocCeoSign').textContent = cert.signatory_name || 'S.B. Sachin';
+
+  document.getElementById('adminCertDocIssueDate').textContent = formatDate(cert.issue_date);
+  document.getElementById('adminCertDocMetaId').textContent = cert.certificate_id || '--';
+
+  const hostDomain = window.location.host || 'vyomantratech.com';
+  document.getElementById('adminCertDocVerifyDomain').textContent = `${hostDomain}/verify`;
+
+  const tokenSnippet = cert.verification_token ? cert.verification_token.substring(0, 16).toUpperCase() : 'VYOM-SECURE';
+  document.getElementById('adminCertDocSecurityToken').textContent = tokenSnippet;
+
+  // Ribbon
+  const ribbon = document.getElementById('adminCertRibbon');
+  const revokeBtn = document.getElementById('btnRevokeFromPreview');
+  const status = (cert.status || 'valid').toLowerCase();
+
+  if (ribbon) {
+    if (status === 'revoked') {
+      ribbon.className = 'cert-status-ribbon revoked';
+      ribbon.textContent = 'REVOKED';
+      ribbon.style.display = 'block';
+    } else if (status === 'expired') {
+      ribbon.className = 'cert-status-ribbon expired';
+      ribbon.textContent = 'EXPIRED';
+      ribbon.style.display = 'block';
+    } else {
+      ribbon.style.display = 'none';
+    }
+  }
+
+  if (revokeBtn) {
+    if (status === 'revoked') {
+      revokeBtn.innerHTML = '<i class="fas fa-undo"></i> Restore';
+      revokeBtn.className = 'btn btn-outline btn-sm';
+    } else {
+      revokeBtn.innerHTML = '<i class="fas fa-ban"></i> Revoke';
+      revokeBtn.className = 'btn btn-outline btn-sm danger';
+    }
+  }
+
+  // QR Code Rendering into preview
+  const qrBox = document.getElementById('adminCertDocQrBox');
+  if (qrBox) {
+    qrBox.innerHTML = '';
+    const siteOrigin = window.location.origin;
+    const vUrl = cert.verification_url || `${siteOrigin}/verify/?id=${encodeURIComponent(cert.certificate_id)}`;
+
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrBox, {
+        text: vUrl,
+        width: 76,
+        height: 76,
+        colorDark: '#050711',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    } else {
+      const img = document.createElement('img');
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=76x76&data=${encodeURIComponent(vUrl)}&margin=1`;
+      img.alt = 'QR Code';
+      img.width = 76;
+      img.height = 76;
+      qrBox.appendChild(img);
+    }
+  }
+
+  // Render Verification Audit Logs
+  const summaryEl = document.getElementById('previewAuditSummary');
+  const logsTbody = document.getElementById('previewAuditLogsBody');
+  if (summaryEl) summaryEl.textContent = `Total verifications recorded: ${logs.length}`;
+
+  if (logsTbody) {
+    if (!logs || logs.length === 0) {
+      logsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-dim);">No verification scans or manual checks recorded yet.</td></tr>';
+    } else {
+      logsTbody.innerHTML = logs.map(l => {
+        const res = (l.result || 'valid').toLowerCase();
+        let resBadge = 'badge-valid';
+        if (res === 'revoked' || res === 'not_found') resBadge = 'badge-rejected';
+        else if (res === 'expired') resBadge = 'badge-pending';
+
+        return `
+          <tr>
+            <td style="padding:0.45rem 0.75rem; color:#cbd5e1; font-family:'JetBrains Mono',monospace;">${escapeHtml(l.verification_timestamp || l.timestamp)}</td>
+            <td style="padding:0.45rem 0.75rem;"><span class="status-badge badge-new" style="font-size:0.68rem;">${escapeHtml(l.verification_method || 'QR_SCAN')}</span></td>
+            <td style="padding:0.45rem 0.75rem;"><span class="status-badge ${resBadge}" style="font-size:0.68rem;">${escapeHtml((l.result || 'valid').toUpperCase())}</span></td>
+            <td style="padding:0.45rem 0.75rem; font-family:'JetBrains Mono',monospace; color:var(--cyan); font-size:0.75rem;">${escapeHtml(l.ip_address || '127.0.0.1')}</td>
+            <td style="padding:0.45rem 0.75rem; font-size:0.75rem; color:var(--text-dim); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(l.user_agent || '')}">${escapeHtml(l.user_agent || 'Standard Browser')}</td>
+          </tr>`;
+      }).join('');
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// DOWNLOAD PDF & PRINT
+// -------------------------------------------------------------
+function adminDownloadCurrentPdf() {
+  if (!certPreviewCurrent) return;
+  const element = document.getElementById('adminCertDoc');
+  if (!element) return;
+
+  showToast('Generating official PDF certificate...');
+
+  const fileName = `${certPreviewCurrent.certificate_id}_Vyomantra_Certificate.pdf`;
+
+  if (typeof html2pdf !== 'undefined') {
+    const opt = {
+      margin: 0,
+      filename: fileName,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+    html2pdf().set(opt).from(element).save().then(() => {
+      showToast('PDF downloaded successfully.');
+    }).catch(err => {
+      console.error(err);
+      window.print();
+    });
+  } else {
+    window.print();
+  }
+}
+
+async function adminDownloadCertPdf(id) {
+  await openCertificatePreview(id);
+  setTimeout(() => {
+    adminDownloadCurrentPdf();
+  }, 400);
+}
+
+function adminPrintCurrentCert() {
+  window.print();
+}
+
+function adminDownloadCurrentQr() {
+  if (!certPreviewCurrent) return;
+  const qrBox = document.getElementById('adminCertDocQrBox');
+  const canvas = qrBox ? qrBox.querySelector('canvas') : null;
+  const img = qrBox ? qrBox.querySelector('img') : null;
+
+  let dataUrl = null;
+  if (canvas) {
+    dataUrl = canvas.toDataURL('image/png');
+  } else if (img) {
+    dataUrl = img.src;
+  }
+
+  if (dataUrl) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `${certPreviewCurrent.certificate_id}_QR.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('QR Code downloaded.');
+  } else {
+    showToast('Failed to export QR', true);
+  }
+}
+
+function adminCopyCurrentVerifyUrl() {
+  if (!certPreviewCurrent) return;
+  const siteOrigin = window.location.origin;
+  const vUrl = certPreviewCurrent.verification_url || `${siteOrigin}/verify/?id=${encodeURIComponent(certPreviewCurrent.certificate_id)}`;
+  navigator.clipboard.writeText(vUrl).then(() => {
+    showToast('Verification URL copied to clipboard');
+  }).catch(() => {
+    prompt('Certificate Verification URL:', vUrl);
+  });
+}
+
+function adminCopyCertId(id) {
+  navigator.clipboard.writeText(id).then(() => {
+    showToast(`Certificate ID ${id} copied to clipboard`);
+  }).catch(() => {
+    prompt('Certificate ID:', id);
+  });
+}
+
+// -------------------------------------------------------------
+// REVOCATION & RESTORE
+// -------------------------------------------------------------
+function adminPromptRevokeCurrent() {
+  if (!certPreviewCurrent) return;
+  if ((certPreviewCurrent.status || 'valid') === 'revoked') {
+    restoreCertificate(certPreviewCurrent.certificate_id);
+  } else {
+    openCertificateRevokeModal(certPreviewCurrent.certificate_id);
+  }
+}
+
+function openCertificateRevokeModal(id) {
+  certRevokeTargetId = id;
+  document.getElementById('revokeModalCertId').textContent = id;
+  document.getElementById('revokeReasonInput').value = '';
+  openAdminModal('certificateRevokeModal');
+}
+
+async function confirmCertificateRevocation() {
+  const reason = document.getElementById('revokeReasonInput').value.trim();
+  if (!reason) {
+    showToast('Please provide a revocation reason', true);
+    return;
+  }
+
+  const id = certRevokeTargetId;
+  if (!id) return;
+
+  if (isDevStaticMode) {
+    let all = getLocalData('certificates');
+    const idx = all.findIndex(c => c.id == id || c.certificate_id === id);
+    if (idx !== -1) {
+      all[idx].status = 'revoked';
+      all[idx].revoked_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      all[idx].revoked_by = currentAdminUser ? currentAdminUser.username : 'Administrator';
+      all[idx].revocation_reason = reason;
+      saveLocalData('certificates', all);
+    }
+    showToast(`Certificate ${id} revoked.`);
+    closeAdminModal('certificateRevokeModal');
+    closeAdminModal('certificatePreviewModal');
+    fetchCertificates();
+    fetchDashboardStats();
+    return;
+  }
+
+  try {
+    const res = await fetch('../api/admin/certificates.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer ' + authToken
+      },
+      body: `action=revoke&id=${encodeURIComponent(id)}&reason=${encodeURIComponent(reason)}`
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      showToast(result.message);
+      closeAdminModal('certificateRevokeModal');
+      closeAdminModal('certificatePreviewModal');
+      fetchCertificates();
+      fetchDashboardStats();
+    } else {
+      showToast(result.message || 'Revocation failed', true);
+    }
+  } catch (e) {
+    showToast('Network error during revocation', true);
+  }
+}
+
+async function restoreCertificate(id) {
+  if (!confirm(`Are you sure you want to restore certificate ${id} to VALID status?`)) return;
+
+  if (isDevStaticMode) {
+    let all = getLocalData('certificates');
+    const idx = all.findIndex(c => c.id == id || c.certificate_id === id);
+    if (idx !== -1) {
+      all[idx].status = 'valid';
+      all[idx].revoked_at = null;
+      all[idx].revoked_by = null;
+      all[idx].revocation_reason = null;
+      saveLocalData('certificates', all);
+    }
+    showToast(`Certificate ${id} restored to VALID status.`);
+    closeAdminModal('certificatePreviewModal');
+    fetchCertificates();
+    fetchDashboardStats();
+    return;
+  }
+
+  try {
+    const res = await fetch('../api/admin/certificates.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer ' + authToken
+      },
+      body: `action=restore&id=${encodeURIComponent(id)}`
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      showToast(result.message);
+      closeAdminModal('certificatePreviewModal');
+      fetchCertificates();
+      fetchDashboardStats();
+    } else {
+      showToast(result.message || 'Restore failed', true);
+    }
+  } catch (e) {
+    showToast('Network error during restore', true);
+  }
+}
+
+async function deleteCertificate(id) {
+  if (!confirm(`CAUTION: Are you sure you want to permanently delete certificate ${id}? This cannot be undone.`)) return;
+
+  if (isDevStaticMode) {
+    let all = getLocalData('certificates').filter(c => !(c.id == id || c.certificate_id === id));
+    saveLocalData('certificates', all);
+    showToast(`Certificate ${id} deleted.`);
+    fetchCertificates();
+    fetchDashboardStats();
+    return;
+  }
+
+  try {
+    const res = await fetch('../api/admin/certificates.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer ' + authToken
+      },
+      body: `action=delete&id=${encodeURIComponent(id)}`
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      showToast(result.message);
+      fetchCertificates();
+      fetchDashboardStats();
+    } else {
+      showToast(result.message || 'Delete failed', true);
+    }
+  } catch (e) {
+    showToast('Network error during delete', true);
+  }
+}
+
+// -------------------------------------------------------------
+// BULK CSV IMPORT
+// -------------------------------------------------------------
+async function executeBulkImport() {
+  const fileInput = document.getElementById('bulkCsvFile');
+  const textInput = document.getElementById('bulkCsvText');
+
+  let rawCsv = textInput ? textInput.value.trim() : '';
+
+  const processRecords = async (records) => {
+    if (!records || records.length === 0) {
+      showToast('No valid certificate rows found in CSV', true);
+      return;
+    }
+
+    if (isDevStaticMode) {
+      let all = getLocalData('certificates');
+      const year = new Date().getFullYear();
+      let count = 0;
+
+      records.forEach(r => {
+        const recipient = (r.recipient_name || '').trim();
+        const course = (r.course_name || '').trim();
+        if (!recipient || !course) return;
+
+        count++;
+        const prefix = (r.prefix || 'VYOM-CRT').toUpperCase();
+        const nextSeq = all.length + 1;
+        const newId = `${prefix}-${year}-${String(nextSeq).padStart(5, '0')}`;
+        const token = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+
+        all.unshift({
+          id: nextSeq,
+          certificate_id: newId,
+          certificate_type: r.certificate_type || 'Course Completion',
+          prefix: prefix,
+          recipient_name: recipient,
+          recipient_email: r.recipient_email || '',
+          course_name: course,
+          course_duration: r.course_duration || '3 Months',
+          description: r.description || 'Successfully completed official program curriculum with distinction.',
+          trainer_name: r.trainer_name || 'Santhosh S',
+          trainer_designation: r.trainer_designation || 'Lead Technical Instructor',
+          signatory_name: 'S.B. Sachin',
+          signatory_designation: 'Founder & CEO',
+          issue_date: r.issue_date || new Date().toISOString().split('T')[0],
+          completion_date: r.issue_date || new Date().toISOString().split('T')[0],
+          expiry_date: null,
+          status: 'valid',
+          verification_token: token,
+          verification_url: `${window.location.origin}/verify/?id=${encodeURIComponent(newId)}`,
+          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+          updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        });
+      });
+
+      saveLocalData('certificates', all);
+      showToast(`Bulk issue complete. Successfully issued ${count} certificates.`);
+      closeAdminModal('certificateBulkModal');
+      fetchCertificates();
+      fetchDashboardStats();
+      return;
+    }
+
+    // Live Mode Backend
+    try {
+      const res = await fetch('../api/admin/certificates.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Bearer ' + authToken
+        },
+        body: `action=bulk_import&records=${encodeURIComponent(JSON.stringify(records))}`
+      });
+      const result = await res.json();
+      if (result && result.success) {
+        showToast(result.message);
+        closeAdminModal('certificateBulkModal');
+        fetchCertificates();
+        fetchDashboardStats();
+      } else {
+        showToast(result.message || 'Bulk import failed', true);
+      }
+    } catch (e) {
+      showToast('Network error during bulk import', true);
+    }
+  };
+
+  // If CSV file selected
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const parsed = parseCsvStringToRecords(e.target.result);
+      processRecords(parsed);
+    };
+    reader.readAsText(fileInput.files[0]);
+    return;
+  }
+
+  // If text pasted
+  if (rawCsv) {
+    const parsed = parseCsvStringToRecords(rawCsv);
+    processRecords(parsed);
+    return;
+  }
+
+  showToast('Please select a CSV file or paste CSV text', true);
+}
+
+function parseCsvStringToRecords(csvText) {
+  const lines = csvText.split(/\r?\n/).filter(Boolean);
+  if (lines.length === 0) return [];
+
+  // Check if first line is header
+  let startIdx = 0;
+  const firstLine = lines[0].toLowerCase();
+  if (firstLine.includes('name') || firstLine.includes('recipient') || firstLine.includes('course')) {
+    startIdx = 1;
+  }
+
+  const records = [];
+  for (let i = startIdx; i < lines.length; i++) {
+    const parts = lines[i].split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
+    if (!parts[0]) continue;
+
+    records.push({
+      recipient_name: parts[0] || '',
+      recipient_email: parts[1] || '',
+      course_name: parts[2] || 'Full Stack Software Engineering',
+      course_duration: parts[3] || '3 Months',
+      issue_date: parts[4] || new Date().toISOString().split('T')[0],
+      certificate_type: parts[5] || 'Course Completion',
+      prefix: parts[6] || 'VYOM-CRT'
+    });
+  }
+  return records;
 }
