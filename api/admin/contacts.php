@@ -1,4 +1,5 @@
 <?php
+header('X-Robots-Tag: noindex, nofollow', true);
 /**
  * Vyomantra Technologies - Admin Contacts Inquiries Endpoint
  */

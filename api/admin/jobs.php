@@ -1,4 +1,5 @@
 <?php
+header('X-Robots-Tag: noindex, nofollow', true);
 /**
  * Vyomantra Technologies - Admin Job Postings & CMS Endpoint
  */

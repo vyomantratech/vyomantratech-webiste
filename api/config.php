@@ -1,4 +1,5 @@
 <?php
+header('X-Robots-Tag: noindex, nofollow', true);
 /**
  * Vyomantra Technologies - Database & API Configuration
  * Compatible with Hostinger Cloud / Shared Web Hosting MySQL

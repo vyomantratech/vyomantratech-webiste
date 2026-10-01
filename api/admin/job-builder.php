@@ -1,4 +1,5 @@
 <?php
+header('X-Robots-Tag: noindex, nofollow', true);
 /**
  * Vyomantra Technologies - Static Job Subpage Generator
  * Automatically compiles clean static HTML subpages in careers/[slug].html

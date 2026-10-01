@@ -1,4 +1,5 @@
 <?php
+header('X-Robots-Tag: noindex, nofollow', true);
 /**
  * Vyomantra Technologies - Public Jobs Listing Endpoint
  * Fetches active job openings and internships for careers.html

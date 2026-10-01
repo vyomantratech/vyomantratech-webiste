@@ -1,0 +1,16 @@
+{
+  "name": "VYOMANTRA TECHNOLOGIES",
+  "short_name": "VYOMANTRA",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#050711",
+  "theme_color": "#050711",
+  "icons": [
+    {
+      "src": "/assets/icons/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 <?php
+header('X-Robots-Tag: noindex, nofollow', true);
 /**
  * Vyomantra Technologies - Project Quote & Blueprint Request API Endpoint
  * Handles submissions from request-a-quote.html
