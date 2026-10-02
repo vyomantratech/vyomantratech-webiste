@@ -51,8 +51,8 @@ function getDbConnection() {
     }
 
     // Check if placeholder is still set
-    if (DB_PASS === 'your_db_password' || DB_NAME === 'vyomantra_db') {
-        // Not configured yet; return null to allow simulation/graceful logging
+    if (DB_PASS === 'your_db_password') {
+        // Not configured yet; return null to allow simulation/graceful fallback
         return null;
     }
 

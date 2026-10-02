@@ -67,16 +67,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Setup UI event listeners
-  initSidebarTabs();
-  initLogout();
-  initRefresh();
-  initContactsFilters();
-  initCoursesFilters();
-  initQuotesFilters();
-  initApplicantsFilters();
-  initJobsCMS();
-  initCertificatesManager();
+  // Initialize widgets independently so one broken dashboard widget cannot
+  // prevent the certificate controls (or other sections) from receiving events.
+  const initializers = [
+    ['Sidebar navigation', initSidebarTabs],
+    ['Logout controls', initLogout],
+    ['Refresh control', initRefresh],
+    ['Certificates', initCertificatesManager],
+    ['Contact filters', initContactsFilters],
+    ['Course filters', initCoursesFilters],
+    ['Quote filters', initQuotesFilters],
+    ['Applicant filters', initApplicantsFilters],
+    ['Jobs CMS', initJobsCMS]
+  ];
+  initializers.forEach(([name, initialize]) => {
+    try {
+      initialize();
+    } catch (error) {
+      console.error(`${name} controls could not initialize`, error);
+      showToast(`${name} controls failed to load. Refresh the dashboard and try again.`, true);
+    }
+  });
 
   // Load initial tab data
   loadCurrentTab();
@@ -169,6 +180,7 @@ function switchTab(tabId) {
     'quotes': { title: '<i class="fas fa-file-invoice-dollar" style="color:var(--cyan);"></i> Project Quotations', subtitle: 'Track custom software scopes, budgets, and pipeline status.' },
     'courses': { title: '<i class="fas fa-user-graduate" style="color:var(--cyan);"></i> Course Admissions & Payments', subtitle: 'Verify student UPI/QR payment proofs and manage enrollment access.' },
     'applicants': { title: '<i class="fas fa-users-cog" style="color:var(--cyan);"></i> Job & Internship Applicants', subtitle: 'Review candidate resumes, portfolios, and interview pipelines.' },
+    'courses-cms': { title: '<i class="fas fa-graduation-cap" style="color:var(--cyan);"></i> Course Creation CMS', subtitle: 'Create, edit, and publish technical courses, syllabi, cohorts, and pricing.' },
     'jobs': { title: '<i class="fas fa-briefcase" style="color:var(--cyan);"></i> Job Postings & CMS', subtitle: 'Publish new roles, update active openings, and generate subpages.' },
     'certificates': { title: '<i class="fas fa-certificate" style="color:var(--cyan);"></i> Credential & Certificate Authority', subtitle: 'Issue, verify, revoke, and manage authentic company certificates with QR verification & DOCX/PDF generation.' }
   };
@@ -192,6 +204,8 @@ function loadCurrentTab() {
       return fetchCourses();
     case 'applicants':
       return fetchApplicants();
+    case 'courses-cms':
+      return fetchCoursesCMS();
     case 'jobs':
       return fetchJobs();
     case 'certificates':
@@ -328,6 +342,7 @@ function renderLocalStats() {
 function renderMonthlyChart(monthlyData) {
   const canvas = document.getElementById('monthlyActivityChart');
   if (!canvas) return;
+  if (typeof Chart === 'undefined') return;
 
   if (monthlyChartInstance) {
     monthlyChartInstance.destroy();
@@ -398,6 +413,7 @@ function renderMonthlyChart(monthlyData) {
 function renderCoursesChart(breakdown) {
   const canvas = document.getElementById('courseDistributionChart');
   if (!canvas) return;
+  if (typeof Chart === 'undefined') return;
 
   if (courseChartInstance) {
     courseChartInstance.destroy();
@@ -1247,6 +1263,307 @@ function viewApplicantModal(applicant) {
 // =========================================================================
 // 8. TAB 6: JOB POSTINGS CMS & STATIC SUBPAGE GENERATION
 // =========================================================================
+// =========================================================================
+// 8A. TAB 6A: COURSE CREATION CMS
+// =========================================================================
+function initCoursesCMS() {
+  const statusSelect = document.getElementById('filterCourseStatus');
+  const catSelect = document.getElementById('filterCourseCategory');
+  const searchInput = document.getElementById('searchCourses');
+  const addBtn = document.getElementById('btnOpenAddCourseModal');
+  const saveBtn = document.getElementById('btnSaveCourse');
+
+  if (statusSelect) statusSelect.addEventListener('change', fetchCoursesCMS);
+  if (catSelect) catSelect.addEventListener('change', fetchCoursesCMS);
+  if (searchInput) searchInput.addEventListener('input', debounce(fetchCoursesCMS, 300));
+
+  if (addBtn) addBtn.addEventListener('click', () => openCourseModal(null));
+  if (saveBtn) saveBtn.addEventListener('click', handleSaveCourse);
+}
+
+async function fetchCoursesCMS() {
+  const status = document.getElementById('filterCourseStatus')?.value || 'all';
+  const category = document.getElementById('filterCourseCategory')?.value || 'all';
+  const search = document.getElementById('searchCourses')?.value || '';
+  const tbody = document.getElementById('coursesTableBody');
+
+  let list = [];
+
+  if (!isDevStaticMode) {
+    try {
+      const res = await fetch(`../api/admin/courses.php?action=list_courses&status=${encodeURIComponent(status)}&category=${encodeURIComponent(category)}&search=${encodeURIComponent(search)}`, {
+        headers: { 'Authorization': 'Bearer ' + authToken }
+      });
+      if (res.status === 405) {
+        isDevStaticMode = true;
+      } else {
+        const result = await res.json().catch(() => null);
+        if (result && result.success && result.data) {
+          list = result.data.courses || [];
+        }
+      }
+    } catch (e) {
+      isDevStaticMode = true;
+    }
+  }
+
+  if (isDevStaticMode) {
+    let all = getLocalData('courses_catalog');
+    if (all.length === 0) {
+      try {
+        const cRes = await fetch('../data/courses.json');
+        const jsonCourses = await cRes.json();
+        if (Array.isArray(jsonCourses)) {
+          all = jsonCourses;
+          saveLocalData('courses_catalog', all);
+        }
+      } catch (e) {}
+    }
+
+    list = all.filter(c => {
+      const matchesStatus = (status === 'all' || (c.status || 'active') === status);
+      const matchesCat = (category === 'all' || c.category === category);
+      const haystack = (c.title + ' ' + (c.summary || '')).toLowerCase();
+      const matchesSearch = !search || haystack.includes(search.toLowerCase());
+      return matchesStatus && matchesCat && matchesSearch;
+    });
+  }
+
+  const badgeCount = document.getElementById('countBadgeCoursesCMS');
+  if (badgeCount) badgeCount.textContent = list.length;
+
+  if (!tbody) return;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-dim);">No courses found. Click "+ Create New Course" to publish your first course.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td>
+        <div style="font-weight:700; color:#fff; font-size:0.95rem;">${escapeHtml(c.title)}</div>
+        <div style="display:flex; gap:6px; margin-top:4px;">
+          <span class="badge-pill badge-purple" style="font-size:0.75rem;">${escapeHtml(c.badge || 'Cohort')}</span>
+          <span class="badge-pill" style="font-size:0.75rem;">${escapeHtml(c.seats_label || 'Seats Limited')}</span>
+        </div>
+      </td>
+      <td>
+        <span class="badge-pill" style="font-size:0.75rem;">${escapeHtml(c.category || 'programming')}</span>
+      </td>
+      <td>
+        <div style="color:#fff; font-size:0.85rem;">${escapeHtml(c.duration || '1 Month')}</div>
+        <div style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;">${escapeHtml(c.mode || 'Live Online')}</div>
+      </td>
+      <td>
+        <div style="color:var(--cyan); font-weight:700; font-size:0.95rem;">₹${Number(c.fee || 649).toLocaleString('en-IN')}</div>
+        ${c.original_fee ? `<div style="font-size:0.75rem; color:var(--text-dim); text-decoration:line-through;">₹${Number(c.original_fee).toLocaleString('en-IN')}</div>` : ''}
+      </td>
+      <td>
+        <span style="color:var(--cyan); font-weight:700; font-size:0.95rem;">${c.student_count || 0}</span> students
+      </td>
+      <td>
+        <select class="admin-select" style="font-size:0.78rem; padding:0.25rem 0.5rem;" onchange="updateCourseStatus(${c.id}, this.value)">
+          <option value="active" ${c.status === 'active' ? 'selected' : ''}>Active (Open)</option>
+          <option value="upcoming" ${c.status === 'upcoming' ? 'selected' : ''}>Upcoming</option>
+          <option value="closed" ${c.status === 'closed' ? 'selected' : ''}>Closed</option>
+          <option value="draft" ${c.status === 'draft' ? 'selected' : ''}>Draft</option>
+        </select>
+      </td>
+      <td style="text-align:right; white-space:nowrap;">
+        <a href="../courses.html" target="_blank" class="btn-action-icon" title="View Public Courses Page">
+          <i class="fas fa-eye"></i>
+        </a>
+        <button type="button" class="btn-action-icon" title="Edit Course Details" onclick='openCourseModal(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
+          <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="btn-action-icon danger" title="Remove Course" onclick="deleteCourse(${c.id})">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openCourseModal(course) {
+  const form = document.getElementById('courseEditorForm');
+  if (form) form.reset();
+
+  const titleEl = document.getElementById('courseModalTitle');
+  const idEl = document.getElementById('courseEditId');
+  const slugEl = document.getElementById('courseEditSlug');
+
+  if (course) {
+    if (titleEl) titleEl.innerHTML = '<i class="fas fa-edit" style="color:var(--cyan);"></i> Edit Course: ' + escapeHtml(course.title);
+    if (idEl) idEl.value = course.id || 0;
+    if (slugEl) slugEl.value = course.slug || '';
+
+    document.getElementById('courseTitle').value = course.title || '';
+    document.getElementById('courseCategory').value = course.category || 'programming';
+    document.getElementById('courseBadge').value = course.badge || 'Live Online Cohort';
+    document.getElementById('courseDuration').value = course.duration || '1 Month';
+    document.getElementById('courseMode').value = course.mode || 'Live Online';
+    document.getElementById('courseStatus').value = course.status || 'active';
+    document.getElementById('courseFee').value = course.fee || 649;
+    document.getElementById('courseOriginalFee').value = course.original_fee || 24999;
+    document.getElementById('courseSeatsLabel').value = course.seats_label || 'Seats Limited';
+    document.getElementById('courseMentor').value = course.mentor_name || 'VYOMANTRA Technical Lead';
+    document.getElementById('courseSummary').value = course.summary || '';
+    document.getElementById('courseSyllabus').value = Array.isArray(course.syllabus) ? course.syllabus.join('\n') : (course.syllabus || '');
+    document.getElementById('courseWhatsApp').value = course.whatsapp_phone || '918122288855';
+  } else {
+    if (titleEl) titleEl.innerHTML = '<i class="fas fa-graduation-cap" style="color:var(--cyan);"></i> Create &amp; Publish Technical Course';
+    if (idEl) idEl.value = 0;
+    if (slugEl) slugEl.value = '';
+    document.getElementById('courseFee').value = '649';
+    document.getElementById('courseOriginalFee').value = '24999';
+    document.getElementById('courseBadge').value = 'Live Online Cohort';
+    document.getElementById('courseDuration').value = '1 Month';
+    document.getElementById('courseSeatsLabel').value = 'Special Inaugural Pass';
+    document.getElementById('courseWhatsApp').value = '918122288855';
+  }
+
+  openAdminModal('courseEditorModal');
+}
+
+async function handleSaveCourse() {
+  const form = document.getElementById('courseEditorForm');
+  const title = document.getElementById('courseTitle').value.trim();
+  const summary = document.getElementById('courseSummary').value.trim();
+  const fee = document.getElementById('courseFee').value.trim();
+
+  if (!title || !summary || !fee) {
+    alert('Please provide Course Title, Fee, and Summary.');
+    return;
+  }
+
+  const saveBtn = document.getElementById('btnSaveCourse');
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Course...';
+
+  const formData = new FormData(form);
+  formData.append('action', 'save_course');
+
+  const id = Number(document.getElementById('courseEditId').value || 0);
+  const slug = document.getElementById('courseEditSlug').value || (title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+
+  if (isDevStaticMode) {
+    let all = getLocalData('courses_catalog');
+    const courseObj = {
+      id: id || Date.now(),
+      slug: slug,
+      title: title,
+      badge: document.getElementById('courseBadge').value || 'Live Online Cohort',
+      category: document.getElementById('courseCategory').value || 'programming',
+      duration: document.getElementById('courseDuration').value || '1 Month',
+      mode: document.getElementById('courseMode').value || 'Live Online',
+      fee: Number(fee),
+      original_fee: Number(document.getElementById('courseOriginalFee').value || 24999),
+      seats_label: document.getElementById('courseSeatsLabel').value || 'Seats Limited',
+      summary: summary,
+      syllabus: document.getElementById('courseSyllabus').value.split('\n').map(s => s.trim()).filter(Boolean),
+      mentor_name: document.getElementById('courseMentor').value || 'VYOMANTRA Technical Lead',
+      whatsapp_phone: document.getElementById('courseWhatsApp').value || '918122288855',
+      status: document.getElementById('courseStatus').value || 'active',
+      student_count: 0
+    };
+
+    if (id > 0) {
+      const idx = all.findIndex(c => c.id === id);
+      if (idx !== -1) all[idx] = { ...all[idx], ...courseObj };
+      else all.unshift(courseObj);
+    } else {
+      all.unshift(courseObj);
+    }
+    saveLocalData('courses_catalog', all);
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fas fa-save"></i> Save &amp; Publish Course';
+    closeAdminModal('courseEditorModal');
+    showToast('Course published successfully!');
+    fetchCoursesCMS();
+    return;
+  }
+
+  try {
+    const res = await fetch('../api/admin/courses.php', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + authToken },
+      body: formData
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      showToast('Course published successfully!');
+      closeAdminModal('courseEditorModal');
+      fetchCoursesCMS();
+    } else {
+      alert(result?.message || 'Failed to save course.');
+    }
+  } catch (err) {
+    alert('Server error saving course. Check network or permissions.');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fas fa-save"></i> Save &amp; Publish Course';
+  }
+}
+
+async function deleteCourse(id) {
+  if (!confirm(`Are you sure you want to delete course #${id}?`)) return;
+
+  if (isDevStaticMode) {
+    let all = getLocalData('courses_catalog');
+    all = all.filter(c => c.id !== id);
+    saveLocalData('courses_catalog', all);
+    showToast(`Course #${id} removed.`);
+    fetchCoursesCMS();
+    return;
+  }
+
+  try {
+    const res = await fetch('../api/admin/courses.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer ' + authToken
+      },
+      body: `action=delete_course&id=${id}`
+    });
+    const result = await res.json();
+    if (result && result.success) {
+      showToast(result.message || 'Course deleted.');
+      fetchCoursesCMS();
+    } else {
+      alert(result?.message || 'Failed to delete course.');
+    }
+  } catch (e) {
+    alert('Error connecting to courses endpoint.');
+  }
+}
+
+async function updateCourseStatus(id, newStatus) {
+  if (isDevStaticMode) {
+    let all = getLocalData('courses_catalog');
+    const item = all.find(c => c.id === id);
+    if (item) item.status = newStatus;
+    saveLocalData('courses_catalog', all);
+    showToast(`Course #${id} status changed to ${newStatus}.`);
+    return;
+  }
+
+  try {
+    await fetch('../api/admin/courses.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer ' + authToken
+      },
+      body: `action=toggle_course_status&id=${id}&status=${encodeURIComponent(newStatus)}`
+    });
+    showToast(`Course #${id} status updated to ${newStatus}.`);
+  } catch (e) {
+    alert('Failed to update course status.');
+  }
+}
+
 function initJobsCMS() {
   const statusSelect = document.getElementById('filterJobStatus');
   const catSelect = document.getElementById('filterJobCategory');
@@ -1556,149 +1873,14 @@ async function deleteJob(id, slug) {
 // 9. LOCAL DATA STORAGE ENGINE (FOR STATIC LIVE SERVER PORT 5500)
 // =========================================================================
 function initLocalSeedData() {
-  if (!localStorage.getItem('vyomantra_admin_contacts')) {
-    saveLocalData('contacts', [
-      {
-        id: 1,
-        name: 'Arun Prakash',
-        email: 'arun@prakashind.com',
-        phone: '+91 98401 23456',
-        service: 'AI & Machine Learning',
-        message: 'Looking for an enterprise AI consultation to automate invoice processing and factory defect analysis.',
-        status: 'new',
-        created_at: '2026-09-29 09:30:00'
-      },
-      {
-        id: 2,
-        name: 'Meenakshi Sundaram',
-        email: 'meenakshi@gmail.com',
-        phone: '+91 94432 98765',
-        service: 'ERP & CRM Solutions',
-        message: 'Need a customized retail billing and multi-warehouse inventory engine similar to StockMitra.',
-        status: 'contacted',
-        created_at: '2026-09-28 14:15:00'
-      },
-      {
-        id: 3,
-        name: 'Kevin Smith',
-        email: 'kevin@techglobal.io',
-        phone: '+1 415 555 0192',
-        service: 'Web Development',
-        message: 'Need high-concurrency Next.js frontend with Tailwind and payment gateway integration.',
-        status: 'resolved',
-        created_at: '2026-09-27 16:45:00'
-      }
-    ]);
-  }
-
-  if (!localStorage.getItem('vyomantra_admin_quotes')) {
-    saveLocalData('quotes', [
-      {
-        id: 1,
-        name: 'Rajesh Kannan',
-        company: 'Apex Logistics Ltd',
-        email: 'rajesh@apexlogistics.in',
-        phone: '+91 98940 11223',
-        service: 'Custom Software',
-        project_type: 'Logistics ERP & Fleet GPS Telemetry',
-        budget: '₹1,50,000 - ₹3,00,000',
-        timeline: '2 - 3 Months',
-        description: 'Real-time fleet tracking, driver dispatch console, automated waybill generation, and client portal.',
-        status: 'proposal_sent',
-        created_at: '2026-09-28 11:20:00'
-      },
-      {
-        id: 2,
-        name: 'Deepak Verma',
-        company: 'Nexus Healthcare',
-        email: 'deepak@nexushealth.org',
-        phone: '+91 94441 55667',
-        service: 'AI Solutions',
-        project_type: 'Patient Intake & Triage Bot',
-        budget: '₹3,00,000 - ₹5,00,000',
-        timeline: '1 - 2 Months',
-        description: 'Multi-lingual intake assistant with automated EHR summary generation and appointment scheduling.',
-        status: 'new',
-        created_at: '2026-09-29 08:45:00'
-      }
-    ]);
-  }
-
-  if (!localStorage.getItem('vyomantra_admin_courses')) {
-    saveLocalData('courses', [
-      {
-        id: 1,
-        student_name: 'Vignesh S',
-        email: 'vignesh.tech@gmail.com',
-        phone: '+91 82481 12345',
-        course_name: 'Full-Stack Web Development',
-        course_mode: 'Live Online',
-        amount_paid: 649.00,
-        reference_number: 'UPI-629837190241',
-        screenshot_filepath: 'assets/icons/payment_qr.png',
-        payment_status: 'pending_verification',
-        created_at: '2026-09-29 08:30:00'
-      },
-      {
-        id: 2,
-        student_name: 'Kavitha R',
-        email: 'kavitha.r@gmail.com',
-        phone: '+91 97890 54321',
-        course_name: 'Python & Backend Engineering',
-        course_mode: 'Live Online',
-        amount_paid: 649.00,
-        reference_number: 'UPI-829103948123',
-        screenshot_filepath: 'assets/icons/payment_qr.png',
-        payment_status: 'verified',
-        created_at: '2026-09-28 17:40:00'
-      }
-    ]);
-  }
-
-  if (!localStorage.getItem('vyomantra_admin_applicants')) {
-    saveLocalData('applicants', [
-      {
-        id: 1,
-        name: 'Suresh Balaji',
-        email: 'suresh.b@gmail.com',
-        phone: '+91 98412 34567',
-        role_applied: 'Full-Stack Software Engineer',
-        experience: '2 Years',
-        portfolio_url: 'https://github.com',
-        resume_filepath: 'uploads/resumes/',
-        resume_filename: 'Suresh_CV.pdf',
-        message: 'Built high-performance full stack web apps with Next.js, Node, and PostgreSQL. Eager to contribute to StockMitra.',
-        status: 'applied',
-        created_at: '2026-09-28 15:10:00'
-      },
-      {
-        id: 2,
-        name: 'Divya N',
-        email: 'divya.n@gmail.com',
-        phone: '+91 99401 87654',
-        role_applied: 'UI/UX & Product Designer',
-        experience: '1 Year',
-        portfolio_url: 'https://behance.net',
-        resume_filepath: 'uploads/resumes/',
-        resume_filename: 'Divya_Portfolio.pdf',
-        message: 'Designed Figma design systems, responsive SaaS portals, and mobile app flows.',
-        status: 'reviewing',
-        created_at: '2026-09-27 18:25:00'
-      }
-    ]);
-  }
-
-  // Pre-load jobs from ../data/jobs.json if not present
-  if (!localStorage.getItem('vyomantra_admin_jobs')) {
-    fetch('../data/jobs.json')
-      .then(res => res.json())
-      .then(jobs => {
-        if (Array.isArray(jobs) && jobs.length > 0) {
-          saveLocalData('jobs', jobs);
-        }
-      })
-      .catch(() => {});
-  }
+  // Clear any existing demo contacts, quotes, course registrations, applicants, and demo jobs
+  // while strictly keeping authentic certificates data.
+  localStorage.setItem('vyomantra_admin_contacts', JSON.stringify([]));
+  localStorage.setItem('vyomantra_admin_quotes', JSON.stringify([]));
+  localStorage.setItem('vyomantra_admin_courses', JSON.stringify([]));
+  localStorage.setItem('vyomantra_admin_applicants', JSON.stringify([]));
+  localStorage.setItem('vyomantra_admin_jobs', JSON.stringify([]));
+  localStorage.setItem('vyomantra_admin_courses_catalog', JSON.stringify([]));
 
   // Pre-load certificates from ../data/certificates.json if not present
   if (!localStorage.getItem('vyomantra_admin_certificates')) {
@@ -1856,24 +2038,6 @@ function initCertificatesManager() {
     fetchCertificates();
   });
 
-  // Modal Open Buttons
-  const createBtn = document.getElementById('btnOpenCreateCertModal');
-  if (createBtn) createBtn.addEventListener('click', openCertificateCreateModal);
-
-  const bulkBtn = document.getElementById('btnOpenBulkCertModal');
-  if (bulkBtn) bulkBtn.addEventListener('click', () => openAdminModal('certificateBulkModal'));
-
-  // Configurator Button
-  const configBtn = document.getElementById('btnOpenCertConfigurator');
-  if (configBtn) configBtn.addEventListener('click', openCertificateConfiguratorModal);
-
-  // Export CSV Button
-  const exportBtn = document.getElementById('btnExportCertsCsv');
-  if (exportBtn) exportBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    exportCertificatesCsv();
-  });
-
   // Form Save
   const saveBtn = document.getElementById('btnSaveCertificate');
   if (saveBtn) saveBtn.addEventListener('click', saveCertificate);
@@ -1894,6 +2058,33 @@ function initCertificatesManager() {
 
   // Initialize Configurator modal event listeners
   initConfiguratorEvents();
+}
+
+async function handleCertificateAction(event) {
+  const button = event.target.closest('[data-cert-action]');
+  if (!button) return;
+
+  const id = button.dataset.certId;
+  try {
+    switch (button.dataset.certAction) {
+      case 'create': openCertificateCreateModal(); break;
+      case 'configurator': await openCertificateConfiguratorModal(); break;
+      case 'bulk': openAdminModal('certificateBulkModal'); break;
+      case 'export': exportCertificatesCsv(); break;
+      case 'copy-id': await adminCopyCertId(id); break;
+      case 'preview': await openCertificatePreview(id); break;
+      case 'docx': await downloadCertificateDocx(id, button.dataset.certMode || 'digital'); break;
+      case 'pdf': await adminDownloadCertPdf(id); break;
+      case 'edit': await openCertificateEditModal(id); break;
+      case 'revoke': openCertificateRevokeModal(id); break;
+      case 'restore': await restoreCertificate(id); break;
+      case 'delete': await deleteCertificate(id); break;
+      default: return;
+    }
+  } catch (error) {
+    console.error('Certificate action failed:', error);
+    showToast('That certificate action failed. Check the browser console for details.', true);
+  }
 }
 
 function updateLiveCertIdPreview() {
@@ -2041,7 +2232,7 @@ function renderCertificatesTable(certs, totalCount) {
         <td class="cert-cell-id">
           <div style="display: flex; align-items: center; gap: 8px;">
             <strong class="cert-id-badge">${escapeHtml(c.certificate_id)}</strong>
-            <button type="button" class="btn-action-icon" style="padding:2px 6px; font-size:0.75rem;" onclick="adminCopyCertId('${escapeHtml(c.certificate_id)}')" title="Copy Certificate ID">
+            <button type="button" class="btn-action-icon" style="padding:2px 6px; font-size:0.75rem;" data-cert-action="copy-id" data-cert-id="${escapeHtml(c.certificate_id)}" title="Copy Certificate ID">
               <i class="fas fa-copy"></i>
             </button>
           </div>
@@ -2065,36 +2256,36 @@ function renderCertificatesTable(certs, totalCount) {
           ${status === 'revoked' && c.revocation_reason ? `<div style="font-size:0.72rem; color:#ef4444; margin-top:4px; max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(c.revocation_reason)}">${escapeHtml(c.revocation_reason)}</div>` : ''}
         </td>
         <td style="text-align: center;">
-          <button type="button" class="btn-action-icon" style="padding:6px 8px;" onclick="openCertificatePreview('${escapeHtml(c.certificate_id)}')" title="Preview Certificate &amp; QR">
+          <button type="button" class="btn-action-icon" style="padding:6px 8px;" data-cert-action="preview" data-cert-id="${escapeHtml(c.certificate_id)}" title="Preview Certificate &amp; QR">
             <i class="fas fa-qrcode" style="color:var(--cyan); font-size:1.1rem;"></i>
           </button>
         </td>
         <td class="cert-cell-actions">
-          <button type="button" class="btn btn-outline btn-sm btn-docx-partial" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" onclick="downloadCertificateDocx('${escapeHtml(c.certificate_id)}', 'partial')" title="Download DOCX with QR, ID & Course (Leaves Recipient Name and Founder Signature blank for manual pen signing)">
+          <button type="button" class="btn btn-outline btn-sm btn-docx-partial" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="docx" data-cert-mode="partial" data-cert-id="${escapeHtml(c.certificate_id)}" title="Download DOCX with QR, ID & Course (Leaves Recipient Name and Founder Signature blank for manual pen signing)">
             <i class="fas fa-file-word"></i> DOCX (Manual)
           </button>
-          <button type="button" class="btn btn-outline btn-sm btn-docx-digital" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" onclick="downloadCertificateDocx('${escapeHtml(c.certificate_id)}', 'digital')" title="Download 100% Complete Digital DOCX with all details and signatures">
+          <button type="button" class="btn btn-outline btn-sm btn-docx-digital" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="docx" data-cert-mode="digital" data-cert-id="${escapeHtml(c.certificate_id)}" title="Download 100% Complete Digital DOCX with all details and signatures">
             <i class="fas fa-file-word"></i> DOCX (Digital)
           </button>
-          <button type="button" class="btn btn-outline btn-sm" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" onclick="openCertificatePreview('${escapeHtml(c.certificate_id)}')" title="Preview Official Certificate">
+          <button type="button" class="btn btn-outline btn-sm" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="preview" data-cert-id="${escapeHtml(c.certificate_id)}" title="Preview Official Certificate">
             <i class="fas fa-eye"></i> View
           </button>
-          <button type="button" class="btn btn-outline btn-sm" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" onclick="adminDownloadCertPdf('${escapeHtml(c.certificate_id)}')" title="Download PDF Certificate">
+          <button type="button" class="btn btn-outline btn-sm" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="pdf" data-cert-id="${escapeHtml(c.certificate_id)}" title="Download PDF Certificate">
             <i class="fas fa-file-pdf"></i> PDF
           </button>
-          <button type="button" class="btn-action-icon" style="margin-right:2px;" onclick="openCertificateEditModal('${escapeHtml(c.certificate_id)}')" title="Edit Certificate">
+          <button type="button" class="btn-action-icon" style="margin-right:2px;" data-cert-action="edit" data-cert-id="${escapeHtml(c.certificate_id)}" title="Edit Certificate">
             <i class="fas fa-edit"></i>
           </button>
           ${status === 'revoked' ? `
-            <button type="button" class="btn-action-icon" style="color:var(--green); margin-right:2px;" onclick="restoreCertificate('${escapeHtml(c.certificate_id)}')" title="Restore to Valid">
+            <button type="button" class="btn-action-icon" style="color:var(--green); margin-right:2px;" data-cert-action="restore" data-cert-id="${escapeHtml(c.certificate_id)}" title="Restore to Valid">
               <i class="fas fa-undo"></i>
             </button>
           ` : `
-            <button type="button" class="btn-action-icon danger" style="margin-right:2px;" onclick="openCertificateRevokeModal('${escapeHtml(c.certificate_id)}')" title="Revoke Certificate">
+            <button type="button" class="btn-action-icon danger" style="margin-right:2px;" data-cert-action="revoke" data-cert-id="${escapeHtml(c.certificate_id)}" title="Revoke Certificate">
               <i class="fas fa-ban"></i>
             </button>
           `}
-          <button type="button" class="btn-action-icon danger" onclick="deleteCertificate('${escapeHtml(c.certificate_id)}')" title="Delete Certificate">
+          <button type="button" class="btn-action-icon danger" data-cert-action="delete" data-cert-id="${escapeHtml(c.certificate_id)}" title="Delete Certificate">
             <i class="fas fa-trash-alt"></i>
           </button>
         </td>
@@ -3091,9 +3282,12 @@ async function openCertificateConfiguratorModal() {
       currentCertConfig = result.data;
     }
   } catch (e) {
-    const localCfg = localStorage.getItem('vyomantra_cert_config');
-    if (localCfg) {
-      currentCertConfig = { ...currentCertConfig, ...JSON.parse(localCfg) };
+    try {
+      const localCfg = localStorage.getItem('vyomantra_cert_config');
+      if (localCfg) currentCertConfig = { ...currentCertConfig, ...JSON.parse(localCfg) };
+    } catch (storageError) {
+      console.warn('Saved certificate configuration could not be read; using defaults.', storageError);
+      localStorage.removeItem('vyomantra_cert_config');
     }
   }
 
@@ -3304,6 +3498,10 @@ function testSampleDocxGeneration() {
 }
 
 // Explicit Window Method Bindings for Inline HTML Event Compatibility
+window.openCourseModal = openCourseModal;
+window.deleteCourse = deleteCourse;
+window.updateCourseStatus = updateCourseStatus;
+window.handleSaveCourse = handleSaveCourse;
 window.downloadCertificateDocx = downloadCertificateDocx;
 window.adminDownloadCurrentDocx = adminDownloadCurrentDocx;
 window.openCertificatePreview = openCertificatePreview;
@@ -3331,3 +3529,6 @@ window.closeAdminModal = closeAdminModal;
 window.openCertificateCreateModal = openCertificateCreateModal;
 window.exportCertificatesCsv = exportCertificatesCsv;
 
+// Install the click router as soon as this body-end script loads. It must not
+// depend on the async authentication/setup path finishing first.
+document.addEventListener('click', handleCertificateAction);

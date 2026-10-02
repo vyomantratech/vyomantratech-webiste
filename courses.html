@@ -142,80 +142,32 @@
     </div>
   </section>
 
-  <!-- Featured Course Card -->
-  <section style="padding-top: 1rem;">
+  <!-- Courses Catalog Section (Dynamic from Admin CMS) -->
+  <section style="padding-top: 1rem;" id="coursesSection">
     <div class="container">
-      <div class="course-featured-card">
-        <div class="course-main-info">
-          <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
-            <span class="badge-pill badge-purple">Live Online Cohort</span>
-            <span class="badge-pill">Duration: 1 Month</span>
-            <span class="badge-pill"
-              style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">Special
-              Inaugural Pass</span>
-          </div>
+      <div id="coursesCatalogContainer" style="display: flex; flex-direction: column; gap: 2.5rem;">
+        <!-- Dynamic course cards render here when posted from Admin CMS -->
+      </div>
 
-          <h2 style="font-size: 2.2rem; margin-bottom: 1rem;">
-            Python Programming with AI Tools — <span class="gradient-text">From Zero to Pro</span>
-          </h2>
-          <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
-            A high-intensity, practical 1-month program designed to take you from writing your first line of code to
-            building automated AI scripts, APIs, and real-world tools. Learn with AI assistance tools from Day 1.
-          </p>
-
-          <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--cyan);">What You Will Master:</h4>
-          <div class="course-curriculum-list">
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Learn Python with AI Tools from Day 1</span>
-            </div>
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Live, Real-World Enterprise Projects</span>
-            </div>
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>1-on-1 Dedicated Mentor Guidance</span>
-            </div>
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Core & Advanced Python Architecture</span>
-            </div>
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>AI-Powered Project-Based Learning</span>
-            </div>
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Smart Debugging & Error Handling</span>
-            </div>
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Automation, Scripting & AI Workflows</span>
-            </div>
-            <div class="curriculum-item">
-              <i class="fas fa-check-circle"></i>
-              <span>Career Boost & Industry-Ready Portfolio</span>
-            </div>
-          </div>
+      <!-- Clean Empty State when no courses are active -->
+      <div id="noCoursesNotice" style="display: block; max-width: 900px; margin: 0 auto; text-align: center; padding: 4.5rem 2rem; background: rgba(15, 20, 45, 0.55); border: 1px dashed var(--border-cyan); border-radius: var(--radius-md); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+        <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-cyan); display: inline-flex; align-items: center; justify-content: center; color: var(--cyan); font-size: 1.8rem; margin-bottom: 1.5rem;">
+          <i class="fas fa-graduation-cap"></i>
         </div>
-
-        <!-- Pricing & Enrollment Box -->
-        <div class="pricing-panel">
-          <span class="badge-pill badge-purple" style="margin-bottom: 0.5rem;">Seats Limited</span>
-          <div class="original-price">Standard Fee: ₹24,999</div>
-          <div class="price-tag">
-            ₹649 <span>/ full course</span>
-          </div>
-          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.75rem;">
-            One-time inclusive fee. Includes live classes, recorded access, project reviews, and verified certificate.
-          </p>
-          <button class="btn btn-primary btn-lg" style="width: 100%; margin-bottom: 1rem;" data-open-payment>
-            <i class="fas fa-user-plus"></i> Register for Course
-          </button>
-          <a href="https://wa.me/918122288855?text=Hi!%20I%20have%20questions%20about%20the%20Python%20AI%20Course"
-            target="_blank" class="btn btn-outline" style="width: 100%;" rel="noopener noreferrer">
-            <i class="fab fa-whatsapp"></i> Ask on WhatsApp
+        <span class="badge-pill badge-purple" style="margin-bottom: 0.75rem;">Curriculum Under Preparation</span>
+        <h2 style="color: #fff; font-size: 2rem; margin-bottom: 1rem; font-family: var(--font-heading);">
+          Upcoming Cohorts &amp; Masterclasses <br><span class="gradient-text">Launching Soon</span>
+        </h2>
+        <p style="color: var(--text-muted); max-width: 620px; margin: 0 auto 2rem auto; font-size: 1.05rem; line-height: 1.7;">
+          We are currently structuring our next intensive engineering batches and practical AI workshops. Inquire directly on WhatsApp to receive priority syllabus announcements and early-bird registration invites.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="https://wa.me/918122288855?text=Hi!%20I%20want%20to%20know%20about%20upcoming%20courses%20at%20Vyomantra"
+            target="_blank" class="btn btn-primary" rel="noopener noreferrer">
+            <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
+          </a>
+          <a href="contact.html" class="btn btn-outline">
+            <i class="fas fa-envelope"></i> Contact Admissions
           </a>
         </div>
       </div>
@@ -296,6 +248,8 @@
           <span class="badge-pill badge-purple" style="font-size: 0.8rem; margin-bottom: 0.75rem;">Step 2: Submit Details</span>
           
           <form id="courseEnrollForm" enctype="multipart/form-data">
+            <input type="hidden" id="regCourseName" name="course_name" value="">
+            <input type="hidden" id="regAmountPaid" name="amount_paid" value="649">
             <div class="form-group" style="margin-bottom: 0.85rem;">
               <label class="form-label" for="regStudentName" style="font-size: 0.85rem;">Student Name *</label>
               <input type="text" id="regStudentName" name="student_name" class="form-control" style="padding: 0.55rem 0.75rem; font-size: 0.9rem;" placeholder="e.g. Rahul Sharma" required>
@@ -470,6 +424,135 @@
   <script src="js/pixel-scroll.js"></script>
   <script src="js/main.js"></script>
   <script src="js/form-handlers.js"></script>
+  <!-- Dynamic Courses Catalog Loader Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('coursesCatalogContainer');
+      const notice = document.getElementById('noCoursesNotice');
+      const paymentModal = document.getElementById('paymentModal');
+      const regCourseInput = document.getElementById('regCourseName');
+      const regAmountInput = document.getElementById('regAmountPaid');
+      const modalFeeDisplay = document.querySelector('#paymentModal [style*="font-size: 1.8rem"]');
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      window.openEnrollmentModal = function(courseTitle, courseFee) {
+        if (regCourseInput) regCourseInput.value = courseTitle;
+        if (regAmountInput) regAmountInput.value = courseFee;
+        if (modalFeeDisplay) {
+          modalFeeDisplay.innerHTML = `₹${courseFee} <span style="font-size: 0.85rem; color: var(--text-dim); font-weight: 400;">(One-Time Fee)</span>`;
+        }
+        if (paymentModal) paymentModal.classList.add('active');
+      };
+
+      // Modal close handler
+      if (paymentModal) {
+        const closeBtn = paymentModal.querySelector('.modal-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => paymentModal.classList.remove('active'));
+        }
+        paymentModal.addEventListener('click', (e) => {
+          if (e.target === paymentModal) paymentModal.classList.remove('active');
+        });
+      }
+
+      // Live fetch from api/get-courses.php
+      fetch('api/get-courses.php?status=active')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.success && data.data && Array.isArray(data.data.courses) && data.data.courses.length > 0) {
+            renderCourses(data.data.courses);
+          } else {
+            fallbackLoadCoursesJson();
+          }
+        })
+        .catch(() => fallbackLoadCoursesJson());
+
+      function fallbackLoadCoursesJson() {
+        fetch('data/courses.json')
+          .then(r => r.json())
+          .then(list => {
+            if (Array.isArray(list) && list.length > 0) {
+              const active = list.filter(c => (c.status || 'active') === 'active');
+              if (active.length > 0) {
+                renderCourses(active);
+                return;
+              }
+            }
+            if (notice) notice.style.display = 'block';
+          })
+          .catch(() => {
+            if (notice) notice.style.display = 'block';
+          });
+      }
+
+      function renderCourses(list) {
+        if (!container) return;
+        if (notice) notice.style.display = 'none';
+
+        container.innerHTML = list.map(c => {
+          const syllabusItems = (c.syllabus || []).map(s => `
+            <div class="curriculum-item">
+              <i class="fas fa-check-circle"></i>
+              <span>${escapeHtml(s)}</span>
+            </div>
+          `).join('');
+
+          const fee = Number(c.fee || 649);
+          const origFee = Number(c.original_fee || 24999);
+          const waPhone = c.whatsapp_phone || '918122288855';
+          const waMsg = encodeURIComponent(`Hi! I have questions about the ${c.title} course at Vyomantra.`);
+
+          return `
+            <div class="course-featured-card">
+              <div class="course-main-info">
+                <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                  <span class="badge-pill badge-purple">${escapeHtml(c.badge || 'Live Online Cohort')}</span>
+                  <span class="badge-pill">Duration: ${escapeHtml(c.duration || '1 Month')}</span>
+                  <span class="badge-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">${escapeHtml(c.seats_label || 'Special Pass')}</span>
+                </div>
+
+                <h2 style="font-size: 2.2rem; margin-bottom: 1rem;">
+                  ${escapeHtml(c.title)}
+                </h2>
+                <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
+                  ${escapeHtml(c.summary || '')}
+                </p>
+
+                ${syllabusItems ? `
+                  <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--cyan);">What You Will Master:</h4>
+                  <div class="course-curriculum-list">
+                    ${syllabusItems}
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="pricing-panel">
+                <span class="badge-pill badge-purple" style="margin-bottom: 0.5rem;">${escapeHtml(c.seats_label || 'Seats Limited')}</span>
+                ${origFee ? `<div class="original-price">Standard Fee: ₹${origFee.toLocaleString('en-IN')}</div>` : ''}
+                <div class="price-tag">
+                  ₹${fee.toLocaleString('en-IN')} <span>/ full course</span>
+                </div>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.75rem;">
+                  One-time inclusive fee. Includes live classes, recorded access, project reviews, and verified certificate.
+                </p>
+                <button type="button" class="btn btn-primary btn-lg" style="width: 100%; margin-bottom: 1rem;" onclick="openEnrollmentModal('${escapeHtml(c.title)}', ${fee})">
+                  <i class="fas fa-user-plus"></i> Register for Course
+                </button>
+                <a href="https://wa.me/${waPhone}?text=${waMsg}" target="_blank" class="btn btn-outline" style="width: 100%;" rel="noopener noreferrer">
+                  <i class="fab fa-whatsapp"></i> Ask on WhatsApp
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    });
+  </script>
+
 </body>
 
 </html>

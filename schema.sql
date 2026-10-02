@@ -1,12 +1,13 @@
 -- =======================================================================
--- VYOMANTRA TECHNOLOGIES - DATABASE SCHEMA (HOSTINGER MYSQL READY)
+-- VYOMANTRA TECHNOLOGIES - PRODUCTION DATABASE SCHEMA (HOSTINGER MYSQL READY)
 -- =======================================================================
--- Instructions for Hostinger:
--- 1. Go to Hostinger cPanel / hPanel -> Databases -> MySQL Databases.
+-- Quick Setup on Hostinger:
+-- 1. Log in to Hostinger hPanel -> Databases -> MySQL Databases.
 -- 2. Create a new Database (e.g., u123456789_vyomantra) and User with password.
--- 3. Open phpMyAdmin for that database.
--- 4. Click "Import" -> Select this schema.sql file -> Click "Go".
--- 5. Open api/config.php and update DB_HOST, DB_NAME, DB_USER, DB_PASS.
+-- 3. Click "Enter phpMyAdmin" beside your new database.
+-- 4. In phpMyAdmin, click "Import" tab at the top.
+-- 5. Choose this schema.sql file and click "Go" at the bottom.
+-- 6. Open api/config.php and update DB_HOST, DB_NAME, DB_USER, DB_PASS.
 -- =======================================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -117,6 +118,11 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Seed default Super Admin user (Password: Vyomantra@2026)
+INSERT INTO `admin_users` (`id`, `username`, `email`, `password_hash`, `full_name`, `role`, `created_at`) 
+VALUES (1, 'admin', 'vyomantratech@gmail.com', '$2y$10$gm9vteZEX1Qqou5x.dYAP.AQKDRbS26pkVA7ijC6FrRLbDVSR1OwC', 'Vyomantra Administrator', 'super_admin', NOW())
+ON DUPLICATE KEY UPDATE `username`=`username`;
+
 -- -----------------------------------------------------------------------
 -- 6. Job & Internship Postings (CMS Managed)
 -- -----------------------------------------------------------------------
@@ -148,9 +154,35 @@ CREATE TABLE IF NOT EXISTS `job_postings` (
   INDEX `idx_category` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- -----------------------------------------------------------------------
+-- 7. Technical Courses & Masterclasses (CMS Managed)
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `courses` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `slug` VARCHAR(120) NOT NULL UNIQUE,
+  `title` VARCHAR(180) NOT NULL,
+  `badge` VARCHAR(80) DEFAULT 'Live Online Cohort',
+  `category` VARCHAR(80) DEFAULT 'programming',
+  `duration` VARCHAR(80) DEFAULT '1 Month',
+  `mode` VARCHAR(60) DEFAULT 'Live Online',
+  `fee` DECIMAL(10, 2) NOT NULL DEFAULT 649.00,
+  `original_fee` DECIMAL(10, 2) DEFAULT 24999.00,
+  `seats_label` VARCHAR(80) DEFAULT 'Seats Limited',
+  `summary` TEXT NOT NULL,
+  `syllabus` TEXT DEFAULT NULL,       -- JSON array of strings
+  `features` TEXT DEFAULT NULL,       -- JSON array of strings
+  `mentor_name` VARCHAR(120) DEFAULT 'VYOMANTRA Technical Lead',
+  `whatsapp_phone` VARCHAR(30) DEFAULT '918122288855',
+  `status` ENUM('active', 'upcoming', 'closed', 'draft') DEFAULT 'active',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_course_slug` (`slug`),
+  INDEX `idx_course_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------
--- 7. Certificate Verification & Management Table
+-- 8. Certificate Verification & Management Table
 -- -----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `certificates` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -191,7 +223,7 @@ CREATE TABLE IF NOT EXISTS `certificates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------
--- 8. Certificate Verification Audit Logs Table
+-- 9. Certificate Verification Audit Logs Table
 -- -----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `certificate_logs` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -207,5 +239,3 @@ CREATE TABLE IF NOT EXISTS `certificate_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;
-
-

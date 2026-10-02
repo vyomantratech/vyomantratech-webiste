@@ -57,18 +57,22 @@
         <span class="badge-count" id="countBadgeQuotes">0</span>
       </button>
       <button type="button" class="sidebar-tab-btn" data-tab="courses">
-        <i class="fas fa-user-graduate"></i> Course Admissions
+        <i class="fas fa-user-graduate"></i> Student Admissions
         <span class="badge-count" id="countBadgeCourses">0</span>
       </button>
 
-      <div class="nav-section-title" style="margin-top: 0.5rem;">Talent &amp; CMS</div>
-      <button type="button" class="sidebar-tab-btn" data-tab="applicants">
-        <i class="fas fa-users-cog"></i> Job Applicants
-        <span class="badge-count" id="countBadgeApplicants">0</span>
+      <div class="nav-section-title" style="margin-top: 0.5rem;">Content &amp; Course CMS</div>
+      <button type="button" class="sidebar-tab-btn" data-tab="courses-cms" id="sidebarTabCoursesCMS">
+        <i class="fas fa-graduation-cap"></i> Course Creation CMS
+        <span class="badge-count" id="countBadgeCoursesCMS">0</span>
       </button>
       <button type="button" class="sidebar-tab-btn" data-tab="jobs">
         <i class="fas fa-briefcase"></i> Job Postings CMS
-        <span class="badge-count" id="countBadgeJobs">6</span>
+        <span class="badge-count" id="countBadgeJobs">0</span>
+      </button>
+      <button type="button" class="sidebar-tab-btn" data-tab="applicants">
+        <i class="fas fa-users-cog"></i> Job Applicants
+        <span class="badge-count" id="countBadgeApplicants">0</span>
       </button>
 
       <div class="nav-section-title" style="margin-top: 0.5rem;">Credentials &amp; Awards</div>
@@ -197,7 +201,7 @@
               <span class="stat-card-label">Active Postings</span>
               <div class="stat-card-icon icon-cyan"><i class="fas fa-briefcase"></i></div>
             </div>
-            <div class="stat-card-value" id="statJobsActive">6</div>
+            <div class="stat-card-value" id="statJobsActive">0</div>
             <div class="stat-card-footer">
               <span style="color: var(--cyan); font-weight: 700;">6 Published</span>
               <span>live on website</span>
@@ -556,16 +560,16 @@
             </div>
           </div>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline btn-sm" id="btnOpenCertConfigurator" title="Configure DOCX course certificate templates, field mappings & signatures">
+            <button type="button" class="btn btn-outline btn-sm" id="btnOpenCertConfigurator" data-cert-action="configurator" title="Configure DOCX course certificate templates, field mappings & signatures">
               <i class="fas fa-sliders-h" style="color:var(--cyan);"></i> Certificate Configurator
             </button>
-            <button type="button" class="btn btn-outline btn-sm" id="btnOpenBulkCertModal" title="Import & Issue multiple certificates via CSV">
+            <button type="button" class="btn btn-outline btn-sm" id="btnOpenBulkCertModal" data-cert-action="bulk" title="Import & Issue multiple certificates via CSV">
               <i class="fas fa-file-csv"></i> Bulk Issue (CSV)
             </button>
-            <button type="button" class="btn btn-outline btn-sm" id="btnExportCertsCsv" title="Export all certificates to CSV">
+            <button type="button" class="btn btn-outline btn-sm" id="btnExportCertsCsv" data-cert-action="export" title="Export all certificates to CSV">
               <i class="fas fa-download"></i> Export
             </button>
-            <button type="button" class="btn btn-primary btn-sm" id="btnOpenCreateCertModal">
+            <button type="button" class="btn btn-primary btn-sm" id="btnOpenCreateCertModal" data-cert-action="create">
               <i class="fas fa-plus-circle"></i> Issue New Certificate
             </button>
           </div>
@@ -646,6 +650,111 @@
       </div>
       <div class="admin-modal-footer">
         <button type="button" class="btn btn-primary btn-sm" onclick="closeAdminModal('detailsModal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2B. Course Creation CMS Modal -->
+  <div class="admin-modal-backdrop" id="courseEditorModal">
+    <div class="admin-modal-card modal-lg">
+      <div class="admin-modal-header">
+        <h3 id="courseModalTitle"><i class="fas fa-graduation-cap" style="color: var(--cyan);"></i> Create &amp; Publish Technical Course</h3>
+        <button type="button" class="modal-close-btn" onclick="closeAdminModal('courseEditorModal')">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        
+        <form id="courseEditorForm">
+          <input type="hidden" id="courseEditId" name="id" value="0">
+          <input type="hidden" id="courseEditSlug" name="slug" value="">
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="courseTitle">Course Title *</label>
+              <input type="text" id="courseTitle" name="title" class="form-control" placeholder="e.g. Python Programming with AI Tools — From Zero to Pro" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="courseCategory">Category *</label>
+              <select id="courseCategory" name="category" class="form-control" style="background:#050713;" required>
+                <option value="programming">Programming &amp; Software</option>
+                <option value="ai">AI &amp; Data Science</option>
+                <option value="web">Full-Stack Web Dev</option>
+                <option value="cloud">Cloud &amp; DevOps</option>
+                <option value="mobile">Mobile Apps</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="courseBadge">Cohort Badge</label>
+              <input type="text" id="courseBadge" name="badge" class="form-control" placeholder="e.g. Live Online Cohort">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="courseDuration">Duration</label>
+              <input type="text" id="courseDuration" name="duration" class="form-control" placeholder="e.g. 1 Month">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="courseMode">Delivery Mode</label>
+              <select id="courseMode" name="mode" class="form-control" style="background:#050713;">
+                <option value="Live Online">Live Online</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Self-Paced">Self-Paced with Mentor</option>
+                <option value="Weekend Masterclass">Weekend Masterclass</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="courseStatus">Publishing Status</label>
+              <select id="courseStatus" name="status" class="form-control" style="background:#050713;">
+                <option value="active">Active (Open for Admissions)</option>
+                <option value="upcoming">Upcoming Cohort</option>
+                <option value="closed">Closed / Archived</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="courseFee">Course Fee (₹ INR) *</label>
+              <input type="number" id="courseFee" name="fee" class="form-control" placeholder="649" min="0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="courseOriginalFee">Standard / Crossed-Out Fee (₹ INR)</label>
+              <input type="number" id="courseOriginalFee" name="original_fee" class="form-control" placeholder="24999" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="courseSeatsLabel">Seats Badge Text</label>
+              <input type="text" id="courseSeatsLabel" name="seats_label" class="form-control" placeholder="e.g. Special Inaugural Pass / Seats Limited">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="courseMentor">Lead Instructor / Mentor</label>
+              <input type="text" id="courseMentor" name="mentor_name" class="form-control" placeholder="e.g. S. Santhosh Kumar / Technical Lead">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="courseSummary">Course Summary / Program Description *</label>
+            <textarea id="courseSummary" name="summary" class="form-control" rows="3" placeholder="Explain the program outcome, real projects students build, and skills gained..." required></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="courseSyllabus">What You Will Master / Syllabus Points (Enter 1 point per line)</label>
+            <textarea id="courseSyllabus" name="syllabus" class="form-control" rows="5" placeholder="Learn Python with AI Tools from Day 1&#10;Live, Real-World Enterprise Projects&#10;1-on-1 Dedicated Mentor Guidance&#10;Core &amp; Advanced Python Architecture&#10;AI-Powered Project-Based Learning&#10;Smart Debugging &amp; Error Handling&#10;Automation, Scripting &amp; AI Workflows&#10;Verified Industry Credential"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="courseWhatsApp">Inquiries WhatsApp Phone Number</label>
+            <input type="text" id="courseWhatsApp" name="whatsapp_phone" class="form-control" placeholder="918122288855" value="918122288855">
+          </div>
+
+        </form>
+
+      </div>
+      <div class="admin-modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('courseEditorModal')">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSaveCourse">
+          <i class="fas fa-save"></i> Save &amp; Publish Course
+        </button>
       </div>
     </div>
   </div>
@@ -772,6 +881,7 @@
         </button>
       </div>
     </div>
+  </div>
   <!-- =========================================================================
        CERTIFICATE MANAGEMENT MODALS
        ========================================================================= -->
@@ -1413,7 +1523,7 @@
   </div>
 
   <!-- Admin JS Script -->
-  <script src="js/admin.js?v=2.6.1"></script>
+  <script src="js/admin.js?v=2.6.2"></script>
 </body>
 
 </html>

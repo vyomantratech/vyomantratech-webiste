@@ -26,9 +26,9 @@ function generateJobSubpage($jobData) {
     $datePosted   = htmlspecialchars($jobData['date_posted'] ?? date('Y-m-d'));
     $formattedDate= date('F d, Y', strtotime($datePosted));
 
-    $responsibilities = is_array($jobData['responsibilities'] ?? []) ? $jobData['responsibilities'] : json_decode($jobData['responsibilities'] ?? '[]', true) ?: [];
-    $competencies     = is_array($jobData['competencies'] ?? []) ? $jobData['competencies'] : json_decode($jobData['competencies'] ?? '[]', true) ?: [];
-    $techStack        = is_array($jobData['tech_stack'] ?? []) ? $jobData['tech_stack'] : json_decode($jobData['tech_stack'] ?? '[]', true) ?: [];
+    $responsibilities = is_array($jobData['responsibilities'] ?? []) ? $jobData['responsibilities'] : (json_decode($jobData['responsibilities'] ?? '[]', true) ?: []);
+    $competencies     = is_array($jobData['competencies'] ?? []) ? $jobData['competencies'] : (json_decode($jobData['competencies'] ?? '[]', true) ?: []);
+    $techStack        = is_array($jobData['tech_stack'] ?? []) ? $jobData['tech_stack'] : (json_decode($jobData['tech_stack'] ?? '[]', true) ?: []);
 
     // Build responsibilities HTML
     $respHtml = '';
