@@ -194,6 +194,7 @@ body.admin-body {
 .admin-viewport {
   margin-left: 270px;
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -279,6 +280,8 @@ body.admin-body {
 .admin-main-content {
   padding: 2rem;
   flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 /* ==========================================================================
@@ -454,6 +457,43 @@ body.admin-body {
 
 #view-certificates .admin-table {
   min-width: 1280px;
+}
+
+/* Keep the registry's wide table inside its own horizontal scroller. */
+#view-certificates,
+#view-certificates .table-responsive-wrapper {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#view-certificates .table-toolbar {
+  align-items: flex-start;
+}
+
+#view-certificates .table-toolbar > .table-filters {
+  flex: 1 1 620px;
+  min-width: 0;
+}
+
+#view-certificates .table-toolbar > div:last-child {
+  flex: 1 1 100%;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  #view-certificates .table-toolbar > .table-filters,
+  #view-certificates .table-toolbar > div:last-child {
+    flex-basis: 100%;
+  }
+
+  #view-certificates .table-toolbar > .table-filters > * {
+    flex: 1 1 100%;
+    min-width: 0 !important;
+  }
+
+  #view-certificates .table-toolbar > div:last-child > button {
+    flex: 1 1 auto;
+  }
 }
 
 .admin-table {
@@ -848,4 +888,3 @@ body.admin-body {
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
-

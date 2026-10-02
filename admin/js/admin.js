@@ -2504,23 +2504,37 @@ function adminDownloadCurrentQr() {
   }
 }
 
+async function copyCertificateText(value, successMessage) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(value);
+    } else {
+      const field = document.createElement('textarea');
+      field.value = value;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.appendChild(field);
+      field.select();
+      const copied = document.execCommand('copy');
+      field.remove();
+      if (!copied) throw new Error('Clipboard copy was denied');
+    }
+    showToast(successMessage);
+  } catch (error) {
+    prompt('Copy this value:', value);
+  }
+}
+
 function adminCopyCurrentVerifyUrl() {
   if (!certPreviewCurrent) return;
   const siteOrigin = window.location.origin;
   const vUrl = certPreviewCurrent.verification_url || `${siteOrigin}/verify/?id=${encodeURIComponent(certPreviewCurrent.certificate_id)}`;
-  navigator.clipboard.writeText(vUrl).then(() => {
-    showToast('Verification URL copied to clipboard');
-  }).catch(() => {
-    prompt('Certificate Verification URL:', vUrl);
-  });
+  copyCertificateText(vUrl, 'Verification URL copied to clipboard');
 }
 
 function adminCopyCertId(id) {
-  navigator.clipboard.writeText(id).then(() => {
-    showToast(`Certificate ID ${id} copied to clipboard`);
-  }).catch(() => {
-    prompt('Certificate ID:', id);
-  });
+  copyCertificateText(id, `Certificate ID ${id} copied to clipboard`);
 }
 
 // -------------------------------------------------------------
@@ -3316,5 +3330,4 @@ window.openAdminModal = openAdminModal;
 window.closeAdminModal = closeAdminModal;
 window.openCertificateCreateModal = openCertificateCreateModal;
 window.exportCertificatesCsv = exportCertificatesCsv;
-
 
