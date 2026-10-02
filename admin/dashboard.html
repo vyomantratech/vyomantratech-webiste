@@ -15,13 +15,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="css/admin.css">
-  <link rel="stylesheet" href="../css/certificate.css">
+  <link rel="stylesheet" href="css/admin.css?v=2.6.0">
+  <link rel="stylesheet" href="../css/certificate.css?v=2.6.0">
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- QR & PDF Generation Libraries -->
+  <!-- QR, PDF & DOCX Generation Libraries -->
   <script src="../js/vendor/qrcode.min.js"></script>
   <script src="../js/vendor/html2pdf.bundle.min.js"></script>
+  <script src="../js/vendor/jszip.min.js"></script>
 </head>
 
 <body class="admin-body">
@@ -555,12 +556,15 @@
             </div>
           </div>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnOpenCertConfigurator" title="Configure DOCX course certificate templates, field mappings & signatures">
+              <i class="fas fa-sliders-h" style="color:var(--cyan);"></i> Certificate Configurator
+            </button>
             <button type="button" class="btn btn-outline btn-sm" id="btnOpenBulkCertModal" title="Import & Issue multiple certificates via CSV">
               <i class="fas fa-file-csv"></i> Bulk Issue (CSV)
             </button>
-            <a href="../api/admin/certificates.php?action=export_csv" class="btn btn-outline btn-sm" id="btnExportCertsCsv" title="Export all certificates to CSV">
+            <button type="button" class="btn btn-outline btn-sm" id="btnExportCertsCsv" title="Export all certificates to CSV">
               <i class="fas fa-download"></i> Export
-            </a>
+            </button>
             <button type="button" class="btn btn-primary btn-sm" id="btnOpenCreateCertModal">
               <i class="fas fa-plus-circle"></i> Issue New Certificate
             </button>
@@ -571,13 +575,13 @@
           <table class="admin-table">
             <thead>
               <tr>
-                <th>Certificate ID</th>
-                <th>Recipient Name</th>
-                <th>Credential Type &amp; Program</th>
-                <th>Issue Date</th>
-                <th>Status</th>
-                <th>QR</th>
-                <th style="text-align: right;">Actions</th>
+                <th style="min-width: 190px;">Certificate ID</th>
+                <th style="min-width: 170px;">Recipient Name</th>
+                <th style="min-width: 220px;">Credential Type &amp; Program</th>
+                <th style="min-width: 120px;">Issue Date</th>
+                <th style="min-width: 90px;">Status</th>
+                <th style="min-width: 60px; text-align: center;">QR</th>
+                <th style="min-width: 390px; text-align: right;">Registry &amp; Download Actions</th>
               </tr>
             </thead>
             <tbody id="certificatesTableBody">
@@ -925,6 +929,12 @@
           <span style="font-size: 0.8rem; color: var(--text-dim);" id="previewModalSub">Certificate ID: <strong id="previewCertIdLabel" style="color:#00f0ff;">--</strong></span>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline btn-sm btn-docx-partial" onclick="adminDownloadCurrentDocx('partial')" title="Download DOCX with QR, ID, and Course Details (Leaves Recipient Name and Founder Signature blank for manual pen signing)">
+            <i class="fas fa-file-word"></i> DOCX (Manual Sign)
+          </button>
+          <button type="button" class="btn btn-outline btn-sm btn-docx-digital" onclick="adminDownloadCurrentDocx('digital')" title="Download 100% Completed Digital DOCX Certificate with all details and signatures">
+            <i class="fas fa-file-word"></i> DOCX (All Digital)
+          </button>
           <button type="button" class="btn btn-outline btn-sm" onclick="adminDownloadCurrentPdf()">
             <i class="fas fa-file-pdf"></i> Download PDF
           </button>
@@ -1132,6 +1142,270 @@
     </div>
   </div>
 
+  <!-- 5. Certificate Template & Signature Configurator Modal -->
+  <div class="admin-modal-backdrop" id="certificateConfiguratorModal">
+    <div class="admin-modal-card modal-lg" style="max-width: 980px; width: 95vw;">
+      <div class="admin-modal-header">
+        <div>
+          <h3><i class="fas fa-sliders-h" style="color: var(--cyan);"></i> Certificate Template &amp; Signature Configurator</h3>
+          <span style="font-size: 0.8rem; color: var(--text-dim);">Manage DOCX course certificate templates, field tag mappings, and configure digital vs manual signatures.</span>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeAdminModal('certificateConfiguratorModal')">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        
+        <!-- Configurator Tabs -->
+        <div class="configurator-tabs">
+          <button type="button" class="configurator-tab-btn active" data-cfg-panel="panelTemplate">
+            <i class="fas fa-file-word"></i> DOCX Template Manager
+          </button>
+          <button type="button" class="configurator-tab-btn" data-cfg-panel="panelMapping">
+            <i class="fas fa-tags"></i> Field Tag Mappings
+          </button>
+          <button type="button" class="configurator-tab-btn" data-cfg-panel="panelSignatures">
+            <i class="fas fa-signature"></i> Signature &amp; Mode Rules
+          </button>
+        </div>
+
+        <!-- PANEL 1: DOCX TEMPLATE MANAGER -->
+        <div class="configurator-panel active" id="panelTemplate">
+          
+          <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--border-cyan); border-radius: var(--radius-sm); padding: 0.85rem 1.25rem; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
+              <i class="fas fa-info-circle" style="color:var(--cyan); margin-right:6px;"></i> Active Course Certificate Template
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">
+              Upload your official Microsoft Word (.docx) Course Certificate template. The system parses your template, embeds authentic QR codes, and dynamically populates fields according to your chosen download mode.
+            </p>
+          </div>
+
+          <!-- Active Template Status Card -->
+          <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 48px; height: 48px; background: rgba(0, 240, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--cyan);">
+                <i class="fas fa-file-word"></i>
+              </div>
+              <div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.98rem;" id="cfgCurrentTemplateName">Vyomantra_Course_Certificate_Template.docx</div>
+                <div style="font-size: 0.78rem; color: var(--text-dim);" id="cfgTemplateMeta">Status: Active Registry Template • Format: Word Document (OpenXML)</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="status-badge badge-valid" style="font-size: 0.72rem;"><i class="fas fa-check-circle"></i> Ready for Generation</span>
+              <button type="button" class="btn btn-outline btn-sm" id="btnDownloadCurrentTemplate" onclick="downloadActiveTemplateFile()" title="Download current .docx template to view tags">
+                <i class="fas fa-download"></i> Download Template
+              </button>
+            </div>
+          </div>
+
+          <!-- Upload Drop Zone -->
+          <div class="docx-drop-zone" id="docxDropZone" onclick="document.getElementById('inputTemplateDocx').click()">
+            <input type="file" id="inputTemplateDocx" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display: none;">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
+              Click or Drag &amp; Drop New DOCX Template Here
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">
+              Upload any custom course certificate (.docx). Formats, fonts, logos &amp; existing digital signatures are 100% preserved.
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center;">
+            <span>Supported file extension: <strong>.docx</strong> (Word 2007+)</span>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding: 2px 8px;" onclick="resetDefaultDocxTemplate()">
+              <i class="fas fa-undo"></i> Reset to Default Template
+            </button>
+          </div>
+
+        </div>
+
+        <!-- PANEL 2: FIELD TAG MAPPINGS -->
+        <div class="configurator-panel" id="panelMapping">
+          
+          <div style="margin-bottom: 1rem;">
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.75rem 0;">
+              Use the standard placeholder tags below inside your Word document. The generator replaces each tag with authentic certificate record data:
+            </p>
+          </div>
+
+          <div style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border-admin); border-radius: var(--radius-sm);">
+            <table class="admin-table" style="font-size: 0.82rem;">
+              <thead>
+                <tr>
+                  <th style="padding: 0.65rem 0.85rem;">Word Placeholder Tag</th>
+                  <th style="padding: 0.65rem 0.85rem;">Mapped Data Field</th>
+                  <th style="padding: 0.65rem 0.85rem;">Sample Injected Value</th>
+                  <th style="padding: 0.65rem 0.85rem;">Partial Mode Behavior</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{CERTIFICATE_ID}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Unique Certificate ID</td>
+                  <td style="padding: 0.65rem 0.85rem; color:var(--cyan); font-family:var(--font-mono);">VYOM-PY-2026-00001</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{RECIPIENT_NAME}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Candidate / Student Name</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Deepa Narayanan</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#f59e0b;"><i class="fas fa-minus-circle"></i> Blank (Manual Entry)</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{COURSE_NAME}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Course / Program Title</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Python Programming &amp; Applied AI</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{COURSE_DURATION}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Program Duration</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">3 Months</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{ISSUE_DATE}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Official Issue Date</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">28 Sept 2026</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{QR_CODE}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Verification QR Image</td>
+                  <td style="padding: 0.65rem 0.85rem; color:var(--cyan);"><i class="fas fa-qrcode"></i> [High-Res PNG Embedded]</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Embedded</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{VERIFICATION_URL}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Scan / Verification Link</td>
+                  <td style="padding: 0.65rem 0.85rem; color:var(--cyan); font-family:var(--font-mono); font-size:0.75rem;">vyomantratech.com/verify/?id=...</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{FOUNDER_SIGNATURE}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Founder &amp; CEO Signature</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">S.B. Sachin</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#f59e0b;"><i class="fas fa-pen-nib"></i> Blank for Physical Pen</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{DIRECTOR_SIGNATURE}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Director / Co-Founder Signature</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Santhosh S.</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Digital in Template</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{TRAINER_SIGNATURE}}</span></td>
+                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Trainer / Instructor Signature</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Santhosh S.</td>
+                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Digital in Template</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- PANEL 3: SIGNATURE & MODE RULES -->
+        <div class="configurator-panel" id="panelSignatures">
+          
+          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 0.85rem 1.25rem; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #fbbf24; margin-bottom: 0.25rem;">
+              <i class="fas fa-stamp" style="margin-right:6px;"></i> Dual Output Rules &amp; Signature Authority Matrix
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">
+              Configure which signatures are pre-applied digitally versus left blank for manual physical ink signing.
+            </p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            
+            <!-- Founder Signature -->
+            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">1. Founder &amp; CEO Signature</div>
+              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">S.B. Sachin • Executive Signatory</div>
+              <div class="sig-mode-selector">
+                <button type="button" class="sig-mode-btn" id="sigFounderDigital" onclick="setSignatureMode('founder', 'digital')">
+                  <i class="fas fa-check-double"></i> Digital Stamp
+                </button>
+                <button type="button" class="sig-mode-btn active-manual" id="sigFounderManual" onclick="setSignatureMode('founder', 'manual')">
+                  <i class="fas fa-pen-nib"></i> Manual Pen Sign
+                </button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="sigFounderDesc">
+                In partial download mode, this signature is left blank so it can be physically signed with a pen.
+              </div>
+            </div>
+
+            <!-- Co-Founder / Director Signature -->
+            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">2. Co-Founder &amp; Director Signature</div>
+              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">Santhosh Kumar S • Director</div>
+              <div class="sig-mode-selector">
+                <button type="button" class="sig-mode-btn active-digital" id="sigDirectorDigital" onclick="setSignatureMode('director', 'digital')">
+                  <i class="fas fa-check-double"></i> Digital (In Template)
+                </button>
+                <button type="button" class="sig-mode-btn" id="sigDirectorManual" onclick="setSignatureMode('director', 'manual')">
+                  <i class="fas fa-pen-nib"></i> Manual Pen Sign
+                </button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="sigDirectorDesc">
+                Already digitally embedded in template; will be retained in all generated certificates.
+              </div>
+            </div>
+
+            <!-- Trainer Signature -->
+            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">3. Lead Instructor / Trainer Signature</div>
+              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">Technical Instructor • Training Authority</div>
+              <div class="sig-mode-selector">
+                <button type="button" class="sig-mode-btn active-digital" id="sigTrainerDigital" onclick="setSignatureMode('trainer', 'digital')">
+                  <i class="fas fa-check-double"></i> Digital (In Template)
+                </button>
+                <button type="button" class="sig-mode-btn" id="sigTrainerManual" onclick="setSignatureMode('trainer', 'manual')">
+                  <i class="fas fa-pen-nib"></i> Manual Pen Sign
+                </button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="sigTrainerDesc">
+                Already digitally signed in template; preserved across all output documents.
+              </div>
+            </div>
+
+            <!-- Recipient Name Partial Mode -->
+            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">4. Recipient Name (Pre-Printed Mode)</div>
+              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">Partial Download Name Behavior</div>
+              <div class="sig-mode-selector">
+                <button type="button" class="sig-mode-btn active-manual" id="namePartialBlank" onclick="setNamePartialMode('blank')">
+                  <i class="fas fa-eraser"></i> Leave Blank (Handwritten)
+                </button>
+                <button type="button" class="sig-mode-btn" id="namePartialFilled" onclick="setNamePartialMode('filled')">
+                  <i class="fas fa-font"></i> Include Name
+                </button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="namePartialDesc">
+                Leaves candidate name line empty in partial download for handwriting or calligraphy.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+      <div class="admin-modal-footer" style="justify-content: space-between;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('certificateConfiguratorModal')">Cancel</button>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="testSampleDocxGeneration()">
+            <i class="fas fa-play"></i> Test Sample DOCX
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnSaveCertConfig" onclick="saveCertificateConfiguration()">
+            <i class="fas fa-save"></i> Save &amp; Apply Configuration
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Box -->
   <div id="adminToast">
     <i class="fas fa-check-circle" style="color: var(--cyan);"></i>
@@ -1139,7 +1413,7 @@
   </div>
 
   <!-- Admin JS Script -->
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=2.6.0"></script>
 </body>
 
 </html>

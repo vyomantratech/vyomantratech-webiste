@@ -843,4 +843,115 @@ if ($action === 'export_csv') {
     exit;
 }
 
+// =========================================================================
+// 11. DOCX GENERATION & CONFIGURATOR ACTIONS
+// =========================================================================
+
+// Download populated DOCX (partial or digital)
+if ($action === 'download_docx') {
+    require_once __DIR__ . '/docx-generator.php';
+    $id = trim($_GET['id'] ?? $_POST['id'] ?? '');
+    $mode = trim($_GET['mode'] ?? $_POST['mode'] ?? 'digital');
+    if (!$id) {
+        sendResponse(false, 'Certificate ID is required for download.', [], 400);
+    }
+
+    $cert = null;
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM certificates WHERE certificate_id = :id OR id = :id2 LIMIT 1");
+            $stmt->execute([':id' => $id, ':id2' => $id]);
+            $cert = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {}
+    }
+    if (!$cert) {
+        $all = getLocalCerts();
+        foreach ($all as $c) {
+            if (($c['certificate_id'] ?? '') === $id || ($c['id'] ?? '') == $id) {
+                $cert = $c;
+                break;
+            }
+        }
+    }
+
+    if (!$cert) {
+        sendResponse(false, 'Certificate record not found.', [], 404);
+    }
+
+    try {
+        $engine = new VyomantraDocxEngine();
+        $filePath = $engine->generateDocx($cert, $mode);
+        $safeId = preg_replace('/[^A-Za-z0-9_\-]/', '_', $cert['certificate_id']);
+        $modeSuffix = ($mode === 'partial') ? 'Manual_Sign' : 'Digital';
+        $filename = "{$safeId}_{$modeSuffix}.docx";
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . filesize($filePath));
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        readfile($filePath);
+        @unlink($filePath);
+        exit;
+    } catch (\Exception $e) {
+        sendResponse(false, 'DOCX generation failed: ' . $e->getMessage(), [], 500);
+    }
+}
+
+// Upload custom DOCX template
+if ($action === 'upload_template') {
+    require_once __DIR__ . '/docx-generator.php';
+    if (!isset($_FILES['template_file'])) {
+        sendResponse(false, 'No template file provided in upload.', [], 400);
+    }
+    try {
+        $engine = new VyomantraDocxEngine();
+        $res = $engine->saveUploadedTemplate($_FILES['template_file']);
+        sendResponse(true, 'DOCX template uploaded and validated successfully!', $res);
+    } catch (\Exception $e) {
+        sendResponse(false, $e->getMessage(), [], 400);
+    }
+}
+
+// Get template and signature configuration
+if ($action === 'get_template_config') {
+    require_once __DIR__ . '/docx-generator.php';
+    $engine = new VyomantraDocxEngine();
+    sendResponse(true, 'Template configuration retrieved', $engine->getConfig());
+}
+
+// Save template and signature configuration
+if ($action === 'save_template_config') {
+    require_once __DIR__ . '/docx-generator.php';
+    $inputData = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($inputData)) {
+        $inputData = $_POST;
+    }
+    $engine = new VyomantraDocxEngine();
+    $saved = $engine->saveConfig($inputData);
+    sendResponse(true, 'Certificate configuration saved successfully!', $saved);
+}
+
+// Download the active DOCX template file
+if ($action === 'download_template') {
+    require_once __DIR__ . '/docx-generator.php';
+    $engine = new VyomantraDocxEngine();
+    $path = $engine->getActiveTemplatePath();
+    if (!$path || !file_exists($path)) {
+        sendResponse(false, 'Active template file not found.', [], 404);
+    }
+    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    header('Content-Disposition: attachment; filename="' . basename($path) . '"');
+    header('Content-Length: ' . filesize($path));
+    readfile($path);
+    exit;
+}
+
+// Reset template back to default
+if ($action === 'reset_template') {
+    require_once __DIR__ . '/docx-generator.php';
+    $engine = new VyomantraDocxEngine();
+    $cfg = $engine->resetToDefault();
+    sendResponse(true, 'Template reset back to default Vyomantra course certificate.', $cfg);
+}
+
 sendResponse(false, 'Invalid certificate action specified.', [], 400);
