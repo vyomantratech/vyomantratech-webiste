@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Update these once your domain and Hostinger MySQL database are created:
 // -------------------------------------------------------------
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'vyomantra_db');      // e.g. u123456789_vyomantra
-define('DB_USER', 'vyomantra_user');    // e.g. u123456789_admin
-define('DB_PASS', 'your_db_password');  // Your database password
+define('DB_NAME', 'u424267613_vyomantra');      // e.g. u123456789_vyomantra
+define('DB_USER', 'u424267613_admin');    // e.g. u123456789_admin
+define('DB_PASS', 'Nihcas2004!');  // Your database password
 define('DB_CHARSET', 'utf8mb4');
 
 // -------------------------------------------------------------
