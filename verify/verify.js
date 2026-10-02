@@ -4,6 +4,21 @@
  * live A4 landscape certificate preview, dynamic QR rendering, and PDF generation.
  */
 
+// Clean Extensionless URLs: Strip .html immediately from browser address bar
+(function cleanUrlExtension() {
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      var p = window.location.pathname;
+      if (p.endsWith('.html')) {
+        var clean = p.replace(/\.html$/, '');
+        if (clean.endsWith('/index')) clean = clean.slice(0, -5);
+        if (!clean) clean = '/';
+        window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+      }
+    }
+  } catch (e) {}
+})();
+
 let currentCertData = null;
 
 document.addEventListener('DOMContentLoaded', () => {

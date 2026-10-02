@@ -4,6 +4,21 @@
  * ===================================================================
  */
 
+// 0. Clean Extensionless URLs: Strip .html immediately from browser address bar
+(function cleanUrlExtension() {
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      var p = window.location.pathname;
+      if (p.endsWith('.html')) {
+        var clean = p.replace(/\.html$/, '');
+        if (clean.endsWith('/index')) clean = clean.slice(0, -5);
+        if (!clean) clean = '/';
+        window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+      }
+    }
+  } catch (e) {}
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Sticky Header
   const header = document.querySelector('.site-header');
@@ -370,4 +385,17 @@ document.addEventListener('DOMContentLoaded', () => {
     startAutoScroll();
   }
 
+  // 12. Production URL Normalizer: Ensure internal links point to extensionless URLs
+  if (window.location.protocol === 'https:' || (window.location.protocol === 'http:' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost')) {
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return;
+      if (href.endsWith('.html') || href.includes('.html#') || href.includes('.html?')) {
+        const clean = href.replace(/index\.html/, '').replace(/\.html/, '');
+        a.setAttribute('href', clean || '/');
+      }
+    });
+  }
+
 });
+

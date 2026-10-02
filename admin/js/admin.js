@@ -5,6 +5,21 @@
  * - Static Dev Mode: Seamless localStorage persistence for VS Code Live Server (127.0.0.1:5500)
  */
 
+// 0. Clean Extensionless URLs: Strip .html immediately from browser address bar
+(function cleanUrlExtension() {
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      var p = window.location.pathname;
+      if (p.endsWith('.html')) {
+        var clean = p.replace(/\.html$/, '');
+        if (clean.endsWith('/index')) clean = clean.slice(0, -5);
+        if (!clean) clean = '/';
+        window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+      }
+    }
+  } catch (e) {}
+})();
+
 // Global State
 let currentAdminUser = null;
 let authToken = null;
@@ -20,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   authToken = localStorage.getItem('vyomantra_admin_token');
 
   if (!authToken) {
-    window.location.href = 'index.html';
+    window.location.href = './';
     return;
   }
 
@@ -53,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!result || !result.success) {
           localStorage.removeItem('vyomantra_admin_token');
           localStorage.removeItem('vyomantra_admin_user');
-          window.location.href = 'index.html';
+          window.location.href = './';
           return;
         }
         currentAdminUser = result.data.user || {};
@@ -75,7 +90,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     ['Refresh control', initRefresh],
     ['Certificates', initCertificatesManager],
     ['Contact filters', initContactsFilters],
-    ['Course filters', initCoursesFilters],
+    ['Course Registrations', initRegistrationsFilters],
+    ['Courses CMS', initCoursesCMS],
     ['Quote filters', initQuotesFilters],
     ['Applicant filters', initApplicantsFilters],
     ['Jobs CMS', initJobsCMS]
@@ -123,7 +139,7 @@ function initLogout() {
     } catch (e) {}
     localStorage.removeItem('vyomantra_admin_token');
     localStorage.removeItem('vyomantra_admin_user');
-    window.location.href = 'index.html';
+    window.location.href = './';
   };
 
   const topbarBtn = document.getElementById('topbarLogoutBtn');
@@ -178,10 +194,11 @@ function switchTab(tabId) {
     'stats': { title: '<i class="fas fa-chart-pie" style="color:var(--cyan);"></i> Executive Dashboard', subtitle: 'Unified cross-channel metrics, registrations & recruitment management.' },
     'contacts': { title: '<i class="fas fa-envelope-open-text" style="color:var(--cyan);"></i> Contact Inquiries', subtitle: 'Manage client messages and direct WhatsApp/email replies.' },
     'quotes': { title: '<i class="fas fa-file-invoice-dollar" style="color:var(--cyan);"></i> Project Quotations', subtitle: 'Track custom software scopes, budgets, and pipeline status.' },
-    'courses': { title: '<i class="fas fa-user-graduate" style="color:var(--cyan);"></i> Course Admissions & Payments', subtitle: 'Verify student UPI/QR payment proofs and manage enrollment access.' },
-    'applicants': { title: '<i class="fas fa-users-cog" style="color:var(--cyan);"></i> Job & Internship Applicants', subtitle: 'Review candidate resumes, portfolios, and interview pipelines.' },
     'courses-cms': { title: '<i class="fas fa-graduation-cap" style="color:var(--cyan);"></i> Course Creation CMS', subtitle: 'Create, edit, and publish technical courses, syllabi, cohorts, and pricing.' },
+    'course-registrations': { title: '<i class="fas fa-user-graduate" style="color:var(--cyan);"></i> Course Registrations & Admissions', subtitle: 'Verify student UPI payments, approve enrollments, and manage admissions.' },
+    'courses': { title: '<i class="fas fa-user-graduate" style="color:var(--cyan);"></i> Course Registrations & Admissions', subtitle: 'Verify student UPI payments, approve enrollments, and manage admissions.' },
     'jobs': { title: '<i class="fas fa-briefcase" style="color:var(--cyan);"></i> Job Postings & CMS', subtitle: 'Publish new roles, update active openings, and generate subpages.' },
+    'applicants': { title: '<i class="fas fa-users-cog" style="color:var(--cyan);"></i> Job & Internship Applicants', subtitle: 'Review candidate resumes, portfolios, and interview pipelines.' },
     'certificates': { title: '<i class="fas fa-certificate" style="color:var(--cyan);"></i> Credential & Certificate Authority', subtitle: 'Issue, verify, revoke, and manage authentic company certificates with QR verification & DOCX/PDF generation.' }
   };
 
@@ -200,12 +217,13 @@ function loadCurrentTab() {
       return fetchContacts();
     case 'quotes':
       return fetchQuotes();
-    case 'courses':
-      return fetchCourses();
-    case 'applicants':
-      return fetchApplicants();
     case 'courses-cms':
       return fetchCoursesCMS();
+    case 'course-registrations':
+    case 'courses':
+      return fetchCourseRegistrations();
+    case 'applicants':
+      return fetchApplicants();
     case 'jobs':
       return fetchJobs();
     case 'certificates':
@@ -692,21 +710,21 @@ function viewContactModal(contact) {
 // =========================================================================
 // 5. TAB 3: COURSE ADMISSIONS & PAYMENTS
 // =========================================================================
-function initCoursesFilters() {
-  const statusSelect = document.getElementById('filterCourseStatus');
-  const programSelect = document.getElementById('filterCourseProgram');
-  const searchInput = document.getElementById('searchCourses');
+function initRegistrationsFilters() {
+  const statusSelect = document.getElementById('filterRegPaymentStatus') || document.getElementById('filterCourseStatus');
+  const programSelect = document.getElementById('filterRegProgram') || document.getElementById('filterCourseProgram');
+  const searchInput = document.getElementById('searchRegistrations') || document.getElementById('searchCourses');
 
-  if (statusSelect) statusSelect.addEventListener('change', fetchCourses);
-  if (programSelect) programSelect.addEventListener('change', fetchCourses);
-  if (searchInput) searchInput.addEventListener('input', debounce(fetchCourses, 300));
+  if (statusSelect) statusSelect.addEventListener('change', fetchCourseRegistrations);
+  if (programSelect) programSelect.addEventListener('change', fetchCourseRegistrations);
+  if (searchInput) searchInput.addEventListener('input', debounce(fetchCourseRegistrations, 300));
 }
 
-async function fetchCourses() {
-  const status = document.getElementById('filterCourseStatus')?.value || 'all';
-  const course = document.getElementById('filterCourseProgram')?.value || 'all';
-  const search = document.getElementById('searchCourses')?.value || '';
-  const tbody = document.getElementById('coursesTableBody');
+async function fetchCourseRegistrations() {
+  const status = (document.getElementById('filterRegPaymentStatus') || document.getElementById('filterCourseStatus'))?.value || 'all';
+  const course = (document.getElementById('filterRegProgram') || document.getElementById('filterCourseProgram'))?.value || 'all';
+  const search = (document.getElementById('searchRegistrations') || document.getElementById('searchCourses'))?.value || '';
+  const tbody = document.getElementById('registrationsTableBody') || document.getElementById('coursesTableBody');
 
   let list = [];
 
@@ -1267,9 +1285,9 @@ function viewApplicantModal(applicant) {
 // 8A. TAB 6A: COURSE CREATION CMS
 // =========================================================================
 function initCoursesCMS() {
-  const statusSelect = document.getElementById('filterCourseStatus');
-  const catSelect = document.getElementById('filterCourseCategory');
-  const searchInput = document.getElementById('searchCourses');
+  const statusSelect = document.getElementById('filterCmsCourseStatus');
+  const catSelect = document.getElementById('filterCmsCourseCategory');
+  const searchInput = document.getElementById('searchCmsCourses');
   const addBtn = document.getElementById('btnOpenAddCourseModal');
   const saveBtn = document.getElementById('btnSaveCourse');
 
@@ -1282,10 +1300,10 @@ function initCoursesCMS() {
 }
 
 async function fetchCoursesCMS() {
-  const status = document.getElementById('filterCourseStatus')?.value || 'all';
-  const category = document.getElementById('filterCourseCategory')?.value || 'all';
-  const search = document.getElementById('searchCourses')?.value || '';
-  const tbody = document.getElementById('coursesTableBody');
+  const status = document.getElementById('filterCmsCourseStatus')?.value || 'all';
+  const category = document.getElementById('filterCmsCourseCategory')?.value || 'all';
+  const search = document.getElementById('searchCmsCourses')?.value || '';
+  const tbody = document.getElementById('coursesCmsTableBody');
 
   let list = [];
 
@@ -3532,3 +3550,6 @@ window.exportCertificatesCsv = exportCertificatesCsv;
 // Install the click router as soon as this body-end script loads. It must not
 // depend on the async authentication/setup path finishing first.
 document.addEventListener('click', handleCertificateAction);
+
+window.fetchCourses = fetchCourseRegistrations;
+window.fetchCourseRegistrations = fetchCourseRegistrations;

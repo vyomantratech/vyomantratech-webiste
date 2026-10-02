@@ -24,7 +24,7 @@
     
     <!-- Brand Header -->
     <div style="text-align: center; margin-bottom: 2rem;">
-      <a href="../index.html" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem;">
+      <a href="../" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem;">
         <img src="../assets/icons/vyomantra_logo.webp" alt="VYOMANTRA TECHNOLOGIES" style="width: 48px; height: 48px; filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.45));" decoding="async" width="1024" height="1024">
         <div style="text-align: left;">
           <div style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; color: #fff; letter-spacing: 0.05em; line-height: 1;">
@@ -92,12 +92,30 @@
   </div>
 
   <script>
+    // Clean Extensionless URLs: Strip .html immediately from browser address bar
+    (function cleanUrlExtension() {
+      try {
+        if (typeof window !== 'undefined' && window.location) {
+          var p = window.location.pathname;
+          if (p.endsWith('.html')) {
+            var clean = p.replace(/\.html$/, '');
+            if (clean.endsWith('/index')) clean = clean.slice(0, -5);
+            if (!clean) clean = '/';
+            window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+          }
+        }
+      } catch (e) {}
+    })();
+
     document.addEventListener('DOMContentLoaded', () => {
+      const isProduction = (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost');
+      const targetDashboard = isProduction ? 'dashboard' : 'dashboard.html';
+
       const token = localStorage.getItem('vyomantra_admin_token');
       // If token exists, test if still valid
       if (token) {
         if (token.startsWith('mock_token_') || token.startsWith('local_')) {
-          window.location.href = 'dashboard.html';
+          window.location.href = targetDashboard;
           return;
         }
 
@@ -109,14 +127,14 @@
         .then(res => {
           if (res.status === 405) {
             // Static server (Live Server)
-            window.location.href = 'dashboard.html';
+            window.location.href = targetDashboard;
             return;
           }
           return res.json();
         })
         .then(data => {
           if (data && data.success) {
-            window.location.href = 'dashboard.html';
+            window.location.href = targetDashboard;
           }
         })
         .catch(() => {});
@@ -157,7 +175,7 @@
         }));
         submitBtn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          window.location.href = targetDashboard;
         }, 300);
       }
 
@@ -204,7 +222,7 @@
             localStorage.setItem('vyomantra_admin_user', JSON.stringify(result.data.user || {}));
             submitBtn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
             setTimeout(() => {
-              window.location.href = 'dashboard.html';
+              window.location.href = targetDashboard;
             }, 300);
           } else if (isDefaultCreds) {
             handleLocalSuccess();
