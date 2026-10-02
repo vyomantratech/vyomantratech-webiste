@@ -108,36 +108,48 @@
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
-      const isProduction = (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost');
+      const isProduction = (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost' && window.location.protocol !== 'file:');
       const targetDashboard = isProduction ? 'dashboard' : 'dashboard.html';
 
       const token = localStorage.getItem('vyomantra_admin_token');
       // If token exists, test if still valid
       if (token) {
         if (token.startsWith('mock_token_') || token.startsWith('local_')) {
-          window.location.href = targetDashboard;
-          return;
-        }
-
-        fetch('../api/admin/auth.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'action=verify&token=' + encodeURIComponent(token)
-        })
-        .then(res => {
-          if (res.status === 405) {
-            // Static server (Live Server)
+          if (isProduction) {
+            // Clean up obsolete dev token on live domain
+            localStorage.removeItem('vyomantra_admin_token');
+            localStorage.removeItem('vyomantra_admin_user');
+          } else {
             window.location.href = targetDashboard;
             return;
           }
-          return res.json();
-        })
-        .then(data => {
-          if (data && data.success) {
-            window.location.href = targetDashboard;
-          }
-        })
-        .catch(() => {});
+        } else {
+          fetch('../api/admin/auth.php', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': 'Bearer ' + token,
+              'X-Admin-Token': token
+            },
+            body: 'action=verify&token=' + encodeURIComponent(token)
+          })
+          .then(res => {
+            if (!isProduction && res.status === 405) {
+              window.location.href = targetDashboard;
+              return;
+            }
+            return res.json();
+          })
+          .then(data => {
+            if (data && data.success) {
+              window.location.href = targetDashboard;
+            } else if (isProduction) {
+              localStorage.removeItem('vyomantra_admin_token');
+              localStorage.removeItem('vyomantra_admin_user');
+            }
+          })
+          .catch(() => {});
+        }
       }
 
       // Password toggle
@@ -202,15 +214,9 @@
           });
 
           // If running on a static dev server (VS Code Live Server on port 5500 returns 405 Method Not Allowed for PHP POST)
-          if (res.status === 405 || !res.ok) {
+          if (!isProduction && (res.status === 405 || !res.ok)) {
             if (isDefaultCreds) {
               handleLocalSuccess();
-              return;
-            } else {
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Dashboard';
-              errorBox.style.display = 'flex';
-              errorMsg.textContent = 'Invalid username or password.';
               return;
             }
           }
@@ -224,7 +230,7 @@
             setTimeout(() => {
               window.location.href = targetDashboard;
             }, 300);
-          } else if (isDefaultCreds) {
+          } else if (!isProduction && isDefaultCreds) {
             handleLocalSuccess();
           } else {
             submitBtn.disabled = false;
@@ -233,13 +239,13 @@
             errorMsg.textContent = (result && result.message) ? result.message : 'Invalid username or password.';
           }
         } catch (err) {
-          if (isDefaultCreds) {
+          if (!isProduction && isDefaultCreds) {
             handleLocalSuccess();
           } else {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Dashboard';
             errorBox.style.display = 'flex';
-            errorMsg.textContent = 'Invalid username or password.';
+            errorMsg.textContent = 'Connection error. Check database or network.';
           }
         }
       });

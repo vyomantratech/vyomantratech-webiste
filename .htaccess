@@ -10,6 +10,11 @@ DirectoryIndex index.html index.php
   RewriteEngine On
   RewriteBase /
 
+  # FastCGI / PHP-FPM Authorization Header Forwarding (Crucial for Hostinger API Auth)
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+  RewriteCond %{HTTP:Authorization} ^(.*)
+  RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
   # 1. Force HTTPS on Production (exclude localhost / 127.0.0.1)
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP_HOST} !^localhost(:\d+)?$

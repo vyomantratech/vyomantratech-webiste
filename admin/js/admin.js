@@ -27,6 +27,40 @@ let activeTab = 'stats';
 let monthlyChartInstance = null;
 let courseChartInstance = null;
 let isDevStaticMode = false;
+const isLocalDevHost = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:');
+
+// Universal Auth Header Helper
+function getAuthHeaders(extra = {}) {
+  const h = { ...extra };
+  if (authToken) {
+    h['Authorization'] = 'Bearer ' + authToken;
+    h['X-Admin-Token'] = authToken;
+  }
+  return h;
+}
+
+// Authenticated API fetch wrapper: attaches headers and query token fallback
+async function apiFetch(url, options = {}) {
+  const isPost = options.method && options.method.toUpperCase() === 'POST';
+  let finalUrl = url;
+
+  if (!isPost && authToken && !finalUrl.includes('token=')) {
+    const separator = finalUrl.includes('?') ? '&' : '?';
+    finalUrl += separator + 'token=' + encodeURIComponent(authToken);
+  }
+
+  options.headers = getAuthHeaders(options.headers || {});
+
+  const res = await fetch(finalUrl, options);
+
+  if (res.status === 401 && !isDevStaticMode) {
+    localStorage.removeItem('vyomantra_admin_token');
+    localStorage.removeItem('vyomantra_admin_user');
+    window.location.href = './';
+  }
+
+  return res;
+}
 
 // =========================================================================
 // 1. INITIALIZATION & DUAL-MODE AUTH GUARD
@@ -39,46 +73,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Detect static dev server (e.g. VS Code Live Server 127.0.0.1, localhost, any port, or mock token)
-  if (authToken.startsWith('mock_token_') || authToken.startsWith('local_') || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') {
+  const isLocalDevHost = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:');
+
+  if (isLocalDevHost) {
+    // 1A. LOCAL STATIC DEV ENVIRONMENT (Live Server port 5500, localhost)
     isDevStaticMode = true;
     currentAdminUser = JSON.parse(localStorage.getItem('vyomantra_admin_user') || '{"username":"admin","full_name":"Vyomantra Administrator","role":"super_admin"}');
     populateHeaderUser(currentAdminUser);
     initLocalSeedData();
   } else {
-    // Verify Token with backend
+    // 1B. LIVE PRODUCTION ENVIRONMENT (vyomantratech.com)
+    isDevStaticMode = false;
+
+    // If an obsolete mock or local token is in localStorage, purge it so user authenticates with live DB
+    if (authToken.startsWith('mock_token_') || authToken.startsWith('local_')) {
+      localStorage.removeItem('vyomantra_admin_token');
+      localStorage.removeItem('vyomantra_admin_user');
+      window.location.href = './';
+      return;
+    }
+
     try {
-      const res = await fetch('../api/admin/auth.php', {
+      const res = await apiFetch('../api/admin/auth.php', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Bearer ' + authToken
-        },
+        headers: getAuthHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' }),
         body: 'action=verify&token=' + encodeURIComponent(authToken)
       });
 
-      if (res.status === 405 || res.status === 404 || !res.ok) {
-        // Static server without PHP runtime
-        isDevStaticMode = true;
-        currentAdminUser = JSON.parse(localStorage.getItem('vyomantra_admin_user') || '{"username":"admin","full_name":"Vyomantra Administrator","role":"super_admin"}');
-        populateHeaderUser(currentAdminUser);
-        initLocalSeedData();
-      } else {
-        const result = await res.json().catch(() => null);
-        if (!result || !result.success) {
-          localStorage.removeItem('vyomantra_admin_token');
-          localStorage.removeItem('vyomantra_admin_user');
-          window.location.href = './';
-          return;
-        }
-        currentAdminUser = result.data.user || {};
-        populateHeaderUser(currentAdminUser);
+      if (res.status === 401) {
+        // Session expired or invalid on MySQL
+        localStorage.removeItem('vyomantra_admin_token');
+        localStorage.removeItem('vyomantra_admin_user');
+        window.location.href = './';
+        return;
       }
-    } catch (err) {
-      isDevStaticMode = true;
-      currentAdminUser = JSON.parse(localStorage.getItem('vyomantra_admin_user') || '{"username":"admin","full_name":"Vyomantra Administrator","role":"super_admin"}');
+
+      const result = await res.json().catch(() => null);
+      if (!result || !result.success) {
+        localStorage.removeItem('vyomantra_admin_token');
+        localStorage.removeItem('vyomantra_admin_user');
+        window.location.href = './';
+        return;
+      }
+
+      currentAdminUser = result.data.user || {};
       populateHeaderUser(currentAdminUser);
-      initLocalSeedData();
+    } catch (err) {
+      console.error('Production auth verification network error', err);
     }
   }
 
@@ -130,7 +171,7 @@ function initLogout() {
   const doLogout = async () => {
     try {
       if (!isDevStaticMode) {
-        await fetch('../api/admin/auth.php', {
+        await apiFetch('../api/admin/auth.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: 'action=logout&token=' + encodeURIComponent(authToken)
@@ -243,11 +284,8 @@ async function fetchDashboardStats() {
   }
 
   try {
-    const res = await fetch('../api/admin/stats.php', {
-      headers: { 'Authorization': 'Bearer ' + authToken }
-    });
+    const res = await apiFetch('../api/admin/stats.php');
     if (res.status === 405) {
-      isDevStaticMode = true;
       renderLocalStats();
       return;
     }
@@ -260,46 +298,49 @@ async function fetchDashboardStats() {
 
     updateStatsUI(result.data);
   } catch (err) {
-    isDevStaticMode = true;
     renderLocalStats();
   }
 }
 
 function updateStatsUI(data) {
-  document.getElementById('statContactsTotal').textContent = data.contacts.total || 0;
-  document.getElementById('statContactsNew').textContent = (data.contacts.new || 0) + ' New';
+  if (!data) return;
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
 
-  document.getElementById('statQuotesTotal').textContent = data.quotes.total || 0;
-  document.getElementById('statQuotesNew').textContent = (data.quotes.new || 0) + ' New';
+  setTxt('statContactsTotal', data.contacts?.total || 0);
+  setTxt('statContactsNew', (data.contacts?.new || 0) + ' New');
 
-  document.getElementById('statCoursesTotal').textContent = data.courses.total || 0;
-  document.getElementById('statCoursesRevenue').textContent = '₹' + Number(data.courses.total_revenue || 0).toLocaleString('en-IN');
+  setTxt('statQuotesTotal', data.quotes?.total || 0);
+  setTxt('statQuotesNew', (data.quotes?.new || 0) + ' New');
 
-  document.getElementById('statApplicantsTotal').textContent = data.careers.total_applicants || 0;
-  document.getElementById('statApplicantsReviewing').textContent = (data.careers.applied || 0) + ' New';
+  setTxt('statCoursesTotal', data.courses?.total || 0);
+  setTxt('statCoursesRevenue', '₹' + Number(data.courses?.total_revenue || 0).toLocaleString('en-IN'));
 
-  document.getElementById('statJobsActive').textContent = data.jobs.active || 6;
+  setTxt('statApplicantsTotal', data.careers?.total_applicants || 0);
+  setTxt('statApplicantsReviewing', (data.careers?.applied || 0) + ' New');
+
+  setTxt('statJobsActive', data.jobs?.active || 0);
 
   if (data.certificates) {
-    const certTotal = document.getElementById('statCertsTotal');
-    const certValid = document.getElementById('statCertsValid');
-    const certMonth = document.getElementById('statCertsThisMonth');
-    const certBadge = document.getElementById('countBadgeCertificates');
-    if (certTotal) certTotal.textContent = data.certificates.total || 0;
-    if (certValid) certValid.textContent = (data.certificates.valid || 0) + ' Valid';
-    if (certMonth) certMonth.textContent = (data.certificates.this_month || 0) + ' this month';
-    if (certBadge) certBadge.textContent = data.certificates.total || 0;
+    setTxt('statCertsTotal', data.certificates.total || 0);
+    setTxt('statCertsValid', (data.certificates.valid || 0) + ' Valid');
+    setTxt('statCertsThisMonth', (data.certificates.this_month || 0) + ' this month');
+    setTxt('countBadgeCertificates', data.certificates.total || 0);
   }
 
-  document.getElementById('countBadgeContacts').textContent = data.contacts.new || 0;
-  document.getElementById('countBadgeQuotes').textContent = data.quotes.new || 0;
-  document.getElementById('countBadgeCourses').textContent = data.courses.pending || 0;
-  document.getElementById('countBadgeApplicants').textContent = data.careers.applied || 0;
-  document.getElementById('countBadgeJobs').textContent = data.jobs.active || 6;
+  setTxt('countBadgeContacts', data.contacts?.new || 0);
+  setTxt('countBadgeQuotes', data.quotes?.new || 0);
+  setTxt('countBadgeCoursesCMS', data.courses?.total || 0);
+  setTxt('countBadgeRegistrations', data.courses?.pending || 0);
+  setTxt('countBadgeCourses', data.courses?.pending || 0);
+  setTxt('countBadgeApplicants', data.careers?.applied || 0);
+  setTxt('countBadgeJobs', data.jobs?.active || 0);
 
-  renderMonthlyChart(data.charts.monthly);
-  renderCoursesChart(data.charts.courses_breakdown);
-  renderActivityStream(data.activity || []);
+  if (data.charts?.monthly) renderMonthlyChart(data.charts.monthly);
+  if (data.charts?.courses_breakdown) renderCoursesChart(data.charts.courses_breakdown);
+  if (data.activity) renderActivityStream(data.activity);
 }
 
 function renderLocalStats() {
@@ -544,7 +585,7 @@ async function fetchContacts() {
 
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/contacts.php?action=list&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`, {
+      const res = await apiFetch(`../api/admin/contacts.php?action=list&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       if (res.status === 405) {
@@ -630,7 +671,7 @@ async function updateContactStatus(id, newStatus) {
   }
 
   try {
-    const res = await fetch('../api/admin/contacts.php', {
+    const res = await apiFetch('../api/admin/contacts.php', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -658,7 +699,7 @@ async function deleteContact(id) {
   }
 
   try {
-    const res = await fetch('../api/admin/contacts.php', {
+    const res = await apiFetch('../api/admin/contacts.php', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -730,7 +771,7 @@ async function fetchCourseRegistrations() {
 
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/courses.php?action=list&status=${encodeURIComponent(status)}&course=${encodeURIComponent(course)}&search=${encodeURIComponent(search)}`, {
+      const res = await apiFetch(`../api/admin/courses.php?action=list&status=${encodeURIComponent(status)}&course=${encodeURIComponent(course)}&search=${encodeURIComponent(search)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       if (res.status === 405) {
@@ -852,7 +893,7 @@ async function verifyPayment(id, status) {
   }
 
   try {
-    const res = await fetch('../api/admin/courses.php', {
+    const res = await apiFetch('../api/admin/courses.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -884,7 +925,7 @@ async function deleteCourseRegistration(id) {
   }
 
   try {
-    const res = await fetch('../api/admin/courses.php', {
+    const res = await apiFetch('../api/admin/courses.php', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -922,7 +963,7 @@ async function fetchQuotes() {
 
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/quotes.php?action=list&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`, {
+      const res = await apiFetch(`../api/admin/quotes.php?action=list&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       if (res.status === 405) {
@@ -1008,7 +1049,7 @@ async function updateQuoteStatus(id, newStatus) {
   }
 
   try {
-    const res = await fetch('../api/admin/quotes.php', {
+    const res = await apiFetch('../api/admin/quotes.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1036,7 +1077,7 @@ async function deleteQuote(id) {
   }
 
   try {
-    const res = await fetch('../api/admin/quotes.php', {
+    const res = await apiFetch('../api/admin/quotes.php', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1108,7 +1149,7 @@ async function fetchApplicants() {
 
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/applicants.php?action=list&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`, {
+      const res = await apiFetch(`../api/admin/applicants.php?action=list&status=${encodeURIComponent(status)}&search=${encodeURIComponent(search)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       if (res.status === 405) {
@@ -1204,7 +1245,7 @@ async function updateApplicantStatus(id, newStatus) {
   }
 
   try {
-    const res = await fetch('../api/admin/applicants.php', {
+    const res = await apiFetch('../api/admin/applicants.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1232,7 +1273,7 @@ async function deleteApplicant(id) {
   }
 
   try {
-    const res = await fetch('../api/admin/applicants.php', {
+    const res = await apiFetch('../api/admin/applicants.php', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1309,7 +1350,7 @@ async function fetchCoursesCMS() {
 
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/courses.php?action=list_courses&status=${encodeURIComponent(status)}&category=${encodeURIComponent(category)}&search=${encodeURIComponent(search)}`, {
+      const res = await apiFetch(`../api/admin/courses.php?action=list_courses&status=${encodeURIComponent(status)}&category=${encodeURIComponent(category)}&search=${encodeURIComponent(search)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       if (res.status === 405) {
@@ -1503,7 +1544,7 @@ async function handleSaveCourse() {
   }
 
   try {
-    const res = await fetch('../api/admin/courses.php', {
+    const res = await apiFetch('../api/admin/courses.php', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + authToken },
       body: formData
@@ -1537,7 +1578,7 @@ async function deleteCourse(id) {
   }
 
   try {
-    const res = await fetch('../api/admin/courses.php', {
+    const res = await apiFetch('../api/admin/courses.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1568,7 +1609,7 @@ async function updateCourseStatus(id, newStatus) {
   }
 
   try {
-    await fetch('../api/admin/courses.php', {
+    await apiFetch('../api/admin/courses.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1607,7 +1648,7 @@ async function fetchJobs() {
 
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/jobs.php?action=list&status=${encodeURIComponent(status)}&category=${encodeURIComponent(category)}&search=${encodeURIComponent(search)}`, {
+      const res = await apiFetch(`../api/admin/jobs.php?action=list&status=${encodeURIComponent(status)}&category=${encodeURIComponent(category)}&search=${encodeURIComponent(search)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       if (res.status === 405) {
@@ -1799,7 +1840,7 @@ async function handleSaveJob() {
   }
 
   try {
-    const res = await fetch('../api/admin/jobs.php', {
+    const res = await apiFetch('../api/admin/jobs.php', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + authToken },
       body: formData
@@ -1837,7 +1878,7 @@ async function updateJobStatus(id, slug, newStatus) {
   }
 
   try {
-    const res = await fetch('../api/admin/jobs.php', {
+    const res = await apiFetch('../api/admin/jobs.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1868,7 +1909,7 @@ async function deleteJob(id, slug) {
   }
 
   try {
-    const res = await fetch('../api/admin/jobs.php', {
+    const res = await apiFetch('../api/admin/jobs.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -2188,13 +2229,10 @@ async function fetchCertificates() {
       offset
     });
 
-    const res = await fetch(`../api/admin/certificates.php?${params.toString()}`, {
-      headers: { 'Authorization': 'Bearer ' + authToken }
-    });
+    const res = await apiFetch(`../api/admin/certificates.php?${params.toString()}`);
 
-    if (res.status === 405 || !res.ok) {
-      isDevStaticMode = true;
-      fetchCertificates();
+    if (res.status === 405 || (isDevStaticMode && !res.ok)) {
+      renderLocalCertificates();
       return;
     }
 
@@ -2350,7 +2388,7 @@ async function openCertificateEditModal(id) {
   let cert = null;
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
+      const res = await apiFetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       const result = await res.json();
@@ -2478,7 +2516,7 @@ async function saveCertificate() {
   }
 
   try {
-    const res = await fetch('../api/admin/certificates.php', {
+    const res = await apiFetch('../api/admin/certificates.php', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + authToken },
       body: new URLSearchParams(formData)
@@ -2506,7 +2544,7 @@ async function openCertificatePreview(id) {
 
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
+      const res = await apiFetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
         headers: { 'Authorization': 'Bearer ' + authToken }
       });
       const result = await res.json();
@@ -2794,7 +2832,7 @@ async function confirmCertificateRevocation() {
   }
 
   try {
-    const res = await fetch('../api/admin/certificates.php', {
+    const res = await apiFetch('../api/admin/certificates.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -2838,7 +2876,7 @@ async function restoreCertificate(id) {
   }
 
   try {
-    const res = await fetch('../api/admin/certificates.php', {
+    const res = await apiFetch('../api/admin/certificates.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -2873,7 +2911,7 @@ async function deleteCertificate(id) {
   }
 
   try {
-    const res = await fetch('../api/admin/certificates.php', {
+    const res = await apiFetch('../api/admin/certificates.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -2960,7 +2998,7 @@ async function executeBulkImport() {
 
     // Live Mode Backend
     try {
-      const res = await fetch('../api/admin/certificates.php', {
+      const res = await apiFetch('../api/admin/certificates.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -3040,7 +3078,7 @@ async function exportCertificatesCsv() {
   showToast('Preparing certificate registry CSV export...');
   if (!isDevStaticMode) {
     try {
-      const res = await fetch(`../api/admin/certificates.php?action=export_csv`, {
+      const res = await apiFetch(`../api/admin/certificates.php?action=export_csv`, {
         headers: { 'Authorization': 'Bearer ' + (authToken || '') }
       });
       if (res.ok) {
@@ -3292,9 +3330,7 @@ function initConfiguratorEvents() {
 async function openCertificateConfiguratorModal() {
   // Try loading saved config from API or localStorage
   try {
-    const res = await fetch('../api/admin/certificates.php?action=get_template_config', {
-      headers: { 'Authorization': 'Bearer ' + (authToken || '') }
-    });
+    const res = await apiFetch('../api/admin/certificates.php?action=get_template_config');
     const result = await res.json();
     if (result && result.success && result.data) {
       currentCertConfig = result.data;
@@ -3425,7 +3461,7 @@ async function handleDocxTemplateUpload(file) {
   formData.append('template_file', file);
 
   try {
-    const res = await fetch('../api/admin/certificates.php', {
+    const res = await apiFetch('../api/admin/certificates.php', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + (authToken || '') },
       body: formData
@@ -3456,7 +3492,7 @@ async function saveCertificateConfiguration() {
   localStorage.setItem('vyomantra_cert_config', JSON.stringify(currentCertConfig));
 
   try {
-    const res = await fetch('../api/admin/certificates.php', {
+    const res = await apiFetch('../api/admin/certificates.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -3487,7 +3523,7 @@ function downloadActiveTemplateFile() {
 async function resetDefaultDocxTemplate() {
   if (!confirm('Are you sure you want to revert back to the default Vyomantra Course Certificate template?')) return;
   try {
-    const res = await fetch('../api/admin/certificates.php', {
+    const res = await apiFetch('../api/admin/certificates.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

@@ -10,17 +10,35 @@ require_once __DIR__ . '/../config.php';
 // Common helper to authenticate all /api/admin/*.php requests
 function checkAdminAuth() {
     $token = null;
-    $headers = getallheaders();
-    if (isset($headers['Authorization'])) {
-        if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
-            $token = $matches[1];
+
+    // 1. Check $_SERVER for Authorization header passed by Apache/FastCGI/LiteSpeed
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if (empty($authHeader) && function_exists('getallheaders')) {
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? $headers['AUTHORIZATION'] ?? '';
+    }
+    if (!empty($authHeader) && preg_match('/Bearer\s(\S+)/i', $authHeader, $matches)) {
+        $token = $matches[1];
+    }
+
+    // 2. Check custom X-Admin-Token header
+    if (!$token) {
+        $token = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? null;
+        if (!$token && function_exists('getallheaders')) {
+            $headers = getallheaders();
+            $token = $headers['X-Admin-Token'] ?? $headers['x-admin-token'] ?? null;
         }
     }
+
+    // 3. Check POST body, GET query, or Cookie
     if (!$token && isset($_POST['token'])) {
         $token = trim($_POST['token']);
     }
     if (!$token && isset($_GET['token'])) {
         $token = trim($_GET['token']);
+    }
+    if (!$token && isset($_COOKIE['vyomantra_admin_token'])) {
+        $token = trim($_COOKIE['vyomantra_admin_token']);
     }
 
     if (!$token) {
@@ -34,21 +52,18 @@ function checkAdminAuth() {
             $stmt->execute([':token' => $token]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$user) {
-                sendResponse(false, 'Session invalid or expired. Please login again.', [], 401);
+            if ($user) {
+                if (!empty($user['token_expiry']) && strtotime($user['token_expiry']) < time()) {
+                    sendResponse(false, 'Session expired. Please log in again.', [], 401);
+                }
+                return $user;
             }
-
-            if (!empty($user['token_expiry']) && strtotime($user['token_expiry']) < time()) {
-                sendResponse(false, 'Session expired. Please log in again.', [], 401);
-            }
-
-            return $user;
         } catch (\PDOException $e) {
             error_log("Auth verification DB error: " . $e->getMessage());
         }
     }
 
-    // Fallback file/token verification if DB not configured yet
+    // Fallback file/token verification if DB not configured yet or table being seeded
     $tokenFile = __DIR__ . '/../../data/admin_session.json';
     if (file_exists($tokenFile)) {
         $session = json_decode(file_get_contents($tokenFile), true);
@@ -59,7 +74,7 @@ function checkAdminAuth() {
         }
     }
 
-    sendResponse(false, 'Unauthorized. Session expired.', [], 401);
+    sendResponse(false, 'Session invalid or expired. Please login again.', [], 401);
 }
 
 // If this file is called directly as an endpoint (and not included by another script):
@@ -131,14 +146,29 @@ if ($isDirectEndpoint) {
         $expiryTime = time() + (24 * 60 * 60); // 24 hours
         $expiryDate = date('Y-m-d H:i:s', $expiryTime);
 
-        if ($pdo && isset($authenticatedUser['id'])) {
+        if ($pdo) {
             try {
-                $stmt = $pdo->prepare("UPDATE admin_users SET auth_token = :token, token_expiry = :expiry, last_login = NOW() WHERE id = :id");
-                $stmt->execute([
+                // Ensure admin_users record has this new active token
+                $upStmt = $pdo->prepare("UPDATE admin_users SET auth_token = :token, token_expiry = :expiry, last_login = NOW() WHERE username = :u OR id = :id");
+                $upStmt->execute([
                     ':token'  => $token,
                     ':expiry' => $expiryDate,
-                    ':id'     => $authenticatedUser['id']
+                    ':u'      => $authenticatedUser['username'],
+                    ':id'     => $authenticatedUser['id'] ?? 1
                 ]);
+                if ($upStmt->rowCount() === 0) {
+                    // Row doesn't exist yet: insert it
+                    $insStmt = $pdo->prepare("INSERT INTO admin_users (username, email, password_hash, full_name, role, auth_token, token_expiry, last_login) VALUES (:u, :e, :h, :fn, :r, :token, :expiry, NOW())");
+                    $insStmt->execute([
+                        ':u'      => $authenticatedUser['username'],
+                        ':e'      => $authenticatedUser['email'] ?? 'vyomantratech@gmail.com',
+                        ':h'      => password_hash($password, PASSWORD_BCRYPT),
+                        ':fn'     => $authenticatedUser['full_name'] ?? 'Vyomantra Administrator',
+                        ':r'      => $authenticatedUser['role'] ?? 'super_admin',
+                        ':token'  => $token,
+                        ':expiry' => $expiryDate
+                    ]);
+                }
             } catch (\PDOException $e) {
                 error_log("Token update error: " . $e->getMessage());
             }
