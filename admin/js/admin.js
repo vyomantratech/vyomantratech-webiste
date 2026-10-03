@@ -3348,7 +3348,8 @@ function adminDownloadCurrentDocx(mode = 'digital') {
 // CERTIFICATE CONFIGURATOR LOGIC
 // -------------------------------------------------------------
 let currentCertConfig = {
-  active_template: 'Course_Certificate_Template.docx',
+  active_template: 'Vyomantra_Master_Certificate_of_Completion.docx',
+  master_template_version: 0,
   custom_template_uploaded: false,
   custom_template_name: null,
   custom_template_size: 0,
@@ -3390,7 +3391,7 @@ function getDefaultCertificateFieldMappings() {
     'sdt:company_name': 'issued_by',
     'sdt:course_name': 'course_name',
     'sdt:program_type': 'certificate_type',
-    'sdt:course_description': 'description',
+    'sdt:course_description': '__keep__',
     'sdt:panel_program': 'course_name',
     'sdt:duration': 'course_duration',
     'sdt:completion_date': 'completion_date',
@@ -3507,6 +3508,7 @@ async function loadCertificateConfiguration() {
       if (!result.data.template_placeholders && savedConfig?.template_placeholders) {
         currentCertConfig.template_placeholders = savedConfig.template_placeholders;
       }
+      applyMasterCertificateTemplateUpgrade();
       certificateConfigLoaded = true;
       return currentCertConfig;
     }
@@ -3514,8 +3516,20 @@ async function loadCertificateConfiguration() {
     // Static development servers do not provide the PHP configuration API.
   }
   if (savedConfig) currentCertConfig = { ...currentCertConfig, ...savedConfig };
+  applyMasterCertificateTemplateUpgrade();
   certificateConfigLoaded = true;
   return currentCertConfig;
+}
+
+function applyMasterCertificateTemplateUpgrade() {
+  if (Number(currentCertConfig.master_template_version || 0) >= 1) return;
+  currentCertConfig.active_template = 'Vyomantra_Master_Certificate_of_Completion.docx';
+  currentCertConfig.master_template_version = 1;
+  currentCertConfig.custom_template_uploaded = false;
+  currentCertConfig.custom_template_file = null;
+  currentCertConfig.custom_template_name = null;
+  currentCertConfig.custom_template_size = 0;
+  try { localStorage.setItem('vyomantra_cert_config', JSON.stringify(currentCertConfig)); } catch (_) {}
 }
 
 async function getActiveCertificateTemplateBuffer() {
@@ -3542,7 +3556,7 @@ async function getActiveCertificateTemplateBuffer() {
     throw new Error('The custom template is marked active but its file is missing. Upload it again in the configurator.');
   }
 
-  const response = await fetch('../templates/certificates/Course_Certificate_Template.docx');
+  const response = await fetch('../templates/certificates/Vyomantra_Master_Certificate_of_Completion.docx');
   if (!response.ok) throw new Error('The default certificate template could not be read.');
   return await response.arrayBuffer();
 }
@@ -3694,6 +3708,16 @@ function initConfiguratorEvents() {
 
 async function openCertificateConfiguratorModal() {
   await loadCertificateConfiguration();
+  if (!currentCertConfig.template_controls?.length) {
+    try {
+      const activeBuffer = await getActiveCertificateTemplateBuffer();
+      const scan = await scanCertificateTemplateTags(new Blob([activeBuffer]));
+      currentCertConfig.template_controls = scan.controls;
+      currentCertConfig.template_placeholders = scan.placeholders;
+    } catch (error) {
+      console.warn('Could not scan the active default template fields.', error);
+    }
+  }
   updateConfiguratorUI();
   openAdminModal('certificateConfiguratorModal');
 }
@@ -3706,8 +3730,8 @@ function updateConfiguratorUI() {
     if (nameEl) nameEl.textContent = currentCertConfig.custom_template_name;
     if (metaEl) metaEl.textContent = `Custom Active Template • Size: ${(currentCertConfig.custom_template_size / 1024).toFixed(1)} KB • Word (.docx)`;
   } else {
-    if (nameEl) nameEl.textContent = 'Vyomantra_Course_Certificate_Template.docx';
-    if (metaEl) metaEl.textContent = 'Default Registry Template • Format: Word Document (OpenXML)';
+    if (nameEl) nameEl.textContent = 'Vyomantra_Master_Certificate_of_Completion.docx';
+    if (metaEl) metaEl.textContent = 'Master completion template • Embedded fonts and logo preserved • Word (.docx)';
   }
 
   // Update signature button states

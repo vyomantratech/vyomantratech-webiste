@@ -23,7 +23,8 @@ class VyomantraDocxEngine {
      */
     public function getConfig() {
         $defaults = [
-            'active_template'          => 'Course_Certificate_Template.docx',
+            'active_template'          => 'Vyomantra_Master_Certificate_of_Completion.docx',
+            'master_template_version'  => 1,
             'custom_template_uploaded' => false,
             'custom_template_name'     => null,
             'custom_template_size'     => 0,
@@ -44,14 +45,54 @@ class VyomantraDocxEngine {
                 '{{FOUNDER_SIGNATURE}}'  => 'founder_signature',
                 '{{DIRECTOR_SIGNATURE}}' => 'director_signature',
                 '{{TRAINER_SIGNATURE}}'  => 'trainer_signature',
-                '{{DESCRIPTION}}'        => 'description'
+                '{{DESCRIPTION}}'        => 'description',
+                'sdt:student_name' => 'recipient_name',
+                'sdt:company_name' => 'issued_by',
+                'sdt:course_name' => 'course_name',
+                'sdt:program_type' => 'certificate_type',
+                'sdt:course_description' => '__keep__',
+                'sdt:panel_program' => 'course_name',
+                'sdt:duration' => 'course_duration',
+                'sdt:completion_date' => 'completion_date',
+                'sdt:certificate_id' => 'certificate_id',
+                'sdt:instructor_name' => 'trainer_name',
+                'sdt:instructor_name_title' => 'trainer_designation',
+                'sdt:instructor_name_org' => 'issued_by',
+                'sdt:founder_name' => 'signatory_name',
+                'sdt:founder_name_title' => 'signatory_designation',
+                'sdt:founder_name_org' => 'issued_by',
+                'sdt:scan_label' => '__keep__',
+                'sdt:certificate_id_qr' => 'certificate_id',
+                'sdt:side_left_code' => '__keep__',
+                'sdt:side_left_learn' => '__keep__',
+                'sdt:side_left_create' => '__keep__',
+                'sdt:side_left_evolve' => '__keep__',
+                'sdt:side_right_learn' => '__keep__',
+                'sdt:side_right_build' => '__keep__',
+                'sdt:side_right_grow' => '__keep__',
+                'sdt:side_right_together' => '__keep__',
+                'sdt:website' => '__keep__',
+                'sdt:footer_tagline' => '__keep__'
             ]
         ];
 
         if (file_exists($this->configFile)) {
             $data = json_decode(file_get_contents($this->configFile), true);
             if (is_array($data)) {
-                return array_merge($defaults, $data);
+                $config = array_merge($defaults, $data);
+                $config['field_mappings'] = array_merge(
+                    $defaults['field_mappings'],
+                    is_array($data['field_mappings'] ?? null) ? $data['field_mappings'] : []
+                );
+                if (!isset($data['master_template_version'])) {
+                    $config['active_template'] = 'Vyomantra_Master_Certificate_of_Completion.docx';
+                    $config['master_template_version'] = 1;
+                    $config['custom_template_uploaded'] = false;
+                    $config['custom_template_file'] = null;
+                    $config['custom_template_name'] = null;
+                    $config['custom_template_size'] = 0;
+                }
+                return $config;
             }
         }
         return $defaults;
@@ -83,7 +124,7 @@ class VyomantraDocxEngine {
                 return $customPath;
             }
         }
-        $defaultPath = $this->templateDir . '/Course_Certificate_Template.docx';
+        $defaultPath = $this->templateDir . '/Vyomantra_Master_Certificate_of_Completion.docx';
         if (file_exists($defaultPath)) {
             return $defaultPath;
         }
@@ -123,6 +164,7 @@ class VyomantraDocxEngine {
         }
 
         $this->saveConfig([
+            'master_template_version'  => 1,
             'custom_template_uploaded' => true,
             'custom_template_file'     => $destFilename,
             'custom_template_name'     => $origName,
@@ -141,6 +183,8 @@ class VyomantraDocxEngine {
      */
     public function resetToDefault() {
         return $this->saveConfig([
+            'active_template'          => 'Vyomantra_Master_Certificate_of_Completion.docx',
+            'master_template_version'  => 1,
             'custom_template_uploaded' => false,
             'custom_template_file'     => null,
             'custom_template_name'     => null,
