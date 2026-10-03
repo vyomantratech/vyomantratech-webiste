@@ -1338,7 +1338,7 @@
               <i class="fas fa-info-circle" style="color:var(--cyan); margin-right:6px;"></i> Active Course Certificate Template
             </div>
             <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">
-              Upload your official Microsoft Word (.docx) Course Certificate template. The system parses your template, embeds authentic QR codes, and dynamically populates fields according to your chosen download mode.
+              Upload your official Microsoft Word (.docx) template. The system uses this file for future downloads and fills the detected placeholder tags from each issued certificate.
             </p>
           </div>
 
@@ -1387,7 +1387,7 @@
           
           <div style="margin-bottom: 1rem;">
             <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.75rem 0;">
-              Use the standard placeholder tags below inside your Word document. The generator replaces each tag with authentic certificate record data:
+              Add these exact tags to your Word document, or upload a DOCX and map its detected tags to fields from the issued certificate. Mapping previews use a live sample record:
             </p>
           </div>
 
@@ -1401,7 +1401,7 @@
                   <th style="padding: 0.65rem 0.85rem;">Partial Mode Behavior</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="certificateFieldMappingsBody">
                 <tr>
                   <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{CERTIFICATE_ID}}</span></td>
                   <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Unique Certificate ID</td>

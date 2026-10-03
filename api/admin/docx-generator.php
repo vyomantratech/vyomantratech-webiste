@@ -246,6 +246,41 @@ class VyomantraDocxEngine {
             '{{SIGNATORY_TITLE}}'    => htmlspecialchars($cert['signatory_designation'] ?? 'Founder & CEO', ENT_XML1, 'UTF-8')
         ];
 
+        // Honor mappings configured in the admin field-mapping panel. Unknown
+        // custom placeholders can therefore target any certificate record field.
+        $mappedValues = [
+            'certificate_id' => $certId,
+            'recipient_name' => $recipientName,
+            'recipient_email' => $cert['recipient_email'] ?? '',
+            'certificate_type' => $cert['certificate_type'] ?? '',
+            'course_name' => $courseName,
+            'course_duration' => $courseDuration,
+            'issue_date' => $issueDate,
+            'completion_date' => $completionDate,
+            'expiry_date' => !empty($cert['expiry_date']) ? date('d F Y', strtotime($cert['expiry_date'])) : '',
+            'verification_url' => $vUrl,
+            'description' => $cert['description'] ?? '',
+            'trainer_name' => $cert['trainer_name'] ?? 'Santhosh S.',
+            'trainer_designation' => $cert['trainer_designation'] ?? 'Lead Technical Instructor',
+            'signatory_name' => $cert['signatory_name'] ?? 'S.B. Sachin',
+            'signatory_designation' => $cert['signatory_designation'] ?? 'Founder & CEO',
+            'founder_signature' => $founderSign,
+            'director_signature' => $directorSign,
+            'trainer_signature' => $trainerSign,
+            'qr_code_placeholder' => $qrTextRepresentation
+        ];
+        foreach (($cfg['field_mappings'] ?? []) as $tag => $fieldKey) {
+            if (!is_string($tag) || !preg_match('/^\{\{[A-Z0-9_]+\}\}$/', $tag) || !is_string($fieldKey) || $fieldKey === '') {
+                continue;
+            }
+            $mappedValue = array_key_exists($fieldKey, $mappedValues)
+                ? $mappedValues[$fieldKey]
+                : ($cert[$fieldKey] ?? '');
+            $replacements[$tag] = htmlspecialchars((string)$mappedValue, ENT_XML1, 'UTF-8');
+        }
+
+        $fieldMappings = $cfg['field_mappings'] ?? [];
+
         // 3. Normalize XML to fix tags split across runs like <w:t>{{</w:t></w:r><w:r><w:t>NAME</w:t></w:r><w:r><w:t>}}</w:t>
         $xmlContent = $this->normalizeWordXmlTags($xmlContent);
 
@@ -253,6 +288,7 @@ class VyomantraDocxEngine {
         foreach ($replacements as $tag => $val) {
             $xmlContent = str_replace($tag, $val, $xmlContent);
         }
+        $xmlContent = $this->replaceMappedContentControls($xmlContent, $fieldMappings, $mappedValues, $cert);
 
         $zip->addFromString('word/document.xml', $xmlContent);
 
@@ -266,6 +302,7 @@ class VyomantraDocxEngine {
                     foreach ($replacements as $tag => $val) {
                         $hfXml = str_replace($tag, $val, $hfXml);
                     }
+                    $hfXml = $this->replaceMappedContentControls($hfXml, $fieldMappings, $mappedValues, $cert);
                     $zip->addFromString($filename, $hfXml);
                 }
             }
@@ -274,6 +311,28 @@ class VyomantraDocxEngine {
         $zip->close();
 
         return $tmpOutput;
+    }
+
+    /** Replace tagged Word content controls using the configurator field map. */
+    private function replaceMappedContentControls($xml, $fieldMappings, $mappedValues, $cert) {
+        return preg_replace_callback('/<w:sdt(?:\s[^>]*)?>[\s\S]*?<\/w:sdt>/', function ($match) use ($fieldMappings, $mappedValues, $cert) {
+            $control = $match[0];
+            if (!preg_match('/<w:tag\b[^>]*w:val="([^"]+)"/', $control, $tagMatch)) return $control;
+            $tag = html_entity_decode($tagMatch[1], ENT_QUOTES | ENT_XML1, 'UTF-8');
+            $fieldKey = $fieldMappings['sdt:' . $tag] ?? null;
+            if (!is_string($fieldKey) || $fieldKey === '' || $fieldKey === '__keep__') return $control;
+            $value = array_key_exists($fieldKey, $mappedValues) ? $mappedValues[$fieldKey] : ($cert[$fieldKey] ?? '');
+            $safeValue = htmlspecialchars((string)$value, ENT_XML1, 'UTF-8');
+            return preg_replace_callback('/(<w:sdtContent(?:\s[^>]*)?>)([\s\S]*?)(<\/w:sdtContent>)/', function ($contentMatch) use ($safeValue) {
+                $inserted = false;
+                $inner = preg_replace_callback('/(<w:t\b[^>]*>)[\s\S]*?(<\/w:t>)/', function ($textMatch) use (&$inserted, $safeValue) {
+                    if (!$inserted) { $inserted = true; return $textMatch[1] . $safeValue . $textMatch[2]; }
+                    return $textMatch[1] . $textMatch[2];
+                }, $contentMatch[2]);
+                if (!$inserted) $inner = '<w:r><w:t xml:space="preserve">' . $safeValue . '</w:t></w:r>';
+                return $contentMatch[1] . $inner . $contentMatch[3];
+            }, $control, 1);
+        }, $xml);
     }
 
     /**
