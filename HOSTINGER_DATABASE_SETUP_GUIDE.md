@@ -128,6 +128,6 @@ define('DB_CHARSET', 'utf8mb4');
 | **Reviews & Testimonials** | ✅ Intact | Client reviews on `index.html` and public pages preserved without modification. |
 | **Course Creation CMS** | ✅ Active | Full CMS in admin panel + `api/admin/courses.php` + `api/get-courses.php`. |
 | **Admin Panel Demo Data** | ✅ Cleaned | Contacts, quotes, applicants, and registrations reset to clean production state. |
-| **Certificate System** | ✅ Intact | Dual DOCX download (partial & full), configurator, QR codes, and audit logs preserved. |
+| **Certificate System** | ✅ Simplified | Admin creates verification IDs/tokens/QR codes, uploads the manually completed DOCX, and publishes its converted PDF for public verification. DOCX conversion requires LibreOffice configured on the server. |
 | **PHP Syntax & Compatibility** | ✅ 100% Passed | All 18 PHP endpoints verified syntax error-free for PHP 8.0 – 8.3+. |
 | **MySQL Production Schema** | ✅ Ready | Complete `schema.sql` ready for 1-click phpMyAdmin import. |

@@ -2,7 +2,7 @@
 header('X-Robots-Tag: noindex, nofollow', true);
 /**
  * Vyomantra Technologies - Admin Certificates Management API
- * Full CRUD, unique Certificate ID generation, revocation, restore, audit logs, and bulk CSV generation.
+ * Create and list certificate verification records, and attach manually completed certificate files.
  * Protected by checkAdminAuth() guard.
  */
 
@@ -203,64 +203,6 @@ if ($action === 'list') {
 }
 
 // =========================================================================
-// 2. GET SINGLE CERTIFICATE WITH AUDIT LOGS
-// =========================================================================
-if ($action === 'get') {
-    $id = trim($_GET['id'] ?? $_POST['id'] ?? '');
-    if (empty($id)) {
-        sendResponse(false, 'Certificate ID is required.', [], 400);
-    }
-
-    $certificate = null;
-    $logs = [];
-
-    if ($pdo) {
-        try {
-            $stmt = $pdo->prepare("SELECT * FROM certificates WHERE id = :id OR certificate_id = :cid LIMIT 1");
-            $stmt->execute([':id' => is_numeric($id) ? (int)$id : 0, ':cid' => $id]);
-            $certificate = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($certificate) {
-                $logStmt = $pdo->prepare("SELECT * FROM certificate_logs WHERE certificate_id = :cid ORDER BY verification_timestamp DESC LIMIT 50");
-                $logStmt->execute([':cid' => $certificate['certificate_id']]);
-                $logs = $logStmt->fetchAll(PDO::FETCH_ASSOC);
-            }
-        } catch (\PDOException $e) {
-            error_log("Get certificate error: " . $e->getMessage());
-        }
-    }
-
-    if (!$certificate) {
-        $certs = getLocalCerts();
-        foreach ($certs as $c) {
-            if (($c['id'] ?? '') == $id || ($c['certificate_id'] ?? '') === $id) {
-                $certificate = $c;
-                break;
-            }
-        }
-
-        $logFile = __DIR__ . '/../../data/certificate_logs.json';
-        if (file_exists($logFile) && $certificate) {
-            $allLogs = json_decode(file_get_contents($logFile), true) ?: [];
-            foreach ($allLogs as $l) {
-                if (($l['certificate_id'] ?? '') === $certificate['certificate_id']) {
-                    $logs[] = $l;
-                }
-            }
-        }
-    }
-
-    if (!$certificate) {
-        sendResponse(false, 'Certificate not found.', [], 404);
-    }
-
-    sendResponse(true, 'Certificate details retrieved', [
-        'certificate' => $certificate,
-        'logs'        => $logs
-    ]);
-}
-
-// =========================================================================
 // 3. CREATE CERTIFICATE
 // =========================================================================
 if ($action === 'create') {
@@ -387,571 +329,117 @@ if ($action === 'create') {
 }
 
 // =========================================================================
-// 4. UPDATE CERTIFICATE
-// =========================================================================
-if ($action === 'update') {
+// Attach the manually completed DOCX and publish its converted PDF on verification.
+if ($action === 'upload_final_docx') {
     $id = trim($_POST['id'] ?? '');
-    if (empty($id)) {
-        sendResponse(false, 'Certificate ID is required for update.', [], 400);
+    $upload = $_FILES['final_docx'] ?? null;
+    if ($id === '' || !$upload || ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        sendResponse(false, 'Choose a final DOCX file for a valid certificate record.', [], 400);
+    }
+    if (($upload['size'] ?? 0) < 1 || $upload['size'] > 20 * 1024 * 1024 || strtolower(pathinfo($upload['name'] ?? '', PATHINFO_EXTENSION)) !== 'docx') {
+        sendResponse(false, 'The final certificate must be a DOCX file smaller than 20 MB.', [], 400);
     }
 
-    $recipientName        = trim($_POST['recipient_name'] ?? '');
-    $recipientEmail       = trim($_POST['recipient_email'] ?? '');
-    $certificateType      = trim($_POST['certificate_type'] ?? 'Course Completion');
-    $courseName           = trim($_POST['course_name'] ?? '');
-    $courseDuration       = trim($_POST['course_duration'] ?? '3 Months');
-    $description          = trim($_POST['description'] ?? '');
-    $trainerName          = trim($_POST['trainer_name'] ?? 'Santhosh S');
-    $trainerDesignation   = trim($_POST['trainer_designation'] ?? 'Lead Technical Instructor');
-    $signatoryName        = trim($_POST['signatory_name'] ?? 'S.B. Sachin');
-    $signatoryDesignation = trim($_POST['signatory_designation'] ?? 'Founder & CEO');
-    $issueDate            = trim($_POST['issue_date'] ?? date('Y-m-d'));
-    $completionDate       = trim($_POST['completion_date'] ?? $issueDate);
-    $expiryDate           = trim($_POST['expiry_date'] ?? '') ?: null;
-    $privateNotes         = trim($_POST['private_notes'] ?? '');
-
+    $certificate = null;
     if ($pdo) {
         try {
-            $stmt = $pdo->prepare("
-                UPDATE certificates SET
-                    recipient_name = :rname,
-                    recipient_email = :remail,
-                    certificate_type = :ctype,
-                    course_name = :cname,
-                    course_duration = :cdur,
-                    description = :desc,
-                    trainer_name = :tname,
-                    trainer_designation = :tdesig,
-                    signatory_name = :sname,
-                    signatory_designation = :sdesig,
-                    issue_date = :idate,
-                    completion_date = :cdate,
-                    expiry_date = :edate,
-                    private_notes = :pnotes,
-                    updated_at = NOW()
-                WHERE id = :id OR certificate_id = :cid
-            ");
-            $stmt->execute([
-                ':rname'   => $recipientName,
-                ':remail'  => $recipientEmail,
-                ':ctype'   => $certificateType,
-                ':cname'   => $courseName,
-                ':cdur'    => $courseDuration,
-                ':desc'    => $description,
-                ':tname'   => $trainerName,
-                ':tdesig'  => $trainerDesignation,
-                ':sname'   => $signatoryName,
-                ':sdesig'  => $signatoryDesignation,
-                ':idate'   => $issueDate,
-                ':cdate'   => $completionDate,
-                ':edate'   => $expiryDate,
-                ':pnotes'  => $privateNotes,
-                ':id'      => is_numeric($id) ? (int)$id : 0,
-                ':cid'     => $id
-            ]);
+            $stmt = $pdo->prepare('SELECT * FROM certificates WHERE certificate_id = :cid OR id = :id LIMIT 1');
+            $stmt->execute([':cid' => $id, ':id' => $id]);
+            $certificate = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } catch (\PDOException $e) {
-            error_log("Update certificate DB error: " . $e->getMessage());
+            sendResponse(false, 'Could not load the certificate record.', [], 500);
         }
     }
-
-    // Sync JSON fallback
-    $certs = getLocalCerts();
-    foreach ($certs as &$c) {
-        if (($c['id'] ?? '') == $id || ($c['certificate_id'] ?? '') === $id) {
-            $c['recipient_name']        = $recipientName;
-            $c['recipient_email']       = $recipientEmail;
-            $c['certificate_type']      = $certificateType;
-            $c['course_name']           = $courseName;
-            $c['course_duration']       = $courseDuration;
-            $c['description']           = $description;
-            $c['trainer_name']          = $trainerName;
-            $c['trainer_designation']   = $trainerDesignation;
-            $c['signatory_name']        = $signatoryName;
-            $c['signatory_designation'] = $signatoryDesignation;
-            $c['issue_date']            = $issueDate;
-            $c['completion_date']       = $completionDate;
-            $c['expiry_date']           = $expiryDate;
-            $c['private_notes']         = $privateNotes;
-            $c['updated_at']            = date('Y-m-d H:i:s');
-            break;
+    if (!$certificate) {
+        foreach (getLocalCerts() as $record) {
+            if (($record['certificate_id'] ?? '') === $id || (string)($record['id'] ?? '') === $id) { $certificate = $record; break; }
         }
     }
-    saveLocalCerts($certs);
+    if (!$certificate) sendResponse(false, 'Certificate record not found.', [], 404);
 
-    sendResponse(true, "Certificate $id updated successfully.");
-}
-
-// =========================================================================
-// 5. REVOKE CERTIFICATE
-// =========================================================================
-if ($action === 'revoke') {
-    $id = trim($_POST['id'] ?? '');
-    $reason = trim($_POST['reason'] ?? 'Revoked by Issuing Authority');
-    $revokedBy = $adminUser['username'] ?? 'Administrator';
-
-    if (empty($id)) {
-        sendResponse(false, 'Certificate ID is required for revocation.', [], 400);
-    }
-
-    if ($pdo) {
-        try {
-            $stmt = $pdo->prepare("
-                UPDATE certificates SET
-                    status = 'revoked',
-                    revoked_at = NOW(),
-                    revoked_by = :by,
-                    revocation_reason = :reason,
-                    updated_at = NOW()
-                WHERE id = :id OR certificate_id = :cid
-            ");
-            $stmt->execute([
-                ':by'     => $revokedBy,
-                ':reason' => $reason,
-                ':id'     => is_numeric($id) ? (int)$id : 0,
-                ':cid'    => $id
-            ]);
-        } catch (\PDOException $e) {
-            error_log("Revoke certificate DB error: " . $e->getMessage());
+    $soffice = trim((string)(getenv('CERTIFICATE_SOFFICE_BIN') ?: ''));
+    if ($soffice === '') {
+        foreach (['/usr/bin/soffice', '/usr/local/bin/soffice', '/usr/bin/libreoffice'] as $candidate) {
+            if (is_executable($candidate)) { $soffice = $candidate; break; }
         }
     }
+    if ($soffice === '' || !is_executable($soffice) || !function_exists('proc_open')) {
+        sendResponse(false, 'DOCX-to-PDF conversion is not available on this server. Install LibreOffice and set CERTIFICATE_SOFFICE_BIN to its executable.', [], 503);
+    }
 
-    // Sync JSON fallback
-    $certs = getLocalCerts();
-    foreach ($certs as &$c) {
-        if (($c['id'] ?? '') == $id || ($c['certificate_id'] ?? '') === $id) {
-            $c['status']            = 'revoked';
-            $c['revoked_at']        = date('Y-m-d H:i:s');
-            $c['revoked_by']        = $revokedBy;
-            $c['revocation_reason'] = $reason;
-            $c['updated_at']        = date('Y-m-d H:i:s');
-            break;
+    $zip = new ZipArchive();
+    if ($zip->open($upload['tmp_name']) !== true || $zip->locateName('word/document.xml') === false) {
+        if ($zip->status === ZipArchive::ER_OK) $zip->close();
+        sendResponse(false, 'The uploaded file is not a valid Word DOCX document.', [], 400);
+    }
+    $zip->close();
+
+    $certificateId = (string)$certificate['certificate_id'];
+    $safeId = preg_replace('/[^A-Za-z0-9_-]/', '_', $certificateId);
+    $targetDir = dirname(__DIR__, 2) . '/uploads/certificates';
+    if (!is_dir($targetDir) && !@mkdir($targetDir, 0755, true)) sendResponse(false, 'Could not prepare certificate storage.', [], 500);
+    $workDir = sys_get_temp_dir() . '/vyomantra-cert-' . bin2hex(random_bytes(8));
+    if (!@mkdir($workDir, 0700, true)) sendResponse(false, 'Could not prepare the DOCX conversion workspace.', [], 500);
+
+    $docxPath = $workDir . '/' . $safeId . '.docx';
+    $pdfPath = $workDir . '/' . $safeId . '.pdf';
+    $profilePath = $workDir . '/lo-profile';
+    @mkdir($profilePath, 0700, true);
+    $conversionResult = null;
+    $conversionError = null;
+    try {
+        if (!move_uploaded_file($upload['tmp_name'], $docxPath)) throw new RuntimeException('Could not save the uploaded DOCX.');
+        $command = [$soffice, '--headless', '-env:UserInstallation=file://' . $profilePath, '--convert-to', 'pdf:writer_pdf_Export', '--outdir', $workDir, $docxPath];
+        $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, null, ['bypass_shell' => true]);
+        if (!is_resource($process)) throw new RuntimeException('Could not start the document converter.');
+        $stdout = stream_get_contents($pipes[1]); fclose($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]); fclose($pipes[2]);
+        $exitCode = proc_close($process);
+        if ($exitCode !== 0 || !is_file($pdfPath) || filesize($pdfPath) < 100) {
+            throw new RuntimeException('The DOCX could not be converted to PDF. ' . trim((string)$stderr . ' ' . (string)$stdout));
         }
-    }
-    saveLocalCerts($certs);
 
-    sendResponse(true, "Certificate $id has been revoked successfully.");
-}
-
-// =========================================================================
-// 6. RESTORE CERTIFICATE
-// =========================================================================
-if ($action === 'restore') {
-    $id = trim($_POST['id'] ?? '');
-
-    if (empty($id)) {
-        sendResponse(false, 'Certificate ID is required.', [], 400);
-    }
-
-    if ($pdo) {
-        try {
-            $stmt = $pdo->prepare("
-                UPDATE certificates SET
-                    status = 'valid',
-                    revoked_at = NULL,
-                    revoked_by = NULL,
-                    revocation_reason = NULL,
-                    updated_at = NOW()
-                WHERE id = :id OR certificate_id = :cid
-            ");
-            $stmt->execute([
-                ':id'  => is_numeric($id) ? (int)$id : 0,
-                ':cid' => $id
-            ]);
-        } catch (\PDOException $e) {
-            error_log("Restore certificate DB error: " . $e->getMessage());
-        }
-    }
-
-    // Sync JSON fallback
-    $certs = getLocalCerts();
-    foreach ($certs as &$c) {
-        if (($c['id'] ?? '') == $id || ($c['certificate_id'] ?? '') === $id) {
-            $c['status']            = 'valid';
-            $c['revoked_at']        = null;
-            $c['revoked_by']        = null;
-            $c['revocation_reason'] = null;
-            $c['updated_at']        = date('Y-m-d H:i:s');
-            break;
-        }
-    }
-    saveLocalCerts($certs);
-
-    sendResponse(true, "Certificate $id has been restored to VALID status.");
-}
-
-// =========================================================================
-// 7. DELETE / ARCHIVE CERTIFICATE
-// =========================================================================
-if ($action === 'delete') {
-    $id = trim($_POST['id'] ?? '');
-
-    if (empty($id)) {
-        sendResponse(false, 'Certificate ID is required.', [], 400);
-    }
-
-    if ($pdo) {
-        try {
-            $stmt = $pdo->prepare("DELETE FROM certificates WHERE id = :id OR certificate_id = :cid");
-            $stmt->execute([
-                ':id'  => is_numeric($id) ? (int)$id : 0,
-                ':cid' => $id
-            ]);
-        } catch (\PDOException $e) {
-            error_log("Delete certificate DB error: " . $e->getMessage());
-        }
-    }
-
-    // Sync JSON fallback
-    $certs = getLocalCerts();
-    $certs = array_values(array_filter($certs, function($c) use ($id) {
-        return !(($c['id'] ?? '') == $id || ($c['certificate_id'] ?? '') === $id);
-    }));
-    saveLocalCerts($certs);
-
-    sendResponse(true, "Certificate $id deleted successfully.");
-}
-
-// =========================================================================
-// 8. BULK IMPORT / ISSUE (CSV / JSON)
-// =========================================================================
-if ($action === 'bulk_import') {
-    $recordsJson = trim($_POST['records'] ?? '');
-    $records = [];
-
-    if (!empty($recordsJson)) {
-        $records = json_decode($recordsJson, true) ?: [];
-    }
-
-    // Alternatively parse uploaded CSV file
-    if (empty($records) && isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] === UPLOAD_ERR_OK) {
-        $handle = fopen($_FILES['csv_file']['tmp_name'], 'r');
-        $header = fgetcsv($handle);
-        while (($row = fgetcsv($handle)) !== false) {
-            if (empty($row[0])) continue;
-            $records[] = [
-                'recipient_name'   => trim($row[0] ?? ''),
-                'recipient_email'  => trim($row[1] ?? ''),
-                'course_name'      => trim($row[2] ?? 'Full Stack Development'),
-                'course_duration'  => trim($row[3] ?? '3 Months'),
-                'issue_date'       => trim($row[4] ?? date('Y-m-d')),
-                'certificate_type' => trim($row[5] ?? 'Course Completion'),
-                'prefix'           => trim($row[6] ?? 'VYOM-CRT')
-            ];
-        }
-        fclose($handle);
-    }
-
-    if (empty($records)) {
-        sendResponse(false, 'No valid records provided for bulk certificate generation.', [], 400);
-    }
-
-    $createdList = [];
-    $allLocal = getLocalCerts();
-
-    foreach ($records as $r) {
-        $recipientName = trim($r['recipient_name'] ?? '');
-        $courseName    = trim($r['course_name'] ?? '');
-        if (empty($recipientName) || empty($courseName)) continue;
-
-        $prefix   = strtoupper(trim($r['prefix'] ?? 'VYOM-CRT'));
-        $issueDate = trim($r['issue_date'] ?? date('Y-m-d'));
-        $year      = date('Y', strtotime($issueDate));
-        $certId    = generateNextCertificateId($pdo, $prefix, $year);
-        $token     = bin2hex(random_bytes(16));
-        $vurl      = SITE_URL . '/verify/?id=' . urlencode($certId);
-
-        $item = [
-            'id'                    => count($allLocal) + 1,
-            'certificate_id'        => $certId,
-            'certificate_type'      => trim($r['certificate_type'] ?? 'Course Completion'),
-            'prefix'                => $prefix,
-            'recipient_name'        => $recipientName,
-            'recipient_email'       => trim($r['recipient_email'] ?? ''),
-            'course_name'           => $courseName,
-            'course_duration'       => trim($r['course_duration'] ?? '3 Months'),
-            'description'           => trim($r['description'] ?? 'Successfully completed official program curriculum with excellence.'),
-            'trainer_name'          => trim($r['trainer_name'] ?? 'Santhosh S'),
-            'trainer_designation'   => trim($r['trainer_designation'] ?? 'Lead Technical Instructor'),
-            'signatory_name'        => 'S.B. Sachin',
-            'signatory_designation' => 'Founder & CEO',
-            'issue_date'            => $issueDate,
-            'completion_date'       => $issueDate,
-            'expiry_date'           => null,
-            'status'                => 'valid',
-            'verification_token'    => $token,
-            'verification_url'      => $vurl,
-            'template_id'           => 'vyomantra_premium_v1',
-            'issued_by'             => 'VYOMANTRA TECHNOLOGIES',
-            'private_notes'         => 'Bulk generated via CSV on ' . date('Y-m-d'),
-            'created_at'            => date('Y-m-d H:i:s'),
-            'updated_at'            => date('Y-m-d H:i:s')
-        ];
+        $pdfName = $safeId . '_final.pdf';
+        $storedPdf = $targetDir . '/' . $pdfName;
+        if (!@copy($pdfPath, $storedPdf)) throw new RuntimeException('Converted PDF could not be stored.');
+        $pdfUrl = rtrim(SITE_URL, '/') . '/uploads/certificates/' . rawurlencode($pdfName);
 
         if ($pdo) {
-            try {
-                $stmt = $pdo->prepare("
-                    INSERT INTO certificates (
-                        certificate_id, certificate_type, prefix, recipient_name, recipient_email,
-                        course_name, course_duration, description, trainer_name, trainer_designation,
-                        signatory_name, signatory_designation, issue_date, completion_date,
-                        status, verification_token, verification_url, template_id, issued_by, private_notes,
-                        created_at, updated_at
-                    ) VALUES (
-                        :cid, :ctype, :prefix, :rname, :remail,
-                        :cname, :cdur, :desc, :tname, :tdesig,
-                        :sname, :sdesig, :idate, :cdate,
-                        'valid', :token, :vurl, :tempid, :issuedby, :pnotes,
-                        NOW(), NOW()
-                    )
-                ");
-                $stmt->execute([
-                    ':cid'      => $certId,
-                    ':ctype'    => $item['certificate_type'],
-                    ':prefix'   => $prefix,
-                    ':rname'    => $item['recipient_name'],
-                    ':remail'   => $item['recipient_email'],
-                    ':cname'    => $item['course_name'],
-                    ':cdur'     => $item['course_duration'],
-                    ':desc'     => $item['description'],
-                    ':tname'    => $item['trainer_name'],
-                    ':tdesig'   => $item['trainer_designation'],
-                    ':sname'    => $item['signatory_name'],
-                    ':sdesig'   => $item['signatory_designation'],
-                    ':idate'    => $item['issue_date'],
-                    ':cdate'    => $item['completion_date'],
-                    ':token'    => $token,
-                    ':vurl'     => $vurl,
-                    ':tempid'   => 'vyomantra_premium_v1',
-                    ':issuedby' => 'VYOMANTRA TECHNOLOGIES',
-                    ':pnotes'   => $item['private_notes']
-                ]);
-                $item['id'] = (int)$pdo->lastInsertId();
-            } catch (\PDOException $e) {
-                error_log("Bulk certificate insert DB error: " . $e->getMessage());
+            $update = $pdo->prepare('UPDATE certificates SET certificate_pdf_url = :pdf, updated_at = NOW() WHERE certificate_id = :cid');
+            $update->execute([':pdf' => $pdfUrl, ':cid' => $certificateId]);
+        }
+        $records = getLocalCerts();
+        foreach ($records as &$record) {
+            if (($record['certificate_id'] ?? '') === $certificateId) {
+                $record['certificate_pdf_url'] = $pdfUrl;
+                $record['updated_at'] = date('Y-m-d H:i:s');
             }
         }
-
-        $createdList[] = $item;
-        array_unshift($allLocal, $item);
-    }
-
-    saveLocalCerts($allLocal);
-
-    sendResponse(true, "Bulk generation completed. Successfully issued " . count($createdList) . " certificates.", [
-        'count'        => count($createdList),
-        'certificates' => $createdList
-    ]);
-}
-
-// =========================================================================
-// 9. CERTIFICATES STATS
-// =========================================================================
-if ($action === 'stats') {
-    $stats = [
-        'total'         => 0,
-        'valid'         => 0,
-        'revoked'       => 0,
-        'expired'       => 0,
-        'draft'         => 0,
-        'this_month'    => 0,
-        'this_year'     => 0,
-        'verifications' => 0
-    ];
-
-    if ($pdo) {
-        try {
-            $stmt = $pdo->query("SELECT status, COUNT(*) as cnt FROM certificates GROUP BY status");
-            while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $st = strtolower($r['status']);
-                if (isset($stats[$st])) $stats[$st] = (int)$r['cnt'];
-                $stats['total'] += (int)$r['cnt'];
+        unset($record);
+        saveLocalCerts($records);
+        $conversionResult = [
+            'certificate_id' => $certificateId,
+            'certificate_pdf_url' => $pdfUrl
+        ];
+    } catch (\Throwable $e) {
+        error_log('Final certificate conversion failed: ' . $e->getMessage());
+        $conversionError = $e->getMessage();
+    } finally {
+        $removeTree = static function (string $path) use (&$removeTree): void {
+            if (is_dir($path) && !is_link($path)) {
+                foreach (scandir($path) ?: [] as $entry) {
+                    if ($entry !== '.' && $entry !== '..') $removeTree($path . DIRECTORY_SEPARATOR . $entry);
+                }
+                @rmdir($path);
+            } else {
+                @unlink($path);
             }
-
-            $currentMonth = date('Y-m');
-            $currentYear  = date('Y');
-            $stmt = $pdo->query("SELECT COUNT(*) FROM certificates WHERE issue_date LIKE '$currentMonth%'");
-            $stats['this_month'] = (int)$stmt->fetchColumn();
-
-            $stmt = $pdo->query("SELECT COUNT(*) FROM certificates WHERE issue_date LIKE '$currentYear%'");
-            $stats['this_year'] = (int)$stmt->fetchColumn();
-
-            $stmt = $pdo->query("SELECT COUNT(*) FROM certificate_logs");
-            $stats['verifications'] = (int)$stmt->fetchColumn();
-
-        } catch (\PDOException $e) {
-            error_log("Certificates stats DB error: " . $e->getMessage());
-        }
+        };
+        $removeTree($workDir);
+        @rmdir($workDir);
     }
-
-    if ($stats['total'] === 0) {
-        $certs = getLocalCerts();
-        $stats['total'] = count($certs);
-        $currentMonth = date('Y-m');
-        $currentYear  = date('Y');
-        foreach ($certs as $c) {
-            $st = strtolower($c['status'] ?? 'valid');
-            if (isset($stats[$st])) $stats[$st]++;
-            $idate = $c['issue_date'] ?? '';
-            if (strpos($idate, $currentMonth) === 0) $stats['this_month']++;
-            if (strpos($idate, $currentYear) === 0)  $stats['this_year']++;
-        }
-
-        $logFile = __DIR__ . '/../../data/certificate_logs.json';
-        if (file_exists($logFile)) {
-            $logs = json_decode(file_get_contents($logFile), true) ?: [];
-            $stats['verifications'] = count($logs);
-        }
-    }
-
-    sendResponse(true, 'Certificate stats compiled', $stats);
-}
-
-// =========================================================================
-// 10. EXPORT CSV
-// =========================================================================
-if ($action === 'export_csv') {
-    $rows = [];
-    if ($pdo) {
-        $stmt = $pdo->query("SELECT certificate_id, recipient_name, recipient_email, certificate_type, course_name, course_duration, issue_date, status, verification_url FROM certificates ORDER BY id DESC");
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    if (empty($rows)) {
-        $all = getLocalCerts();
-        foreach ($all as $c) {
-            $rows[] = [
-                'certificate_id'   => $c['certificate_id'] ?? '',
-                'recipient_name'   => $c['recipient_name'] ?? '',
-                'recipient_email'  => $c['recipient_email'] ?? '',
-                'certificate_type' => $c['certificate_type'] ?? '',
-                'course_name'      => $c['course_name'] ?? '',
-                'course_duration'  => $c['course_duration'] ?? '',
-                'issue_date'       => $c['issue_date'] ?? '',
-                'status'           => $c['status'] ?? '',
-                'verification_url' => $c['verification_url'] ?? ''
-            ];
-        }
-    }
-
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=vyomantra_certificates_' . date('Ymd_His') . '.csv');
-    $out = fopen('php://output', 'w');
-    fputcsv($out, ['Certificate ID', 'Recipient Name', 'Recipient Email', 'Type', 'Course/Program', 'Duration', 'Issue Date', 'Status', 'Verification URL']);
-    foreach ($rows as $r) {
-        fputcsv($out, $r);
-    }
-    fclose($out);
-    exit;
-}
-
-// =========================================================================
-// 11. DOCX GENERATION & CONFIGURATOR ACTIONS
-// =========================================================================
-
-// Download populated DOCX (partial or digital)
-if ($action === 'download_docx') {
-    require_once __DIR__ . '/docx-generator.php';
-    $id = trim($_GET['id'] ?? $_POST['id'] ?? '');
-    $mode = trim($_GET['mode'] ?? $_POST['mode'] ?? 'digital');
-    if (!$id) {
-        sendResponse(false, 'Certificate ID is required for download.', [], 400);
-    }
-
-    $cert = null;
-    if ($pdo) {
-        try {
-            $stmt = $pdo->prepare("SELECT * FROM certificates WHERE certificate_id = :id OR id = :id2 LIMIT 1");
-            $stmt->execute([':id' => $id, ':id2' => $id]);
-            $cert = $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {}
-    }
-    if (!$cert) {
-        $all = getLocalCerts();
-        foreach ($all as $c) {
-            if (($c['certificate_id'] ?? '') === $id || ($c['id'] ?? '') == $id) {
-                $cert = $c;
-                break;
-            }
-        }
-    }
-
-    if (!$cert) {
-        sendResponse(false, 'Certificate record not found.', [], 404);
-    }
-
-    try {
-        $engine = new VyomantraDocxEngine();
-        $filePath = $engine->generateDocx($cert, $mode);
-        $safeId = preg_replace('/[^A-Za-z0-9_\-]/', '_', $cert['certificate_id']);
-        $modeSuffix = ($mode === 'partial') ? 'Manual_Sign' : 'Digital';
-        $filename = "{$safeId}_{$modeSuffix}.docx";
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Length: ' . filesize($filePath));
-        header('Cache-Control: no-cache, no-store, must-revalidate');
-        readfile($filePath);
-        @unlink($filePath);
-        exit;
-    } catch (\Exception $e) {
-        sendResponse(false, 'DOCX generation failed: ' . $e->getMessage(), [], 500);
-    }
-}
-
-// Upload custom DOCX template
-if ($action === 'upload_template') {
-    require_once __DIR__ . '/docx-generator.php';
-    if (!isset($_FILES['template_file'])) {
-        sendResponse(false, 'No template file provided in upload.', [], 400);
-    }
-    try {
-        $engine = new VyomantraDocxEngine();
-        $res = $engine->saveUploadedTemplate($_FILES['template_file']);
-        sendResponse(true, 'DOCX template uploaded and validated successfully!', $res);
-    } catch (\Exception $e) {
-        sendResponse(false, $e->getMessage(), [], 400);
-    }
-}
-
-// Get template and signature configuration
-if ($action === 'get_template_config') {
-    require_once __DIR__ . '/docx-generator.php';
-    $engine = new VyomantraDocxEngine();
-    sendResponse(true, 'Template configuration retrieved', $engine->getConfig());
-}
-
-// Save template and signature configuration
-if ($action === 'save_template_config') {
-    require_once __DIR__ . '/docx-generator.php';
-    $inputData = json_decode(file_get_contents('php://input'), true);
-    if (!is_array($inputData)) {
-        $inputData = $_POST;
-    }
-    $engine = new VyomantraDocxEngine();
-    $saved = $engine->saveConfig($inputData);
-    sendResponse(true, 'Certificate configuration saved successfully!', $saved);
-}
-
-// Download the active DOCX template file
-if ($action === 'download_template') {
-    require_once __DIR__ . '/docx-generator.php';
-    $engine = new VyomantraDocxEngine();
-    $path = $engine->getActiveTemplatePath();
-    if (!$path || !file_exists($path)) {
-        sendResponse(false, 'Active template file not found.', [], 404);
-    }
-    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    header('Content-Disposition: attachment; filename="' . basename($path) . '"');
-    header('Content-Length: ' . filesize($path));
-    readfile($path);
-    exit;
-}
-
-// Reset template back to default
-if ($action === 'reset_template') {
-    require_once __DIR__ . '/docx-generator.php';
-    $engine = new VyomantraDocxEngine();
-    $cfg = $engine->resetToDefault();
-    sendResponse(true, 'Template reset back to default Vyomantra course certificate.', $cfg);
+    if ($conversionError !== null) sendResponse(false, $conversionError, [], 500);
+    sendResponse(true, 'Final DOCX uploaded and converted to PDF.', $conversionResult);
 }
 
 sendResponse(false, 'Invalid certificate action specified.', [], 400);

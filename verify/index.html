@@ -26,8 +26,6 @@
   <link rel="stylesheet" href="../css/certificate.css">
 
   <!-- Vendor Libraries for QR and PDF Generation -->
-  <script src="../js/vendor/qrcode.min.js"></script>
-  <script src="../js/vendor/html2pdf.bundle.min.js"></script>
 
   <style>
     /* Public Verification Page Specific Styling */
@@ -605,14 +603,12 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Verification actions -->
       <div class="verify-actions-bar">
-        <button type="button" class="btn-action-primary" onclick="downloadCertificatePdf()">
-          <i class="fas fa-file-pdf"></i> Download Official Certificate (PDF)
-        </button>
-        <button type="button" class="btn-action-secondary" onclick="printCertificateDoc()">
-          <i class="fas fa-print"></i> Print Certificate
-        </button>
+        <a type="button" class="btn-action-primary" id="downloadUploadedCertificatePdf" href="#" download style="display:none;">
+          <i class="fas fa-file-pdf"></i> Download Uploaded Certificate (PDF)
+        </a>
+        <span id="certificatePdfPendingNote" style="display:none;color:var(--text-muted);font-size:.85rem;">The issuing authority has not uploaded a certificate PDF.</span>
         <button type="button" class="btn-action-secondary" onclick="copyVerificationShareUrl()">
           <i class="fas fa-share-alt"></i> Share Verification Link
         </button>
@@ -620,100 +616,6 @@
           <i class="fas fa-search"></i> Verify Another Certificate
         </button>
       </div>
-
-      <!-- A4 Landscape Live Certificate Preview Container -->
-      <div class="certificate-preview-container" id="certPreviewContainer">
-        
-        <div class="vyom-certificate" id="certRenderDoc">
-          <!-- Borders & Security Pattern -->
-          <div class="cert-outer-border"></div>
-          <div class="cert-inner-border"></div>
-          <div class="cert-corner cert-corner-tl"></div>
-          <div class="cert-corner cert-corner-tr"></div>
-          <div class="cert-corner cert-corner-bl"></div>
-          <div class="cert-corner cert-corner-br"></div>
-          <div class="cert-security-pattern"></div>
-          <div class="cert-watermark">VYOMANTRA</div>
-
-          <!-- Status Ribbon if Revoked or Expired -->
-          <div id="certRibbon" class="cert-status-ribbon revoked" style="display: none;">REVOKED</div>
-
-          <!-- Certificate Header -->
-          <div class="cert-header">
-            <div class="cert-brand">
-              <img src="../assets/icons/vyomantra_logo.webp" alt="Vyomantra Logo" class="cert-logo" decoding="async">
-              <div class="cert-brand-text">
-                <h2>VYOMANTRA TECHNOLOGIES</h2>
-                <span>RESEARCH, SOFTWARE &amp; AI INNOVATION LABS</span>
-              </div>
-            </div>
-            <div class="cert-badge-secure">
-              <i class="fas fa-shield-alt"></i>
-              <div class="cert-badge-secure-text">
-                <div class="top">Official Credential</div>
-                <div class="bot" id="certBadgeId">VYOM-PY-2026-00001</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Certificate Body -->
-          <div class="cert-body">
-            <div class="cert-title-label" id="certDocTypeLabel">OFFICIAL ACCREDITATION</div>
-            <h1 class="cert-title-main" id="certDocTitle">CERTIFICATE OF COMPLETION</h1>
-            <div class="cert-presented-to">THIS IS PROUDLY PRESENTED TO</div>
-            <div class="cert-recipient-name" id="certDocRecipient">Recipient Full Name</div>
-
-            <p class="cert-statement">
-              for successfully mastering the curriculum, hands-on industrial projects, and demonstrating technical distinction in
-              <span class="cert-course-highlight" id="certDocCourse">Course / Program Name</span>.
-            </p>
-
-            <p class="cert-description-sub" id="certDocDescription">
-              Successfully demonstrated proficiency in modern software engineering principles and architectural excellence.
-            </p>
-          </div>
-
-          <!-- Certificate Footer -->
-          <div class="cert-footer">
-            
-            <!-- Left Signature -->
-            <div class="cert-sign-col">
-              <div class="cert-sign-img-placeholder" id="certDocTrainerSign">Santhosh S.</div>
-              <div class="cert-sign-line"></div>
-              <div class="cert-sign-name" id="certDocTrainerName">Santhosh S</div>
-              <div class="cert-sign-title" id="certDocTrainerTitle">Lead Technical Instructor</div>
-            </div>
-
-            <!-- Center QR Code Block -->
-            <div class="cert-qr-center">
-              <div class="cert-qr-box" id="certDocQrBox" title="Scan to verify online">
-                <!-- Dynamic QR Canvas will be injected here -->
-              </div>
-              <div class="cert-qr-caption"><i class="fas fa-qrcode"></i> Scan to Verify</div>
-              <div class="cert-meta-tagline" id="certDocMetaId">VYOM-PY-2026-00001</div>
-            </div>
-
-            <!-- Right Signature -->
-            <div class="cert-sign-col">
-              <div class="cert-sign-img-placeholder" id="certDocCeoSign" style="color: #e5b85a;">S.B. Sachin</div>
-              <div class="cert-sign-line"></div>
-              <div class="cert-sign-name" id="certDocSignatoryName">S.B. Sachin</div>
-              <div class="cert-sign-title" id="certDocSignatoryTitle">Founder &amp; CEO</div>
-            </div>
-
-          </div>
-
-          <!-- Bottom Footer Bar -->
-          <div class="cert-bottom-bar">
-            <span>Issue Date: <strong id="certDocIssueDate" style="color:#cbd5e1;">--</strong></span>
-            <span>Verify at: <strong id="certDocVerifyDomain" style="color:var(--cyan);">vyomantratech.com/verify</strong></span>
-            <span>Security Hash: <strong id="certDocSecurityToken" style="font-family:'JetBrains Mono', monospace; color:#cbd5e1;">--</strong></span>
-          </div>
-
-        </div>
-
-      </div>
-
     </div>
 
   </main>

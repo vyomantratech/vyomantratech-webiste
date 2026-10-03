@@ -15,14 +15,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="css/admin.css?v=2.7.0">
+  <link rel="stylesheet" href="css/admin.css?v=2.8.0">
   <link rel="stylesheet" href="../css/certificate.css?v=2.6.0">
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- QR, PDF & DOCX Generation Libraries -->
+  <!-- QR generation library -->
   <script src="../js/vendor/qrcode.min.js"></script>
-  <script src="../js/vendor/html2pdf.bundle.min.js"></script>
-  <script src="../js/vendor/jszip.min.js"></script>
 </head>
 
 <body class="admin-body">
@@ -581,81 +579,53 @@
            TAB 7: CERTIFICATES MANAGEMENT VIEW
            ===================================================================== -->
       <section class="admin-tab-view" id="view-certificates">
-        
-        <div class="table-toolbar">
-          <div class="table-filters" style="flex-wrap: wrap; gap: 0.75rem;">
-            <select id="filterCertStatus" class="admin-select">
-              <option value="all">All Statuses</option>
-              <option value="valid">Valid Active</option>
-              <option value="revoked">Revoked</option>
-              <option value="expired">Expired</option>
-              <option value="draft">Draft</option>
-            </select>
-            <select id="filterCertType" class="admin-select">
-              <option value="all">All Credential Types</option>
-              <option value="Course Completion">Course Completion</option>
-              <option value="Internship Certificate">Internship</option>
-              <option value="Workshop Certificate">Workshop</option>
-              <option value="Training Certificate">Training</option>
-              <option value="Participation Certificate">Participation</option>
-              <option value="Achievement Certificate">Achievement</option>
-              <option value="Event Certificate">Event</option>
-            </select>
-            <select id="sortCerts" class="admin-select">
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="name">Recipient Name A-Z</option>
-              <option value="id">Certificate ID</option>
-            </select>
-            <div class="admin-search-box" style="min-width: 260px;">
-              <i class="fas fa-search"></i>
-              <input type="text" id="searchCerts" placeholder="Search ID, recipient, course...">
+        <div class="certificate-workflow-grid" style="display:grid;grid-template-columns:minmax(320px,1fr) minmax(320px,0.9fr);gap:1rem;align-items:start;">
+          <form id="certificateEditorForm" class="admin-card" style="padding:1.25rem;">
+            <h2 style="margin:0 0 0.35rem;color:#fff;font-size:1.05rem;">Create verification record</h2>
+            <p style="margin:0 0 1.1rem;color:var(--text-muted);font-size:0.82rem;">Enter the certificate details. The registry will create its ID, private token, verification link, and QR code.</p>
+            <input type="hidden" id="certEditId" name="id" value="0">
+            <input type="hidden" id="certStatus" name="status" value="valid">
+            <div class="form-group"><label class="form-label" for="certType">Certificate type</label><select id="certType" name="certificate_type" class="form-control" required><option value="Course Completion">Course Completion</option><option value="Internship Certificate">Internship</option><option value="Workshop Certificate">Workshop</option><option value="Training Certificate">Training</option><option value="Participation Certificate">Participation</option><option value="Achievement Certificate">Achievement</option><option value="Event Certificate">Event</option></select></div>
+            <div class="form-group"><label class="form-label" for="certPrefix">ID prefix</label><select id="certPrefix" name="prefix" class="form-control"><option value="VYOM-CRT">VYOM-CRT</option><option value="VYOM-PY">VYOM-PY</option><option value="VYOM-INT">VYOM-INT</option><option value="VYOM-WKS">VYOM-WKS</option><option value="VYOM-AI">VYOM-AI</option></select></div>
+            <div class="form-group"><label class="form-label" for="certRecipientName">Recipient name *</label><input type="text" id="certRecipientName" name="recipient_name" class="form-control" required autocomplete="name"></div>
+            <div class="form-group"><label class="form-label" for="certRecipientEmail">Recipient email</label><input type="email" id="certRecipientEmail" name="recipient_email" class="form-control" autocomplete="email"></div>
+            <div class="form-group"><label class="form-label" for="certCourseName">Course / program *</label><input type="text" id="certCourseName" name="course_name" class="form-control" required></div>
+            <div class="form-group"><label class="form-label" for="certCourseDuration">Duration</label><input type="text" id="certCourseDuration" name="course_duration" class="form-control" placeholder="Optional"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+              <div class="form-group"><label class="form-label" for="certIssueDate">Issue date *</label><input type="date" id="certIssueDate" name="issue_date" class="form-control" required></div>
+              <div class="form-group"><label class="form-label" for="certCompletionDate">Completion date</label><input type="date" id="certCompletionDate" name="completion_date" class="form-control"></div>
             </div>
-          </div>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline btn-sm" id="btnOpenCertConfigurator" data-cert-action="configurator" title="Configure DOCX course certificate templates, field mappings & signatures">
-              <i class="fas fa-sliders-h" style="color:var(--cyan);"></i> Certificate Configurator
-            </button>
-            <button type="button" class="btn btn-outline btn-sm" id="btnOpenBulkCertModal" data-cert-action="bulk" title="Import & Issue multiple certificates via CSV">
-              <i class="fas fa-file-csv"></i> Bulk Issue (CSV)
-            </button>
-            <button type="button" class="btn btn-outline btn-sm" id="btnExportCertsCsv" data-cert-action="export" title="Export all certificates to CSV">
-              <i class="fas fa-download"></i> Export
-            </button>
-            <button type="button" class="btn btn-primary btn-sm" id="btnOpenCreateCertModal" data-cert-action="create">
-              <i class="fas fa-plus-circle"></i> Issue New Certificate
-            </button>
-          </div>
-        </div>
+            <div class="form-group"><label class="form-label" for="certDescription">Additional details</label><textarea id="certDescription" name="description" class="form-control" rows="2" placeholder="Optional details shown on verification"></textarea></div>
+            <button type="button" class="btn btn-primary" id="btnSaveCertificate"><i class="fas fa-qrcode"></i> Create ID, token &amp; QR</button>
+          </form>
 
-        <div class="table-responsive-wrapper">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th style="min-width: 190px;">Certificate ID</th>
-                <th style="min-width: 170px;">Recipient Name</th>
-                <th style="min-width: 220px;">Credential Type &amp; Program</th>
-                <th style="min-width: 120px;">Issue Date</th>
-                <th style="min-width: 90px;">Status</th>
-                <th style="min-width: 60px; text-align: center;">QR</th>
-                <th style="min-width: 390px; text-align: right;">Registry &amp; Download Actions</th>
-              </tr>
-            </thead>
-            <tbody id="certificatesTableBody">
-              <tr><td colspan="7" style="text-align:center; padding: 3rem; color: var(--text-dim);"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i> Loading credential registry...</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination & Summary Bar -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: var(--bg-admin-card); border: 1px solid var(--border-admin); border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); font-size: 0.85rem; color: var(--text-muted);">
-          <div id="certsPaginationSummary">Showing 0 of 0 certificates</div>
-          <div style="display: flex; gap: 0.5rem;" id="certsPaginationControls">
-            <button type="button" class="btn btn-outline btn-sm" id="btnPrevCertPage" disabled><i class="fas fa-chevron-left"></i> Previous</button>
-            <button type="button" class="btn btn-outline btn-sm" id="btnNextCertPage" disabled>Next <i class="fas fa-chevron-right"></i></button>
+          <div id="generatedCertificatePanel" class="admin-card" style="display:none;padding:1.25rem;">
+            <h2 style="margin:0 0 .35rem;color:#fff;font-size:1.05rem;">Verification details</h2>
+            <p style="margin:0 0 1rem;color:var(--text-muted);font-size:.82rem;">Use this QR on your manually edited certificate. Upload the finished DOCX below to prepare its optional verification PDF.</p>
+            <div id="generatedQrBox" style="display:flex;justify-content:center;background:#fff;border-radius:10px;padding:12px;width:max-content;margin:0 auto 1rem;"></div>
+            <div class="form-group"><label class="form-label">Certificate ID</label><div style="display:flex;gap:.5rem;"><input id="generatedCertId" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="id">Copy</button></div></div>
+            <div class="form-group"><label class="form-label">Verification token</label><div style="display:flex;gap:.5rem;"><input id="generatedCertToken" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="token">Copy</button></div></div>
+            <div class="form-group"><label class="form-label">Verification link</label><div style="display:flex;gap:.5rem;"><input id="generatedCertUrl" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="url">Copy</button></div></div>
+            <button type="button" class="btn btn-outline" id="btnDownloadGeneratedQr"><i class="fas fa-download"></i> Download QR PNG</button>
+            <hr style="border-color:var(--border-admin);margin:1.1rem 0;">
+            <label class="form-label" for="generatedFinalDocx">Final certificate DOCX (optional)</label>
+            <input type="file" id="generatedFinalDocx" class="form-control" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <button type="button" class="btn btn-outline" id="btnUploadFinalDocx" style="margin-top:.6rem;"><i class="fas fa-file-upload"></i> Upload DOCX &amp; prepare PDF</button>
+            <div id="generatedPdfStatus" style="margin-top:.65rem;font-size:.8rem;color:var(--text-muted);"></div>
           </div>
         </div>
 
+        <div class="admin-card" style="margin-top:1rem;padding:1rem 1.15rem;">
+          <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:.85rem;">
+            <h2 style="margin:0;color:#fff;font-size:1rem;">Certificate registry</h2>
+            <input type="search" id="searchCerts" class="form-control" style="max-width:300px;" placeholder="Search name or certificate ID">
+          </div>
+          <div class="table-responsive-wrapper"><table class="admin-table">
+            <thead><tr><th>Recipient / program</th><th>Certificate ID &amp; token</th><th>Issue date</th><th>Verification QR</th><th>Final PDF</th></tr></thead>
+            <tbody id="certificatesTableBody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-dim);">Loading verification registry...</td></tr></tbody>
+          </table></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:.85rem 0 0;font-size:.82rem;color:var(--text-muted);"><div id="certsPaginationSummary">Showing 0 of 0 certificates</div><div style="display:flex;gap:.5rem;" id="certsPaginationControls"><button type="button" class="btn btn-outline btn-sm" id="btnPrevCertPage" disabled>Previous</button><button type="button" class="btn btn-outline btn-sm" id="btnNextCertPage" disabled>Next</button></div></div>
+        </div>
       </section>
 
     </div>
@@ -939,636 +909,6 @@
        CERTIFICATE MANAGEMENT MODALS
        ========================================================================= -->
 
-  <!-- 1. Certificate Create / Edit Form Modal -->
-  <div class="admin-modal-backdrop" id="certificateEditorModal">
-    <div class="admin-modal-card modal-lg">
-      <div class="admin-modal-header">
-        <h3 id="certModalTitle"><i class="fas fa-certificate" style="color: var(--cyan);"></i> Issue New Certificate</h3>
-        <button type="button" class="modal-close-btn" onclick="closeAdminModal('certificateEditorModal')">&times;</button>
-      </div>
-      <div class="admin-modal-body">
-        
-        <form id="certificateEditorForm">
-          <input type="hidden" id="certEditId" name="id" value="0">
-          <input type="hidden" id="certEditActualId" name="actual_cert_id" value="">
-
-          <!-- Live ID Generation Banner -->
-          <div style="background: rgba(0, 240, 255, 0.08); border: 1px dashed var(--border-cyan); border-radius: 10px; padding: 0.85rem 1.25rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <div>
-              <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; letter-spacing: 0.08em;">Assigned Certificate ID</span>
-              <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; font-weight: 700; color: var(--cyan);" id="liveGeneratedIdPreview">VYOM-CRT-2026-XXXXX</div>
-            </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">
-              <i class="fas fa-lock" style="color: var(--green); margin-right: 4px;"></i> Collision-Safe Registry Identifier
-            </div>
-          </div>
-
-          <!-- Type & Prefix Row -->
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group">
-              <label class="form-label" for="certType">Certificate Type *</label>
-              <select id="certType" name="certificate_type" class="form-control" style="background:#050713;" required>
-                <option value="Course Completion">Course Completion Certificate</option>
-                <option value="Internship Certificate">Internship Certificate</option>
-                <option value="Workshop Certificate">Workshop Certificate</option>
-                <option value="Training Certificate">Training Certificate</option>
-                <option value="Participation Certificate">Participation Certificate</option>
-                <option value="Achievement Certificate">Achievement Certificate</option>
-                <option value="Event Certificate">Event Certificate</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certPrefix">ID Prefix Code *</label>
-              <select id="certPrefix" name="prefix" class="form-control" style="background:#050713;" required>
-                <option value="VYOM-PY">VYOM-PY (Python / AI)</option>
-                <option value="VYOM-INT">VYOM-INT (Internship)</option>
-                <option value="VYOM-WKS">VYOM-WKS (Workshop)</option>
-                <option value="VYOM-AI">VYOM-AI (AI / Data Science)</option>
-                <option value="VYOM-CRT" selected>VYOM-CRT (Standard / General)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Recipient Name & Email -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group">
-              <label class="form-label" for="certRecipientName">Recipient Full Name *</label>
-              <input type="text" id="certRecipientName" name="recipient_name" class="form-control" placeholder="e.g. Johnathan Doe" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certRecipientEmail">Recipient Email (Optional / For verification record)</label>
-              <input type="email" id="certRecipientEmail" name="recipient_email" class="form-control" placeholder="recipient@example.com">
-            </div>
-          </div>
-
-          <!-- Course Name & Duration -->
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group">
-              <label class="form-label" for="certCourseName">Course / Program / Internship Name *</label>
-              <input type="text" id="certCourseName" name="course_name" class="form-control" placeholder="e.g. Python Programming &amp; Applied AI" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certCourseDuration">Duration</label>
-              <input type="text" id="certCourseDuration" name="course_duration" class="form-control" placeholder="e.g. 3 Months (120 Hours)" value="3 Months">
-            </div>
-          </div>
-
-          <!-- Dates & Status Row -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group">
-              <label class="form-label" for="certIssueDate">Issue Date *</label>
-              <input type="date" id="certIssueDate" name="issue_date" class="form-control" style="background:#050713;" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certCompletionDate">Completion Date</label>
-              <input type="date" id="certCompletionDate" name="completion_date" class="form-control" style="background:#050713;">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certExpiryDate">Expiry Date (Optional)</label>
-              <input type="date" id="certExpiryDate" name="expiry_date" class="form-control" style="background:#050713;">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certStatus">Status</label>
-              <select id="certStatus" name="status" class="form-control" style="background:#050713;">
-                <option value="valid">Valid (Issued &amp; Active)</option>
-                <option value="draft">Draft (Private / Not Public)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Signatories & Authority -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group">
-              <label class="form-label" for="certTrainerName">Instructor / Trainer Name</label>
-              <input type="text" id="certTrainerName" name="trainer_name" class="form-control" value="Santhosh S" placeholder="Trainer Name">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certTrainerDesignation">Trainer Designation</label>
-              <input type="text" id="certTrainerDesignation" name="trainer_designation" class="form-control" value="Lead Technical Instructor" placeholder="Trainer Title">
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group">
-              <label class="form-label" for="certSignatoryName">Executive Signatory</label>
-              <input type="text" id="certSignatoryName" name="signatory_name" class="form-control" value="S.B. Sachin" placeholder="Executive Signatory">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="certSignatoryDesignation">Signatory Title</label>
-              <input type="text" id="certSignatoryDesignation" name="signatory_designation" class="form-control" value="Founder &amp; CEO" placeholder="Signatory Designation">
-            </div>
-          </div>
-
-          <!-- Certificate Description Paragraph -->
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="certDescription">Curriculum / Achievement Description</label>
-            <textarea id="certDescription" name="description" class="form-control" rows="2" placeholder="e.g. Successfully demonstrated technical mastery in core programming paradigms, building production-grade applications and system design."></textarea>
-          </div>
-
-          <!-- Private Internal Notes -->
-          <div class="form-group">
-            <label class="form-label" for="certPrivateNotes">Internal Administrative Notes (Private - Not visible on public verification)</label>
-            <textarea id="certPrivateNotes" name="private_notes" class="form-control" rows="2" placeholder="e.g. Batch #4, Score 96%, Approved by Academic Council."></textarea>
-          </div>
-
-        </form>
-
-      </div>
-      <div class="admin-modal-footer">
-        <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('certificateEditorModal')">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btnSaveCertificate">
-          <i class="fas fa-save"></i> Save &amp; Issue Certificate
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. Certificate Live Document Preview & Actions Modal -->
-  <div class="admin-modal-backdrop" id="certificatePreviewModal">
-    <div class="admin-modal-card" style="max-width: 1140px; width: 95vw;">
-      <div class="admin-modal-header" style="flex-wrap: wrap; gap: 0.5rem;">
-        <div>
-          <h3 id="previewModalTitle"><i class="fas fa-award" style="color: var(--cyan);"></i> Official Credential Document</h3>
-          <span style="font-size: 0.8rem; color: var(--text-dim);" id="previewModalSub">Certificate ID: <strong id="previewCertIdLabel" style="color:#00f0ff;">--</strong></span>
-        </div>
-        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" class="btn btn-outline btn-sm btn-docx-partial" onclick="adminDownloadCurrentDocx('partial')" title="Download DOCX with QR, ID, and Course Details (Leaves Recipient Name and Founder Signature blank for manual pen signing)">
-            <i class="fas fa-file-word"></i> DOCX (Manual Sign)
-          </button>
-          <button type="button" class="btn btn-outline btn-sm btn-docx-digital" onclick="adminDownloadCurrentDocx('digital')" title="Download 100% Completed Digital DOCX Certificate with all details and signatures">
-            <i class="fas fa-file-word"></i> DOCX (All Digital)
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="adminDownloadCurrentPdf()">
-            <i class="fas fa-file-pdf"></i> Download PDF
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="adminPrintCurrentCert()">
-            <i class="fas fa-print"></i> Print
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="adminDownloadCurrentQr()">
-            <i class="fas fa-qrcode"></i> Download QR
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="adminCopyCurrentVerifyUrl()">
-            <i class="fas fa-link"></i> Copy URL
-          </button>
-          <button type="button" class="btn btn-outline btn-sm danger" id="btnRevokeFromPreview" onclick="adminPromptRevokeCurrent()">
-            <i class="fas fa-ban"></i> Revoke
-          </button>
-          <button type="button" class="modal-close-btn" onclick="closeAdminModal('certificatePreviewModal')">&times;</button>
-        </div>
-      </div>
-      <div class="admin-modal-body" style="padding: 1.25rem;">
-        
-        <!-- Live Certificate Preview Container -->
-        <div class="certificate-preview-container" style="background:#020308; border: 1px solid var(--border-admin); padding: 1.5rem 0.5rem; overflow-x: auto;">
-          
-          <div class="vyom-certificate" id="adminCertDoc">
-            <div class="cert-outer-border"></div>
-            <div class="cert-inner-border"></div>
-            <div class="cert-corner cert-corner-tl"></div>
-            <div class="cert-corner cert-corner-tr"></div>
-            <div class="cert-corner cert-corner-bl"></div>
-            <div class="cert-corner cert-corner-br"></div>
-            <div class="cert-security-pattern"></div>
-            <div class="cert-watermark">VYOMANTRA</div>
-
-            <div id="adminCertRibbon" class="cert-status-ribbon revoked" style="display: none;">REVOKED</div>
-
-            <!-- Header -->
-            <div class="cert-header">
-              <div class="cert-brand">
-                <img src="../assets/icons/vyomantra_logo.webp" alt="Vyomantra Logo" class="cert-logo" decoding="async">
-                <div class="cert-brand-text">
-                  <h2>VYOMANTRA TECHNOLOGIES</h2>
-                  <span>RESEARCH, SOFTWARE &amp; AI INNOVATION LABS</span>
-                </div>
-              </div>
-              <div class="cert-badge-secure">
-                <i class="fas fa-shield-alt"></i>
-                <div class="cert-badge-secure-text">
-                  <div class="top">Official Credential</div>
-                  <div class="bot" id="adminCertBadgeId">VYOM-PY-2026-00001</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Body -->
-            <div class="cert-body">
-              <div class="cert-title-label" id="adminCertDocTypeLabel">OFFICIAL ACCREDITATION</div>
-              <h1 class="cert-title-main" id="adminCertDocTitle">CERTIFICATE OF COMPLETION</h1>
-              <div class="cert-presented-to">THIS IS PROUDLY PRESENTED TO</div>
-              <div class="cert-recipient-name" id="adminCertDocRecipient">Recipient Full Name</div>
-
-              <p class="cert-statement">
-                for successfully mastering the curriculum, hands-on industrial projects, and demonstrating technical distinction in
-                <span class="cert-course-highlight" id="adminCertDocCourse">Course / Program Name</span>.
-              </p>
-
-              <p class="cert-description-sub" id="adminCertDocDescription">
-                Successfully demonstrated proficiency in modern software engineering principles and architectural excellence.
-              </p>
-            </div>
-
-            <!-- Footer -->
-            <div class="cert-footer">
-              <div class="cert-sign-col">
-                <div class="cert-sign-img-placeholder" id="adminCertDocTrainerSign">Santhosh S.</div>
-                <div class="cert-sign-line"></div>
-                <div class="cert-sign-name" id="adminCertDocTrainerName">Santhosh S</div>
-                <div class="cert-sign-title" id="adminCertDocTrainerTitle">Lead Technical Instructor</div>
-              </div>
-
-              <div class="cert-qr-center">
-                <div class="cert-qr-box" id="adminCertDocQrBox"></div>
-                <div class="cert-qr-caption"><i class="fas fa-qrcode"></i> Scan to Verify</div>
-                <div class="cert-meta-tagline" id="adminCertDocMetaId">VYOM-PY-2026-00001</div>
-              </div>
-
-              <div class="cert-sign-col">
-                <div class="cert-sign-img-placeholder" id="adminCertDocCeoSign" style="color: #e5b85a;">S.B. Sachin</div>
-                <div class="cert-sign-line"></div>
-                <div class="cert-sign-name" id="adminCertDocSignatoryName">S.B. Sachin</div>
-                <div class="cert-sign-title" id="adminCertDocSignatoryTitle">Founder &amp; CEO</div>
-              </div>
-            </div>
-
-            <!-- Bottom Line -->
-            <div class="cert-bottom-bar">
-              <span>Issue Date: <strong id="adminCertDocIssueDate" style="color:#cbd5e1;">--</strong></span>
-              <span>Verify at: <strong id="adminCertDocVerifyDomain" style="color:var(--cyan);">vyomantratech.com/verify</strong></span>
-              <span>Security Hash: <strong id="adminCertDocSecurityToken" style="font-family:'JetBrains Mono', monospace; color:#cbd5e1;">--</strong></span>
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- Verification Audit Logs Section -->
-        <div style="margin-top: 1.5rem; background: var(--bg-admin-sidebar); border: 1px solid var(--border-admin); border-radius: var(--radius-md); padding: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-            <div>
-              <h4 style="color: #fff; font-size: 0.95rem; margin: 0 0 0.2rem 0;"><i class="fas fa-history" style="color: var(--cyan); margin-right: 6px;"></i> Verification Audit Trail</h4>
-              <span style="font-size: 0.78rem; color: var(--text-dim);" id="previewAuditSummary">Total verifications recorded: 0</span>
-            </div>
-            <span class="status-badge badge-new" style="font-size: 0.7rem;"><i class="fas fa-shield-alt"></i> Tamper-Evident</span>
-          </div>
-
-          <div style="max-height: 180px; overflow-y: auto;">
-            <table class="admin-table" style="font-size: 0.8rem;">
-              <thead>
-                <tr>
-                  <th style="padding: 0.5rem 0.75rem;">Timestamp</th>
-                  <th style="padding: 0.5rem 0.75rem;">Method</th>
-                  <th style="padding: 0.5rem 0.75rem;">Result</th>
-                  <th style="padding: 0.5rem 0.75rem;">IP Address</th>
-                  <th style="padding: 0.5rem 0.75rem;">Client Device / UA</th>
-                </tr>
-              </thead>
-              <tbody id="previewAuditLogsBody">
-                <tr><td colspan="5" style="text-align:center; padding: 1rem; color: var(--text-dim);">No verification events recorded yet.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. Revoke Confirmation Modal -->
-  <div class="admin-modal-backdrop" id="certificateRevokeModal">
-    <div class="admin-modal-card" style="max-width: 480px;">
-      <div class="admin-modal-header">
-        <h3 style="color: var(--red);"><i class="fas fa-exclamation-triangle"></i> Revoke Certificate</h3>
-        <button type="button" class="modal-close-btn" onclick="closeAdminModal('certificateRevokeModal')">&times;</button>
-      </div>
-      <div class="admin-modal-body">
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
-          Are you sure you want to revoke credential <strong id="revokeModalCertId" style="color:#fff;">--</strong>?
-          Once revoked, anyone scanning this certificate's QR code will be notified of its invalidation.
-        </p>
-        <div class="form-group">
-          <label class="form-label" for="revokeReasonInput">Revocation Reason *</label>
-          <textarea id="revokeReasonInput" class="form-control" rows="3" placeholder="e.g. Course requirements unfulfilled, academic review, or candidate withdrawal." required></textarea>
-        </div>
-      </div>
-      <div class="admin-modal-footer">
-        <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('certificateRevokeModal')">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm danger" id="btnConfirmRevocation" style="background:#ef4444; border-color:#ef4444;">
-          <i class="fas fa-ban"></i> Confirm Revocation
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. Bulk CSV Import Modal -->
-  <div class="admin-modal-backdrop" id="certificateBulkModal">
-    <div class="admin-modal-card modal-lg">
-      <div class="admin-modal-header">
-        <h3><i class="fas fa-file-csv" style="color: var(--cyan);"></i> Bulk Issue Certificates (CSV)</h3>
-        <button type="button" class="modal-close-btn" onclick="closeAdminModal('certificateBulkModal')">&times;</button>
-      </div>
-      <div class="admin-modal-body">
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
-          Upload a CSV file containing multiple students/interns to issue batch certificates with automatically generated unique Certificate IDs, verification tokens, and QR codes.
-        </p>
-
-        <!-- CSV Format Helper -->
-        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1.25rem;">
-          <div style="font-size: 0.78rem; font-weight: 700; color: var(--cyan); margin-bottom: 0.35rem;">Expected CSV Column Headers:</div>
-          <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #cbd5e1; display: block; word-break: break-all;">
-            Recipient Name, Email, Course Name, Duration, Issue Date, Certificate Type, Prefix
-          </code>
-          <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.35rem;">
-            Example row: <em>John Doe, john@example.com, Python Programming, 3 Months, 2026-09-26, Course Completion, VYOM-PY</em>
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" for="bulkCsvFile">Select CSV File</label>
-          <input type="file" id="bulkCsvFile" accept=".csv,text/csv" class="form-control" style="background:#050713;">
-        </div>
-
-        <div style="text-align: center; color: var(--text-dim); margin: 0.5rem 0; font-size: 0.8rem;">— OR PASTE CSV DATA BELOW —</div>
-
-        <div class="form-group">
-          <label class="form-label" for="bulkCsvText">Paste CSV Text</label>
-          <textarea id="bulkCsvText" class="form-control" rows="5" placeholder="Johnathan Doe, john@example.com, Python Mastery, 3 Months, 2026-09-26, Course Completion, VYOM-PY&#10;Jane Smith, jane@example.com, Full Stack Internship, 6 Months, 2026-09-26, Internship Certificate, VYOM-INT"></textarea>
-        </div>
-
-      </div>
-      <div class="admin-modal-footer">
-        <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('certificateBulkModal')">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" id="btnExecuteBulkImport">
-          <i class="fas fa-bolt"></i> Process &amp; Issue Certificates
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 5. Certificate Template & Signature Configurator Modal -->
-  <div class="admin-modal-backdrop" id="certificateConfiguratorModal">
-    <div class="admin-modal-card modal-lg" style="max-width: 980px; width: 95vw;">
-      <div class="admin-modal-header">
-        <div>
-          <h3><i class="fas fa-sliders-h" style="color: var(--cyan);"></i> Certificate Template &amp; Signature Configurator</h3>
-          <span style="font-size: 0.8rem; color: var(--text-dim);">Manage DOCX course certificate templates, field tag mappings, and configure digital vs manual signatures.</span>
-        </div>
-        <button type="button" class="modal-close-btn" onclick="closeAdminModal('certificateConfiguratorModal')">&times;</button>
-      </div>
-      <div class="admin-modal-body">
-        
-        <!-- Configurator Tabs -->
-        <div class="configurator-tabs">
-          <button type="button" class="configurator-tab-btn active" data-cfg-panel="panelTemplate">
-            <i class="fas fa-file-word"></i> DOCX Template Manager
-          </button>
-          <button type="button" class="configurator-tab-btn" data-cfg-panel="panelMapping">
-            <i class="fas fa-tags"></i> Field Tag Mappings
-          </button>
-          <button type="button" class="configurator-tab-btn" data-cfg-panel="panelSignatures">
-            <i class="fas fa-signature"></i> Signature &amp; Mode Rules
-          </button>
-        </div>
-
-        <!-- PANEL 1: DOCX TEMPLATE MANAGER -->
-        <div class="configurator-panel active" id="panelTemplate">
-          
-          <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--border-cyan); border-radius: var(--radius-sm); padding: 0.85rem 1.25rem; margin-bottom: 1.25rem;">
-            <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
-              <i class="fas fa-info-circle" style="color:var(--cyan); margin-right:6px;"></i> Active Course Certificate Template
-            </div>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">
-              Upload your official Microsoft Word (.docx) template. The system uses this file for future downloads and fills the detected placeholder tags from each issued certificate.
-            </p>
-          </div>
-
-          <!-- Active Template Status Card -->
-          <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <div style="width: 48px; height: 48px; background: rgba(0, 240, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; color: var(--cyan);">
-                <i class="fas fa-file-word"></i>
-              </div>
-              <div>
-                <div style="font-weight: 700; color: #fff; font-size: 0.98rem;" id="cfgCurrentTemplateName">Vyomantra_Master_Certificate_of_Completion.docx</div>
-                <div style="font-size: 0.78rem; color: var(--text-dim);" id="cfgTemplateMeta">Status: Active Registry Template • Format: Word Document (OpenXML)</div>
-              </div>
-            </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <span class="status-badge badge-valid" style="font-size: 0.72rem;"><i class="fas fa-check-circle"></i> Ready for Generation</span>
-              <button type="button" class="btn btn-outline btn-sm" id="btnDownloadCurrentTemplate" onclick="downloadActiveTemplateFile()" title="Download current .docx template to view tags">
-                <i class="fas fa-download"></i> Download Template
-              </button>
-            </div>
-          </div>
-
-          <!-- Upload Drop Zone -->
-          <div class="docx-drop-zone" id="docxDropZone" onclick="document.getElementById('inputTemplateDocx').click()">
-            <input type="file" id="inputTemplateDocx" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display: none;">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
-              Click or Drag &amp; Drop New DOCX Template Here
-            </div>
-            <div style="font-size: 0.8rem; color: var(--text-dim);">
-              Upload any custom course certificate (.docx). Formats, fonts, logos &amp; existing digital signatures are 100% preserved.
-            </div>
-          </div>
-
-          <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center;">
-            <span>Supported file extension: <strong>.docx</strong> (Word 2007+)</span>
-            <button type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding: 2px 8px;" onclick="resetDefaultDocxTemplate()">
-              <i class="fas fa-undo"></i> Reset to Default Template
-            </button>
-          </div>
-
-        </div>
-
-        <!-- PANEL 2: FIELD TAG MAPPINGS -->
-        <div class="configurator-panel" id="panelMapping">
-          
-          <div style="margin-bottom: 1rem;">
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.75rem 0;">
-              Add these exact tags to your Word document, or upload a DOCX and map its detected tags to fields from the issued certificate. Mapping previews use a live sample record:
-            </p>
-          </div>
-
-          <div style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border-admin); border-radius: var(--radius-sm);">
-            <table class="admin-table" style="font-size: 0.82rem;">
-              <thead>
-                <tr>
-                  <th style="padding: 0.65rem 0.85rem;">Word Placeholder Tag</th>
-                  <th style="padding: 0.65rem 0.85rem;">Mapped Data Field</th>
-                  <th style="padding: 0.65rem 0.85rem;">Sample Injected Value</th>
-                  <th style="padding: 0.65rem 0.85rem;">Partial Mode Behavior</th>
-                </tr>
-              </thead>
-              <tbody id="certificateFieldMappingsBody">
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{CERTIFICATE_ID}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Unique Certificate ID</td>
-                  <td style="padding: 0.65rem 0.85rem; color:var(--cyan); font-family:var(--font-mono);">VYOM-PY-2026-00001</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{RECIPIENT_NAME}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Candidate / Student Name</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Deepa Narayanan</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#f59e0b;"><i class="fas fa-minus-circle"></i> Blank (Manual Entry)</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{COURSE_NAME}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Course / Program Title</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Python Programming &amp; Applied AI</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{COURSE_DURATION}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Program Duration</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">3 Months</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{ISSUE_DATE}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Official Issue Date</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">28 Sept 2026</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{QR_CODE}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Verification QR Image</td>
-                  <td style="padding: 0.65rem 0.85rem; color:var(--cyan);"><i class="fas fa-qrcode"></i> [High-Res PNG Embedded]</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Embedded</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{VERIFICATION_URL}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Scan / Verification Link</td>
-                  <td style="padding: 0.65rem 0.85rem; color:var(--cyan); font-family:var(--font-mono); font-size:0.75rem;">vyomantratech.com/verify/?id=...</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Always Filled</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{FOUNDER_SIGNATURE}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Founder &amp; CEO Signature</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">S.B. Sachin</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#f59e0b;"><i class="fas fa-pen-nib"></i> Blank for Physical Pen</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{DIRECTOR_SIGNATURE}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Director / Co-Founder Signature</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Santhosh S.</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Digital in Template</td>
-                </tr>
-                <tr>
-                  <td style="padding: 0.65rem 0.85rem;"><span class="tag-badge">{{TRAINER_SIGNATURE}}</span></td>
-                  <td style="padding: 0.65rem 0.85rem; color:#fff; font-weight:600;">Trainer / Instructor Signature</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#cbd5e1;">Santhosh S.</td>
-                  <td style="padding: 0.65rem 0.85rem; color:#22c55e;"><i class="fas fa-check"></i> Digital in Template</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-        <!-- PANEL 3: SIGNATURE & MODE RULES -->
-        <div class="configurator-panel" id="panelSignatures">
-          
-          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 0.85rem 1.25rem; margin-bottom: 1.25rem;">
-            <div style="font-size: 0.85rem; font-weight: 700; color: #fbbf24; margin-bottom: 0.25rem;">
-              <i class="fas fa-stamp" style="margin-right:6px;"></i> Dual Output Rules &amp; Signature Authority Matrix
-            </div>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">
-              Configure which signatures are pre-applied digitally versus left blank for manual physical ink signing.
-            </p>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-            
-            <!-- Founder Signature -->
-            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
-              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">1. Founder &amp; CEO Signature</div>
-              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">S.B. Sachin • Executive Signatory</div>
-              <div class="sig-mode-selector">
-                <button type="button" class="sig-mode-btn" id="sigFounderDigital" onclick="setSignatureMode('founder', 'digital')">
-                  <i class="fas fa-check-double"></i> Digital Stamp
-                </button>
-                <button type="button" class="sig-mode-btn active-manual" id="sigFounderManual" onclick="setSignatureMode('founder', 'manual')">
-                  <i class="fas fa-pen-nib"></i> Manual Pen Sign
-                </button>
-              </div>
-              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="sigFounderDesc">
-                In partial download mode, this signature is left blank so it can be physically signed with a pen.
-              </div>
-            </div>
-
-            <!-- Co-Founder / Director Signature -->
-            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
-              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">2. Co-Founder &amp; Director Signature</div>
-              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">Santhosh Kumar S • Director</div>
-              <div class="sig-mode-selector">
-                <button type="button" class="sig-mode-btn active-digital" id="sigDirectorDigital" onclick="setSignatureMode('director', 'digital')">
-                  <i class="fas fa-check-double"></i> Digital (In Template)
-                </button>
-                <button type="button" class="sig-mode-btn" id="sigDirectorManual" onclick="setSignatureMode('director', 'manual')">
-                  <i class="fas fa-pen-nib"></i> Manual Pen Sign
-                </button>
-              </div>
-              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="sigDirectorDesc">
-                Already digitally embedded in template; will be retained in all generated certificates.
-              </div>
-            </div>
-
-            <!-- Trainer Signature -->
-            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
-              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">3. Lead Instructor / Trainer Signature</div>
-              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">Technical Instructor • Training Authority</div>
-              <div class="sig-mode-selector">
-                <button type="button" class="sig-mode-btn active-digital" id="sigTrainerDigital" onclick="setSignatureMode('trainer', 'digital')">
-                  <i class="fas fa-check-double"></i> Digital (In Template)
-                </button>
-                <button type="button" class="sig-mode-btn" id="sigTrainerManual" onclick="setSignatureMode('trainer', 'manual')">
-                  <i class="fas fa-pen-nib"></i> Manual Pen Sign
-                </button>
-              </div>
-              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="sigTrainerDesc">
-                Already digitally signed in template; preserved across all output documents.
-              </div>
-            </div>
-
-            <!-- Recipient Name Partial Mode -->
-            <div style="background: #040612; border: 1px solid var(--border-admin); border-radius: var(--radius-sm); padding: 1rem;">
-              <div style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">4. Recipient Name (Pre-Printed Mode)</div>
-              <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.75rem;">Partial Download Name Behavior</div>
-              <div class="sig-mode-selector">
-                <button type="button" class="sig-mode-btn active-manual" id="namePartialBlank" onclick="setNamePartialMode('blank')">
-                  <i class="fas fa-eraser"></i> Leave Blank (Handwritten)
-                </button>
-                <button type="button" class="sig-mode-btn" id="namePartialFilled" onclick="setNamePartialMode('filled')">
-                  <i class="fas fa-font"></i> Include Name
-                </button>
-              </div>
-              <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.5rem;" id="namePartialDesc">
-                Leaves candidate name line empty in partial download for handwriting or calligraphy.
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-      <div class="admin-modal-footer" style="justify-content: space-between;">
-        <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('certificateConfiguratorModal')">Cancel</button>
-        <div style="display: flex; gap: 0.5rem;">
-          <button type="button" class="btn btn-outline btn-sm" onclick="testSampleDocxGeneration()">
-            <i class="fas fa-play"></i> Test Sample DOCX
-          </button>
-          <button type="button" class="btn btn-primary btn-sm" id="btnSaveCertConfig" onclick="saveCertificateConfiguration()">
-            <i class="fas fa-save"></i> Save &amp; Apply Configuration
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast Notification Box -->
   <div id="adminToast">
     <i class="fas fa-check-circle" style="color: var(--cyan);"></i>
@@ -1576,7 +916,7 @@
   </div>
 
   <!-- Admin JS Script -->
-  <script src="js/admin.js?v=2.7.0"></script>
+  <script src="js/admin.js?v=2.8.0"></script>
 </body>
 
 </html>

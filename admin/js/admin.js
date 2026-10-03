@@ -240,7 +240,7 @@ function switchTab(tabId) {
     'courses': { title: '<i class="fas fa-user-graduate" style="color:var(--cyan);"></i> Course Registrations & Admissions', subtitle: 'Verify student UPI payments, approve enrollments, and manage admissions.' },
     'jobs': { title: '<i class="fas fa-briefcase" style="color:var(--cyan);"></i> Job Postings & CMS', subtitle: 'Publish new roles, update active openings, and generate subpages.' },
     'applicants': { title: '<i class="fas fa-users-cog" style="color:var(--cyan);"></i> Job & Internship Applicants', subtitle: 'Review candidate resumes, portfolios, and interview pipelines.' },
-    'certificates': { title: '<i class="fas fa-certificate" style="color:var(--cyan);"></i> Credential & Certificate Authority', subtitle: 'Issue, verify, revoke, and manage authentic company certificates with QR verification & DOCX/PDF generation.' }
+    'certificates': { title: '<i class="fas fa-certificate" style="color:var(--cyan);"></i> Certificate Verification Registry', subtitle: 'Create verification IDs and QR codes, then attach your manually completed certificate PDF.' }
   };
 
   const info = titles[tabId] || titles['stats'];
@@ -2067,1906 +2067,277 @@ function debounce(func, wait) {
 // =========================================================================
 // 11. TAB 7: CREDENTIAL & CERTIFICATE AUTHORITY ENGINE
 // =========================================================================
-let certCurrentPage = 0;
 const CERTS_PAGE_SIZE = 25;
-let certPreviewCurrent = null;
-let certRevokeTargetId = null;
+let certCurrentPage = 0;
+let latestGeneratedCertificate = null;
 
 function initCertificatesManager() {
-  const statusFilter = document.getElementById('filterCertStatus');
-  const typeFilter   = document.getElementById('filterCertType');
-  const sortSelect   = document.getElementById('sortCerts');
-  const searchInput  = document.getElementById('searchCerts');
+  const saveButton = document.getElementById('btnSaveCertificate');
+  const searchInput = document.getElementById('searchCerts');
+  const previousButton = document.getElementById('btnPrevCertPage');
+  const nextButton = document.getElementById('btnNextCertPage');
+  const qrButton = document.getElementById('btnDownloadGeneratedQr');
+  const uploadButton = document.getElementById('btnUploadFinalDocx');
+  const uploadInput = document.getElementById('generatedFinalDocx');
 
-  if (statusFilter) statusFilter.addEventListener('change', () => { certCurrentPage = 0; fetchCertificates(); });
-  if (typeFilter)   typeFilter.addEventListener('change', () => { certCurrentPage = 0; fetchCertificates(); });
-  if (sortSelect)   sortSelect.addEventListener('change', () => { certCurrentPage = 0; fetchCertificates(); });
-  if (searchInput)  searchInput.addEventListener('input', debounce(() => { certCurrentPage = 0; fetchCertificates(); }, 300));
-
-  // Pagination buttons
-  const prevBtn = document.getElementById('btnPrevCertPage');
-  const nextBtn = document.getElementById('btnNextCertPage');
-  if (prevBtn) prevBtn.addEventListener('click', () => {
-    if (certCurrentPage > 0) {
-      certCurrentPage--;
-      fetchCertificates();
+  saveButton?.addEventListener('click', saveCertificate);
+  searchInput?.addEventListener('input', debounce(() => { certCurrentPage = 0; fetchCertificates(); }, 250));
+  previousButton?.addEventListener('click', () => { if (certCurrentPage > 0) { certCurrentPage--; fetchCertificates(); } });
+  nextButton?.addEventListener('click', () => { certCurrentPage++; fetchCertificates(); });
+  qrButton?.addEventListener('click', downloadGeneratedQr);
+  document.querySelectorAll('[data-copy-generated]').forEach(button => button.addEventListener('click', () => {
+    const field = document.getElementById(`generatedCert${button.dataset.copyGenerated.charAt(0).toUpperCase()}${button.dataset.copyGenerated.slice(1)}`);
+    if (field) copyCertificateText(field.value, `${button.dataset.copyGenerated.toUpperCase()} copied`);
+  }));
+  uploadButton?.addEventListener('click', () => uploadInput?.click());
+  uploadInput?.addEventListener('change', async () => {
+    if (latestGeneratedCertificate && uploadInput.files?.[0]) {
+      await uploadFinalCertificateDocx(latestGeneratedCertificate.certificate_id, uploadInput.files[0]);
+      uploadInput.value = '';
     }
   });
-  if (nextBtn) nextBtn.addEventListener('click', () => {
-    certCurrentPage++;
-    fetchCertificates();
-  });
-
-  // Form Save
-  const saveBtn = document.getElementById('btnSaveCertificate');
-  if (saveBtn) saveBtn.addEventListener('click', saveCertificate);
-
-  // Dynamic live ID preview on prefix / date change
-  const prefixSelect = document.getElementById('certPrefix');
-  const issueDateInput = document.getElementById('certIssueDate');
-  if (prefixSelect) prefixSelect.addEventListener('change', updateLiveCertIdPreview);
-  if (issueDateInput) issueDateInput.addEventListener('change', updateLiveCertIdPreview);
-
-  // Revocation Confirm
-  const revokeBtn = document.getElementById('btnConfirmRevocation');
-  if (revokeBtn) revokeBtn.addEventListener('click', confirmCertificateRevocation);
-
-  // Bulk Import Submit
-  const executeBulkBtn = document.getElementById('btnExecuteBulkImport');
-  if (executeBulkBtn) executeBulkBtn.addEventListener('click', executeBulkImport);
-
-  // Initialize Configurator modal event listeners
-  initConfiguratorEvents();
 }
 
 async function handleCertificateAction(event) {
   const button = event.target.closest('[data-cert-action]');
   if (!button) return;
-
-  const id = button.dataset.certId;
   try {
-    switch (button.dataset.certAction) {
-      case 'create': openCertificateCreateModal(); break;
-      case 'configurator': await openCertificateConfiguratorModal(); break;
-      case 'bulk': openAdminModal('certificateBulkModal'); break;
-      case 'export': exportCertificatesCsv(); break;
-      case 'copy-id': await adminCopyCertId(id); break;
-      case 'preview': await openCertificatePreview(id); break;
-      case 'docx': await downloadCertificateDocx(id, button.dataset.certMode || 'digital'); break;
-      case 'pdf': await adminDownloadCertPdf(id); break;
-      case 'edit': await openCertificateEditModal(id); break;
-      case 'revoke': openCertificateRevokeModal(id); break;
-      case 'restore': await restoreCertificate(id); break;
-      case 'delete': await deleteCertificate(id); break;
-      default: return;
+    if (button.dataset.certAction === 'download-qr') {
+      await downloadCertificateQr(button.dataset.certName, button.dataset.certId, button.dataset.certUrl);
+    } else if (button.dataset.certAction === 'copy-id') {
+      await copyCertificateText(button.dataset.certId, 'Certificate ID copied');
+    } else if (button.dataset.certAction === 'copy-token') {
+      await copyCertificateText(button.dataset.certToken, 'Verification token copied');
+    } else if (button.dataset.certAction === 'copy-url') {
+      await copyCertificateText(button.dataset.certUrl, 'Verification link copied');
     }
   } catch (error) {
     console.error('Certificate action failed:', error);
-    showToast('That certificate action failed. Check the browser console for details.', true);
-  }
-}
-
-function updateLiveCertIdPreview() {
-  const prefix = document.getElementById('certPrefix')?.value || 'VYOM-CRT';
-  const issueDate = document.getElementById('certIssueDate')?.value || new Date().toISOString();
-  const year = new Date(issueDate).getFullYear() || 2026;
-  const editId = document.getElementById('certEditId')?.value;
-  const actualId = document.getElementById('certEditActualId')?.value;
-
-  const previewEl = document.getElementById('liveGeneratedIdPreview');
-  if (!previewEl) return;
-
-  if (editId && editId !== '0' && actualId) {
-    previewEl.textContent = actualId;
-  } else {
-    previewEl.textContent = `${prefix}-${year}-XXXXX (Auto-sequenced)`;
+    showToast('Certificate action failed. Please try again.', true);
   }
 }
 
 async function fetchCertificates() {
   const tbody = document.getElementById('certificatesTableBody');
-  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:3rem; color:var(--text-dim);"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i> Loading credential registry...</td></tr>';
-
-  const status = document.getElementById('filterCertStatus')?.value || 'all';
-  const type   = document.getElementById('filterCertType')?.value || 'all';
-  const sort   = document.getElementById('sortCerts')?.value || 'newest';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-dim);">Loading verification registry...</td></tr>';
   const search = document.getElementById('searchCerts')?.value.trim() || '';
-
   const offset = certCurrentPage * CERTS_PAGE_SIZE;
 
   if (isDevStaticMode) {
-    let all = getLocalData('certificates');
-    if (!all || all.length === 0) {
-      all = JSON.parse(localStorage.getItem('vyomantra_certificates') || '[]');
-    }
-
-    if (!all || all.length === 0) {
+    let all = getLocalData('certificates') || [];
+    if (!all.length) {
       try {
-        const resp = await fetch('../data/certificates.json');
-        if (resp.ok) {
-          all = await resp.json();
-          saveLocalData('certificates', all);
-        }
-      } catch (e) {
-        console.warn('Could not auto-seed certificates from json', e);
-      }
+        const response = await fetch('../data/certificates.json');
+        if (response.ok) { all = await response.json(); saveLocalData('certificates', all); }
+      } catch (_) {}
     }
-
-    // Filter
-    let filtered = all.filter(c => {
-      if (status !== 'all' && (c.status || 'valid') !== status) return false;
-      if (type !== 'all' && (c.certificate_type || '') !== type) return false;
-      if (search) {
-        const needle = search.toLowerCase();
-        const haystack = `${c.certificate_id} ${c.recipient_name} ${c.recipient_email} ${c.course_name}`.toLowerCase();
-        if (!haystack.includes(needle)) return false;
-      }
-      return true;
-    });
-
-    // Sort
-    filtered.sort((a, b) => {
-      if (sort === 'oldest') return (a.created_at || '').localeCompare(b.created_at || '');
-      if (sort === 'name') return (a.recipient_name || '').localeCompare(b.recipient_name || '');
-      if (sort === 'id') return (b.certificate_id || '').localeCompare(a.certificate_id || '');
-      return (b.created_at || '').localeCompare(a.created_at || '');
-    });
-
-    const pageSlice = filtered.slice(offset, offset + CERTS_PAGE_SIZE);
-    renderCertificatesTable(pageSlice, filtered.length);
+    const needle = search.toLowerCase();
+    const filtered = all.filter(cert => !needle || `${cert.certificate_id} ${cert.recipient_name} ${cert.course_name}`.toLowerCase().includes(needle))
+      .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+    renderCertificatesTable(filtered.slice(offset, offset + CERTS_PAGE_SIZE), filtered.length);
     updateCertPagination(filtered.length);
     return;
   }
 
   try {
-    const params = new URLSearchParams({
-      action: 'list',
-      status,
-      type,
-      sort,
-      search,
-      limit: CERTS_PAGE_SIZE,
-      offset
-    });
-
-    const res = await apiFetch(`../api/admin/certificates.php?${params.toString()}`);
-
-    if (res.status === 405 || (isDevStaticMode && !res.ok)) {
-      renderLocalCertificates();
-      return;
-    }
-
-    const result = await res.json();
-    if (result && result.success && result.data) {
-      const list = result.data.certificates || [];
-      const total = result.data.total || 0;
-      renderCertificatesTable(list, total);
-      updateCertPagination(total);
-
-      if (result.data.counts) {
-        const badge = document.getElementById('countBadgeCertificates');
-        if (badge) badge.textContent = result.data.counts.total || 0;
-      }
-    } else {
-      renderCertificatesTable([], 0);
-    }
-  } catch (err) {
-    isDevStaticMode = true;
-    fetchCertificates();
+    const params = new URLSearchParams({ action: 'list', status: 'all', type: 'all', sort: 'newest', search, limit: CERTS_PAGE_SIZE, offset });
+    const response = await apiFetch(`../api/admin/certificates.php?${params.toString()}`);
+    const result = await response.json();
+    if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not load certificate records.');
+    const certificates = result.data?.certificates || [];
+    renderCertificatesTable(certificates, result.data?.total || 0);
+    updateCertPagination(result.data?.total || 0);
+    const badge = document.getElementById('countBadgeCertificates');
+    if (badge && result.data?.counts) badge.textContent = result.data.counts.total || 0;
+  } catch (error) {
+    console.error('Certificate registry load failed:', error);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--red);">Could not load the verification registry.</td></tr>';
   }
 }
 
-function renderCertificatesTable(certs, totalCount) {
+function renderCertificatesTable(certificates, total) {
   const tbody = document.getElementById('certificatesTableBody');
   if (!tbody) return;
-
-  if (!certs || certs.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 3.5rem 1rem; color: var(--text-dim);">
-          <i class="fas fa-certificate" style="font-size: 2.2rem; margin-bottom: 0.75rem; display: block; opacity: 0.35;"></i>
-          No certificates matching current filters. Click "Issue New Certificate" to create one.
-        </td>
-      </tr>`;
+  if (!certificates.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-dim);">No verification records found.</td></tr>';
     return;
   }
-
-  tbody.innerHTML = certs.map(c => {
-    const status = (c.status || 'valid').toLowerCase();
-    let badgeClass = 'badge-valid';
-    let statusLabel = 'VALID';
-    if (status === 'revoked') { badgeClass = 'badge-rejected'; statusLabel = 'REVOKED'; }
-    else if (status === 'expired') { badgeClass = 'badge-pending'; statusLabel = 'EXPIRED'; }
-    else if (status === 'draft') { badgeClass = 'badge-draft'; statusLabel = 'DRAFT'; }
-
-    const formattedDate = formatDate(c.issue_date);
-    const siteOrigin = window.location.origin;
-    const vUrl = c.verification_url || `${siteOrigin}/verify/?id=${encodeURIComponent(c.certificate_id)}`;
-
-    return `
-      <tr>
-        <td class="cert-cell-id">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <strong class="cert-id-badge">${escapeHtml(c.certificate_id)}</strong>
-            <button type="button" class="btn-action-icon" style="padding:2px 6px; font-size:0.75rem;" data-cert-action="copy-id" data-cert-id="${escapeHtml(c.certificate_id)}" title="Copy Certificate ID">
-              <i class="fas fa-copy"></i>
-            </button>
-          </div>
-          <span style="font-size:0.72rem; color:var(--text-dim); display:block; margin-top:2px; font-family:'JetBrains Mono',monospace;">Token: ${escapeHtml((c.verification_token || '').substring(0, 10))}...</span>
-        </td>
-        <td>
-          <div style="font-weight:700; color:#fff; font-size:0.95rem;">${escapeHtml(c.recipient_name)}</div>
-          <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(c.recipient_email || 'No email specified')}</div>
-        </td>
-        <td>
-          <span style="font-size:0.74rem; font-weight:700; text-transform:uppercase; color:#e5b85a; letter-spacing:0.04em;">${escapeHtml(c.certificate_type || 'Course Completion')}</span>
-          <div style="font-size:0.85rem; color:#cbd5e1; font-weight:500;">${escapeHtml(c.course_name)}</div>
-          <span style="font-size:0.72rem; color:var(--text-dim);">${escapeHtml(c.course_duration || '3 Months')}</span>
-        </td>
-        <td>
-          <div style="font-size:0.88rem; color:#fff;">${formattedDate}</div>
-          ${c.completion_date ? `<span style="font-size:0.72rem; color:var(--text-dim);">Completed: ${formatDate(c.completion_date)}</span>` : ''}
-        </td>
-        <td>
-          <span class="status-badge ${badgeClass}">${statusLabel}</span>
-          ${status === 'revoked' && c.revocation_reason ? `<div style="font-size:0.72rem; color:#ef4444; margin-top:4px; max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(c.revocation_reason)}">${escapeHtml(c.revocation_reason)}</div>` : ''}
-        </td>
-        <td style="text-align: center;">
-          <button type="button" class="btn-action-icon" style="padding:6px 8px;" data-cert-action="preview" data-cert-id="${escapeHtml(c.certificate_id)}" title="Preview Certificate &amp; QR">
-            <i class="fas fa-qrcode" style="color:var(--cyan); font-size:1.1rem;"></i>
-          </button>
-        </td>
-        <td class="cert-cell-actions">
-          <button type="button" class="btn btn-outline btn-sm btn-docx-partial" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="docx" data-cert-mode="partial" data-cert-id="${escapeHtml(c.certificate_id)}" title="Download DOCX with QR, ID & Course (Leaves Recipient Name and Founder Signature blank for manual pen signing)">
-            <i class="fas fa-file-word"></i> DOCX (Manual)
-          </button>
-          <button type="button" class="btn btn-outline btn-sm btn-docx-digital" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="docx" data-cert-mode="digital" data-cert-id="${escapeHtml(c.certificate_id)}" title="Download 100% Complete Digital DOCX with all details and signatures">
-            <i class="fas fa-file-word"></i> DOCX (Digital)
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="preview" data-cert-id="${escapeHtml(c.certificate_id)}" title="Preview Official Certificate">
-            <i class="fas fa-eye"></i> View
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" style="padding:0.32rem 0.55rem; font-size:0.75rem; margin-right:3px;" data-cert-action="pdf" data-cert-id="${escapeHtml(c.certificate_id)}" title="Download PDF Certificate">
-            <i class="fas fa-file-pdf"></i> PDF
-          </button>
-          <button type="button" class="btn-action-icon" style="margin-right:2px;" data-cert-action="edit" data-cert-id="${escapeHtml(c.certificate_id)}" title="Edit Certificate">
-            <i class="fas fa-edit"></i>
-          </button>
-          ${status === 'revoked' ? `
-            <button type="button" class="btn-action-icon" style="color:var(--green); margin-right:2px;" data-cert-action="restore" data-cert-id="${escapeHtml(c.certificate_id)}" title="Restore to Valid">
-              <i class="fas fa-undo"></i>
-            </button>
-          ` : `
-            <button type="button" class="btn-action-icon danger" style="margin-right:2px;" data-cert-action="revoke" data-cert-id="${escapeHtml(c.certificate_id)}" title="Revoke Certificate">
-              <i class="fas fa-ban"></i>
-            </button>
-          `}
-          <button type="button" class="btn-action-icon danger" data-cert-action="delete" data-cert-id="${escapeHtml(c.certificate_id)}" title="Delete Certificate">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </td>
-      </tr>`;
+  tbody.innerHTML = certificates.map(cert => {
+    const id = escapeHtml(cert.certificate_id || '');
+    const name = escapeHtml(cert.recipient_name || '');
+    const safeName = escapeHtml(cert.recipient_name || 'Certificate');
+    const url = escapeHtml(cert.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(cert.certificate_id || '')}`);
+    const token = escapeHtml(cert.verification_token || '');
+    const pdfUrl = cert.certificate_pdf_url ? escapeHtml(cert.certificate_pdf_url) : '';
+    return `<tr>
+      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} · ${escapeHtml(cert.certificate_type || 'Certificate')}</div></td>
+      <td><div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;"><strong class="cert-id-badge">${id}</strong><button type="button" class="btn-action-icon" data-cert-action="copy-id" data-cert-id="${id}" title="Copy ID"><i class="fas fa-copy"></i></button></div><div style="font-size:.72rem;color:var(--text-dim);margin-top:4px;">Token: ${token}</div></td>
+      <td>${escapeHtml(formatDate(cert.issue_date))}</td>
+      <td><button type="button" class="btn btn-outline btn-sm" data-cert-action="download-qr" data-cert-name="${safeName}" data-cert-id="${id}" data-cert-url="${url}"><i class="fas fa-qrcode"></i> Download QR</button><button type="button" class="btn-action-icon" data-cert-action="copy-token" data-cert-token="${token}" title="Copy token"><i class="fas fa-key"></i></button><button type="button" class="btn-action-icon" data-cert-action="copy-url" data-cert-url="${url}" title="Copy verification link"><i class="fas fa-link"></i></button></td>
+      <td>${pdfUrl ? `<a class="btn btn-outline btn-sm" href="${pdfUrl}" download><i class="fas fa-file-pdf"></i> Download PDF</a>` : `<label class="btn btn-outline btn-sm" style="cursor:pointer;"><i class="fas fa-upload"></i> Upload final DOCX<input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;"></label><div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;">PDF not uploaded</div>`}</td>
+    </tr>`;
   }).join('');
+  tbody.querySelectorAll('[data-cert-upload]').forEach(input => input.addEventListener('change', async () => {
+    if (input.files?.[0]) await uploadFinalCertificateDocx(input.dataset.certUpload, input.files[0]);
+    input.value = '';
+  }));
 }
 
 function updateCertPagination(total) {
-  const summaryEl = document.getElementById('certsPaginationSummary');
-  const prevBtn = document.getElementById('btnPrevCertPage');
-  const nextBtn = document.getElementById('btnNextCertPage');
-
-  const start = total === 0 ? 0 : certCurrentPage * CERTS_PAGE_SIZE + 1;
-  const end = Math.min((certCurrentPage + 1) * CERTS_PAGE_SIZE, total);
-
-  if (summaryEl) summaryEl.textContent = `Showing ${start} to ${end} of ${total} certificates`;
-  if (prevBtn) prevBtn.disabled = (certCurrentPage === 0);
-  if (nextBtn) nextBtn.disabled = (end >= total);
-}
-
-// -------------------------------------------------------------
-// CREATE & EDIT MODAL
-// -------------------------------------------------------------
-function openCertificateCreateModal() {
-  document.getElementById('certificateEditorForm').reset();
-  document.getElementById('certEditId').value = '0';
-  document.getElementById('certEditActualId').value = '';
-  document.getElementById('certModalTitle').innerHTML = '<i class="fas fa-certificate" style="color: var(--cyan);"></i> Issue New Certificate';
-
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('certIssueDate').value = today;
-  document.getElementById('certCompletionDate').value = today;
-  document.getElementById('certTrainerName').value = 'Santhosh S';
-  document.getElementById('certTrainerDesignation').value = 'Lead Technical Instructor';
-  document.getElementById('certSignatoryName').value = 'S.B. Sachin';
-  document.getElementById('certSignatoryDesignation').value = 'Founder & CEO';
-  document.getElementById('certStatus').value = 'valid';
-
-  updateLiveCertIdPreview();
-  openAdminModal('certificateEditorModal');
-}
-
-async function openCertificateEditModal(id) {
-  let cert = null;
-  if (!isDevStaticMode) {
-    try {
-      const res = await apiFetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
-        headers: { 'Authorization': 'Bearer ' + authToken }
-      });
-      const result = await res.json();
-      if (result && result.success && result.data) {
-        cert = result.data.certificate;
-      }
-    } catch (e) {}
-  }
-
-  if (!cert) {
-    const all = getLocalData('certificates');
-    cert = all.find(c => c.id == id || c.certificate_id === id);
-  }
-
-  if (!cert) {
-    showToast('Certificate record not found', true);
-    return;
-  }
-
-  document.getElementById('certEditId').value = cert.id || '1';
-  document.getElementById('certEditActualId').value = cert.certificate_id;
-  document.getElementById('certModalTitle').innerHTML = `<i class="fas fa-edit" style="color: var(--cyan);"></i> Edit Certificate: ${escapeHtml(cert.certificate_id)}`;
-
-  document.getElementById('certType').value = cert.certificate_type || 'Course Completion';
-  document.getElementById('certPrefix').value = cert.prefix || 'VYOM-CRT';
-  document.getElementById('certRecipientName').value = cert.recipient_name || '';
-  document.getElementById('certRecipientEmail').value = cert.recipient_email || '';
-  document.getElementById('certCourseName').value = cert.course_name || '';
-  document.getElementById('certCourseDuration').value = cert.course_duration || '3 Months';
-  document.getElementById('certIssueDate').value = cert.issue_date || '';
-  document.getElementById('certCompletionDate').value = cert.completion_date || '';
-  document.getElementById('certExpiryDate').value = cert.expiry_date || '';
-  document.getElementById('certTrainerName').value = cert.trainer_name || 'Santhosh S';
-  document.getElementById('certTrainerDesignation').value = cert.trainer_designation || 'Lead Technical Instructor';
-  document.getElementById('certSignatoryName').value = cert.signatory_name || 'S.B. Sachin';
-  document.getElementById('certSignatoryDesignation').value = cert.signatory_designation || 'Founder & CEO';
-  document.getElementById('certStatus').value = cert.status || 'valid';
-  document.getElementById('certDescription').value = cert.description || '';
-  document.getElementById('certPrivateNotes').value = cert.private_notes || '';
-
-  updateLiveCertIdPreview();
-  openAdminModal('certificateEditorModal');
+  const summary = document.getElementById('certsPaginationSummary');
+  const previous = document.getElementById('btnPrevCertPage');
+  const next = document.getElementById('btnNextCertPage');
+  const start = total ? certCurrentPage * CERTS_PAGE_SIZE + 1 : 0;
+  if (summary) summary.textContent = `Showing ${start}–${Math.min((certCurrentPage + 1) * CERTS_PAGE_SIZE, total)} of ${total} records`;
+  if (previous) previous.disabled = certCurrentPage === 0;
+  if (next) next.disabled = (certCurrentPage + 1) * CERTS_PAGE_SIZE >= total;
 }
 
 async function saveCertificate() {
   const form = document.getElementById('certificateEditorForm');
-  const recipientName = document.getElementById('certRecipientName').value.trim();
-  const courseName = document.getElementById('certCourseName').value.trim();
-
-  if (!recipientName || !courseName) {
-    showToast('Please provide Recipient Full Name and Course/Program Name', true);
-    return;
-  }
-
+  if (!form?.reportValidity()) return;
+  const button = document.getElementById('btnSaveCertificate');
+  button.disabled = true;
   const formData = new FormData(form);
-  const editId = document.getElementById('certEditId').value;
-  const isEdit = (editId && editId !== '0');
-  formData.append('action', isEdit ? 'update' : 'create');
-
-  if (isDevStaticMode) {
-    let all = getLocalData('certificates');
-    if (isEdit) {
-      const idx = all.findIndex(c => c.id == editId || c.certificate_id === document.getElementById('certEditActualId').value);
-      if (idx !== -1) {
-        all[idx] = {
-          ...all[idx],
-          certificate_type: formData.get('certificate_type'),
-          recipient_name: formData.get('recipient_name'),
-          recipient_email: formData.get('recipient_email'),
-          course_name: formData.get('course_name'),
-          course_duration: formData.get('course_duration'),
-          issue_date: formData.get('issue_date'),
-          completion_date: formData.get('completion_date'),
-          expiry_date: formData.get('expiry_date') || null,
-          trainer_name: formData.get('trainer_name'),
-          trainer_designation: formData.get('trainer_designation'),
-          signatory_name: formData.get('signatory_name'),
-          signatory_designation: formData.get('signatory_designation'),
-          description: formData.get('description'),
-          private_notes: formData.get('private_notes'),
-          status: formData.get('status') || 'valid',
-          updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-        };
-      }
-      showToast('Certificate updated successfully');
-    } else {
-      const prefix = formData.get('prefix') || 'VYOM-CRT';
-      const year = new Date(formData.get('issue_date')).getFullYear() || 2026;
-      const nextSeq = all.length + 1;
-      const newCertId = `${prefix}-${year}-${String(nextSeq).padStart(5, '0')}`;
-      const token = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-      const newRecord = {
-        id: nextSeq,
-        certificate_id: newCertId,
-        certificate_type: formData.get('certificate_type'),
-        prefix: prefix,
-        recipient_name: formData.get('recipient_name'),
-        recipient_email: formData.get('recipient_email'),
-        course_name: formData.get('course_name'),
-        course_duration: formData.get('course_duration'),
-        issue_date: formData.get('issue_date'),
-        completion_date: formData.get('completion_date'),
-        expiry_date: formData.get('expiry_date') || null,
-        trainer_name: formData.get('trainer_name'),
-        trainer_designation: formData.get('trainer_designation'),
-        signatory_name: formData.get('signatory_name'),
-        signatory_designation: formData.get('signatory_designation'),
-        description: formData.get('description'),
-        private_notes: formData.get('private_notes'),
-        status: formData.get('status') || 'valid',
-        verification_token: token,
-        verification_url: `${window.location.origin}/verify/?id=${encodeURIComponent(newCertId)}`,
-        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-      };
-      all.unshift(newRecord);
-      showToast(`Certificate ${newCertId} issued successfully!`);
-    }
-
-    saveLocalData('certificates', all);
-    closeAdminModal('certificateEditorModal');
-    fetchCertificates();
-    fetchDashboardStats();
-    return;
-  }
-
+  formData.set('action', 'create');
   try {
-    const res = await apiFetch('../api/admin/certificates.php', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + authToken },
-      body: new URLSearchParams(formData)
-    });
-    const result = await res.json();
-    if (result && result.success) {
-      showToast(result.message);
-      closeAdminModal('certificateEditorModal');
-      fetchCertificates();
-      fetchDashboardStats();
+    let certificate;
+    if (isDevStaticMode) {
+      const all = getLocalData('certificates') || [];
+      const prefix = String(formData.get('prefix') || 'VYOM-CRT');
+      const issueDate = String(formData.get('issue_date') || new Date().toISOString().slice(0, 10));
+      const year = new Date(`${issueDate}T00:00:00`).getFullYear();
+      const matcher = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-${year}-(\\d+)$`);
+      const sequence = all.reduce((max, item) => Math.max(max, Number((item.certificate_id || '').match(matcher)?.[1] || 0)), 0) + 1;
+      const certificateId = `${prefix}-${year}-${String(sequence).padStart(5, '0')}`;
+      const random = new Uint8Array(16);
+      crypto.getRandomValues(random);
+      const token = [...random].map(value => value.toString(16).padStart(2, '0')).join('');
+      certificate = {
+        id: Date.now(), certificate_id: certificateId, verification_token: token,
+        verification_url: `${window.location.origin}/verify/?id=${encodeURIComponent(certificateId)}`,
+        certificate_type: String(formData.get('certificate_type') || 'Course Completion'), prefix,
+        recipient_name: String(formData.get('recipient_name') || '').trim(),
+        recipient_email: String(formData.get('recipient_email') || '').trim(),
+        course_name: String(formData.get('course_name') || '').trim(),
+        course_duration: String(formData.get('course_duration') || '').trim(),
+        issue_date: issueDate, completion_date: String(formData.get('completion_date') || issueDate),
+        description: String(formData.get('description') || '').trim(), status: 'valid',
+        issued_by: 'VYOMANTRA TECHNOLOGIES', created_at: new Date().toISOString()
+      };
+      all.unshift(certificate);
+      saveLocalData('certificates', all);
     } else {
-      showToast(result.message || 'Failed to save certificate', true);
+      const response = await apiFetch('../api/admin/certificates.php', { method: 'POST', headers: { 'Authorization': `Bearer ${authToken || ''}` }, body: formData });
+      const result = await response.json();
+      if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not create the certificate record.');
+      certificate = result.data?.certificate;
     }
-  } catch (err) {
-    showToast('Network error while saving certificate', true);
+    if (!certificate) throw new Error('The registry did not return the generated verification details.');
+    form.reset();
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('certIssueDate').value = today;
+    document.getElementById('certCompletionDate').value = today;
+    document.getElementById('certStatus').value = 'valid';
+    showGeneratedCertificate(certificate);
+    showToast(`Verification record ${certificate.certificate_id} created.`);
+    await fetchCertificates();
+    fetchDashboardStats();
+  } catch (error) {
+    console.error('Certificate record create failed:', error);
+    showToast(error.message || 'Could not create the certificate record.', true);
+  } finally {
+    button.disabled = false;
   }
 }
 
-// -------------------------------------------------------------
-// LIVE PREVIEW & AUDIT LOGS MODAL
-// -------------------------------------------------------------
-async function openCertificatePreview(id) {
-  let cert = null;
-  let logs = [];
-
-  if (!isDevStaticMode) {
-    try {
-      const res = await apiFetch(`../api/admin/certificates.php?action=get&id=${encodeURIComponent(id)}`, {
-        headers: { 'Authorization': 'Bearer ' + authToken }
-      });
-      const result = await res.json();
-      if (result && result.success && result.data) {
-        cert = result.data.certificate;
-        logs = result.data.logs || [];
-      }
-    } catch (e) {}
-  }
-
-  if (!cert) {
-    const all = getLocalData('certificates');
-    cert = all.find(c => c.id == id || c.certificate_id === id);
-    const allLogs = getLocalData('certificate_logs');
-    if (cert) {
-      logs = allLogs.filter(l => l.certificate_id === cert.certificate_id);
-    }
-  }
-
-  if (!cert) {
-    showToast('Certificate not found', true);
-    return;
-  }
-
-  certPreviewCurrent = cert;
-  renderAdminCertPreviewDoc(cert, logs);
-  openAdminModal('certificatePreviewModal');
-}
-
-function renderAdminCertPreviewDoc(cert, logs = []) {
-  document.getElementById('previewCertIdLabel').textContent = cert.certificate_id || '--';
-  document.getElementById('adminCertBadgeId').textContent = cert.certificate_id || '--';
-  document.getElementById('adminCertDocTypeLabel').textContent = (cert.certificate_type || 'CREDENTIAL').toUpperCase();
-  document.getElementById('adminCertDocTitle').textContent = `CERTIFICATE OF ${(cert.certificate_type || 'COMPLETION').toUpperCase()}`;
-  document.getElementById('adminCertDocRecipient').textContent = cert.recipient_name || '--';
-  document.getElementById('adminCertDocCourse').textContent = cert.course_name || '--';
-  document.getElementById('adminCertDocDescription').textContent = cert.description || 'Successfully demonstrated proficiency in modern software engineering principles and architectural excellence.';
-
-  document.getElementById('adminCertDocTrainerName').textContent = cert.trainer_name || 'Santhosh S';
-  document.getElementById('adminCertDocTrainerTitle').textContent = cert.trainer_designation || 'Lead Technical Instructor';
-  document.getElementById('adminCertDocTrainerSign').textContent = (cert.trainer_name || 'Santhosh S.').replace(/ [A-Z]$/, ' S.');
-
-  document.getElementById('adminCertDocSignatoryName').textContent = cert.signatory_name || 'S.B. Sachin';
-  document.getElementById('adminCertDocSignatoryTitle').textContent = cert.signatory_designation || 'Founder & CEO';
-  document.getElementById('adminCertDocCeoSign').textContent = cert.signatory_name || 'S.B. Sachin';
-
-  document.getElementById('adminCertDocIssueDate').textContent = formatDate(cert.issue_date);
-  document.getElementById('adminCertDocMetaId').textContent = cert.certificate_id || '--';
-
-  const hostDomain = window.location.host || 'vyomantratech.com';
-  document.getElementById('adminCertDocVerifyDomain').textContent = `${hostDomain}/verify`;
-
-  const tokenSnippet = cert.verification_token ? cert.verification_token.substring(0, 16).toUpperCase() : 'VYOM-SECURE';
-  document.getElementById('adminCertDocSecurityToken').textContent = tokenSnippet;
-
-  // Ribbon
-  const ribbon = document.getElementById('adminCertRibbon');
-  const revokeBtn = document.getElementById('btnRevokeFromPreview');
-  const status = (cert.status || 'valid').toLowerCase();
-
-  if (ribbon) {
-    if (status === 'revoked') {
-      ribbon.className = 'cert-status-ribbon revoked';
-      ribbon.textContent = 'REVOKED';
-      ribbon.style.display = 'block';
-    } else if (status === 'expired') {
-      ribbon.className = 'cert-status-ribbon expired';
-      ribbon.textContent = 'EXPIRED';
-      ribbon.style.display = 'block';
-    } else {
-      ribbon.style.display = 'none';
-    }
-  }
-
-  if (revokeBtn) {
-    if (status === 'revoked') {
-      revokeBtn.innerHTML = '<i class="fas fa-undo"></i> Restore';
-      revokeBtn.className = 'btn btn-outline btn-sm';
-    } else {
-      revokeBtn.innerHTML = '<i class="fas fa-ban"></i> Revoke';
-      revokeBtn.className = 'btn btn-outline btn-sm danger';
-    }
-  }
-
-  // QR Code Rendering into preview
-  const qrBox = document.getElementById('adminCertDocQrBox');
-  if (qrBox) {
-    qrBox.innerHTML = '';
-    const siteOrigin = window.location.origin;
-    const vUrl = cert.verification_url || `${siteOrigin}/verify/?id=${encodeURIComponent(cert.certificate_id)}`;
-
-    if (typeof QRCode !== 'undefined') {
-      new QRCode(qrBox, {
-        text: vUrl,
-        width: 76,
-        height: 76,
-        colorDark: '#050711',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
-    } else {
-      const img = document.createElement('img');
-      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=76x76&data=${encodeURIComponent(vUrl)}&margin=1`;
-      img.alt = 'QR Code';
-      img.width = 76;
-      img.height = 76;
-      qrBox.appendChild(img);
-    }
-  }
-
-  // Render Verification Audit Logs
-  const summaryEl = document.getElementById('previewAuditSummary');
-  const logsTbody = document.getElementById('previewAuditLogsBody');
-  if (summaryEl) summaryEl.textContent = `Total verifications recorded: ${logs.length}`;
-
-  if (logsTbody) {
-    if (!logs || logs.length === 0) {
-      logsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-dim);">No verification scans or manual checks recorded yet.</td></tr>';
-    } else {
-      logsTbody.innerHTML = logs.map(l => {
-        const res = (l.result || 'valid').toLowerCase();
-        let resBadge = 'badge-valid';
-        if (res === 'revoked' || res === 'not_found') resBadge = 'badge-rejected';
-        else if (res === 'expired') resBadge = 'badge-pending';
-
-        return `
-          <tr>
-            <td style="padding:0.45rem 0.75rem; color:#cbd5e1; font-family:'JetBrains Mono',monospace;">${escapeHtml(l.verification_timestamp || l.timestamp)}</td>
-            <td style="padding:0.45rem 0.75rem;"><span class="status-badge badge-new" style="font-size:0.68rem;">${escapeHtml(l.verification_method || 'QR_SCAN')}</span></td>
-            <td style="padding:0.45rem 0.75rem;"><span class="status-badge ${resBadge}" style="font-size:0.68rem;">${escapeHtml((l.result || 'valid').toUpperCase())}</span></td>
-            <td style="padding:0.45rem 0.75rem; font-family:'JetBrains Mono',monospace; color:var(--cyan); font-size:0.75rem;">${escapeHtml(l.ip_address || '127.0.0.1')}</td>
-            <td style="padding:0.45rem 0.75rem; font-size:0.75rem; color:var(--text-dim); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(l.user_agent || '')}">${escapeHtml(l.user_agent || 'Standard Browser')}</td>
-          </tr>`;
-      }).join('');
-    }
-  }
-}
-
-// -------------------------------------------------------------
-// DOWNLOAD PDF & PRINT
-// -------------------------------------------------------------
-function adminDownloadCurrentPdf() {
-  if (!certPreviewCurrent) return;
-  const element = document.getElementById('adminCertDoc');
-  if (!element) return;
-
-  showToast('Generating official PDF certificate...');
-
-  const fileName = `${certPreviewCurrent.certificate_id}_Vyomantra_Certificate.pdf`;
-
-  if (typeof html2pdf !== 'undefined') {
-    const opt = {
-      margin: 0,
-      filename: fileName,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
-    html2pdf().set(opt).from(element).save().then(() => {
-      showToast('PDF downloaded successfully.');
-    }).catch(err => {
-      console.error(err);
-      window.print();
-    });
-  } else {
-    window.print();
-  }
-}
-
-async function adminDownloadCertPdf(id) {
-  await openCertificatePreview(id);
-  setTimeout(() => {
-    adminDownloadCurrentPdf();
-  }, 400);
-}
-
-function adminPrintCurrentCert() {
-  window.print();
-}
-
-function adminDownloadCurrentQr() {
-  if (!certPreviewCurrent) return;
-  const qrBox = document.getElementById('adminCertDocQrBox');
-  const canvas = qrBox ? qrBox.querySelector('canvas') : null;
-  const img = qrBox ? qrBox.querySelector('img') : null;
-
-  let dataUrl = null;
-  if (canvas) {
-    dataUrl = canvas.toDataURL('image/png');
-  } else if (img) {
-    dataUrl = img.src;
-  }
-
-  if (dataUrl) {
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = `${certPreviewCurrent.certificate_id}_QR.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast('QR Code downloaded.');
-  } else {
-    showToast('Failed to export QR', true);
-  }
+function showGeneratedCertificate(certificate) {
+  latestGeneratedCertificate = certificate;
+  const panel = document.getElementById('generatedCertificatePanel');
+  const id = certificate.certificate_id;
+  const url = certificate.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(id)}`;
+  document.getElementById('generatedCertId').value = id;
+  document.getElementById('generatedCertToken').value = certificate.verification_token || '';
+  document.getElementById('generatedCertUrl').value = url;
+  document.getElementById('generatedPdfStatus').textContent = '';
+  const qrBox = document.getElementById('generatedQrBox');
+  qrBox.replaceChildren();
+  if (typeof QRCode !== 'undefined') new QRCode(qrBox, { text: url, width: 190, height: 190, colorDark: '#07111d', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+  if (panel) panel.style.display = 'block';
+  document.getElementById('generatedFinalDocx').value = '';
+  panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 async function copyCertificateText(value, successMessage) {
   try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(value);
-    } else {
-      const field = document.createElement('textarea');
-      field.value = value;
-      field.setAttribute('readonly', '');
-      field.style.position = 'fixed';
-      field.style.opacity = '0';
-      document.body.appendChild(field);
-      field.select();
-      const copied = document.execCommand('copy');
+    if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(String(value || ''));
+    else {
+      const field = document.createElement('textarea'); field.value = String(value || ''); field.style.position = 'fixed'; field.style.opacity = '0';
+      document.body.appendChild(field); field.select();
+      if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
       field.remove();
-      if (!copied) throw new Error('Clipboard copy was denied');
     }
     showToast(successMessage);
-  } catch (error) {
-    prompt('Copy this value:', value);
-  }
+  } catch (_) { prompt('Copy this value:', String(value || '')); }
 }
 
-function adminCopyCurrentVerifyUrl() {
-  if (!certPreviewCurrent) return;
-  const siteOrigin = window.location.origin;
-  const vUrl = certPreviewCurrent.verification_url || `${siteOrigin}/verify/?id=${encodeURIComponent(certPreviewCurrent.certificate_id)}`;
-  copyCertificateText(vUrl, 'Verification URL copied to clipboard');
+function safeQrName(name, id) {
+  const safeRecipient = String(name || 'Certificate').normalize('NFKC').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').replace(/\s+/g, ' ').trim() || 'Certificate';
+  const safeId = String(id || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_');
+  return `${safeRecipient}_${safeId}.png`;
 }
 
-function adminCopyCertId(id) {
-  copyCertificateText(id, `Certificate ID ${id} copied to clipboard`);
-}
-
-// -------------------------------------------------------------
-// REVOCATION & RESTORE
-// -------------------------------------------------------------
-function adminPromptRevokeCurrent() {
-  if (!certPreviewCurrent) return;
-  if ((certPreviewCurrent.status || 'valid') === 'revoked') {
-    restoreCertificate(certPreviewCurrent.certificate_id);
-  } else {
-    openCertificateRevokeModal(certPreviewCurrent.certificate_id);
+async function downloadCertificateQr(name, id, verificationUrl) {
+  if (typeof QRCode === 'undefined') throw new Error('QR generation library is unavailable.');
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-10000px;top:0;background:#fff;padding:8px;';
+  document.body.appendChild(holder);
+  new QRCode(holder, { text: verificationUrl, width: 600, height: 600, colorDark: '#07111d', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+  await new Promise(resolve => setTimeout(resolve, 30));
+  const canvas = holder.querySelector('canvas');
+  let blob;
+  if (canvas) blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  else {
+    const image = holder.querySelector('img');
+    const response = await fetch(image.src);
+    blob = await response.blob();
   }
-}
-
-function openCertificateRevokeModal(id) {
-  certRevokeTargetId = id;
-  document.getElementById('revokeModalCertId').textContent = id;
-  document.getElementById('revokeReasonInput').value = '';
-  openAdminModal('certificateRevokeModal');
-}
-
-async function confirmCertificateRevocation() {
-  const reason = document.getElementById('revokeReasonInput').value.trim();
-  if (!reason) {
-    showToast('Please provide a revocation reason', true);
-    return;
-  }
-
-  const id = certRevokeTargetId;
-  if (!id) return;
-
-  if (isDevStaticMode) {
-    let all = getLocalData('certificates');
-    const idx = all.findIndex(c => c.id == id || c.certificate_id === id);
-    if (idx !== -1) {
-      all[idx].status = 'revoked';
-      all[idx].revoked_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
-      all[idx].revoked_by = currentAdminUser ? currentAdminUser.username : 'Administrator';
-      all[idx].revocation_reason = reason;
-      saveLocalData('certificates', all);
-    }
-    showToast(`Certificate ${id} revoked.`);
-    closeAdminModal('certificateRevokeModal');
-    closeAdminModal('certificatePreviewModal');
-    fetchCertificates();
-    fetchDashboardStats();
-    return;
-  }
-
-  try {
-    const res = await apiFetch('../api/admin/certificates.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer ' + authToken
-      },
-      body: `action=revoke&id=${encodeURIComponent(id)}&reason=${encodeURIComponent(reason)}`
-    });
-    const result = await res.json();
-    if (result && result.success) {
-      showToast(result.message);
-      closeAdminModal('certificateRevokeModal');
-      closeAdminModal('certificatePreviewModal');
-      fetchCertificates();
-      fetchDashboardStats();
-    } else {
-      showToast(result.message || 'Revocation failed', true);
-    }
-  } catch (e) {
-    showToast('Network error during revocation', true);
-  }
-}
-
-async function restoreCertificate(id) {
-  if (!confirm(`Are you sure you want to restore certificate ${id} to VALID status?`)) return;
-
-  if (isDevStaticMode) {
-    let all = getLocalData('certificates');
-    const idx = all.findIndex(c => c.id == id || c.certificate_id === id);
-    if (idx !== -1) {
-      all[idx].status = 'valid';
-      all[idx].revoked_at = null;
-      all[idx].revoked_by = null;
-      all[idx].revocation_reason = null;
-      saveLocalData('certificates', all);
-    }
-    showToast(`Certificate ${id} restored to VALID status.`);
-    closeAdminModal('certificatePreviewModal');
-    fetchCertificates();
-    fetchDashboardStats();
-    return;
-  }
-
-  try {
-    const res = await apiFetch('../api/admin/certificates.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer ' + authToken
-      },
-      body: `action=restore&id=${encodeURIComponent(id)}`
-    });
-    const result = await res.json();
-    if (result && result.success) {
-      showToast(result.message);
-      closeAdminModal('certificatePreviewModal');
-      fetchCertificates();
-      fetchDashboardStats();
-    } else {
-      showToast(result.message || 'Restore failed', true);
-    }
-  } catch (e) {
-    showToast('Network error during restore', true);
-  }
-}
-
-async function deleteCertificate(id) {
-  if (!confirm(`CAUTION: Are you sure you want to permanently delete certificate ${id}? This cannot be undone.`)) return;
-
-  if (isDevStaticMode) {
-    let all = getLocalData('certificates').filter(c => !(c.id == id || c.certificate_id === id));
-    saveLocalData('certificates', all);
-    showToast(`Certificate ${id} deleted.`);
-    fetchCertificates();
-    fetchDashboardStats();
-    return;
-  }
-
-  try {
-    const res = await apiFetch('../api/admin/certificates.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer ' + authToken
-      },
-      body: `action=delete&id=${encodeURIComponent(id)}`
-    });
-    const result = await res.json();
-    if (result && result.success) {
-      showToast(result.message);
-      fetchCertificates();
-      fetchDashboardStats();
-    } else {
-      showToast(result.message || 'Delete failed', true);
-    }
-  } catch (e) {
-    showToast('Network error during delete', true);
-  }
-}
-
-// -------------------------------------------------------------
-// BULK CSV IMPORT
-// -------------------------------------------------------------
-async function executeBulkImport() {
-  const fileInput = document.getElementById('bulkCsvFile');
-  const textInput = document.getElementById('bulkCsvText');
-
-  let rawCsv = textInput ? textInput.value.trim() : '';
-
-  const processRecords = async (records) => {
-    if (!records || records.length === 0) {
-      showToast('No valid certificate rows found in CSV', true);
-      return;
-    }
-
-    if (isDevStaticMode) {
-      let all = getLocalData('certificates');
-      const year = new Date().getFullYear();
-      let count = 0;
-
-      records.forEach(r => {
-        const recipient = (r.recipient_name || '').trim();
-        const course = (r.course_name || '').trim();
-        if (!recipient || !course) return;
-
-        count++;
-        const prefix = (r.prefix || 'VYOM-CRT').toUpperCase();
-        const nextSeq = all.length + 1;
-        const newId = `${prefix}-${year}-${String(nextSeq).padStart(5, '0')}`;
-        const token = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-
-        all.unshift({
-          id: nextSeq,
-          certificate_id: newId,
-          certificate_type: r.certificate_type || 'Course Completion',
-          prefix: prefix,
-          recipient_name: recipient,
-          recipient_email: r.recipient_email || '',
-          course_name: course,
-          course_duration: r.course_duration || '3 Months',
-          description: r.description || 'Successfully completed official program curriculum with distinction.',
-          trainer_name: r.trainer_name || 'Santhosh S',
-          trainer_designation: r.trainer_designation || 'Lead Technical Instructor',
-          signatory_name: 'S.B. Sachin',
-          signatory_designation: 'Founder & CEO',
-          issue_date: r.issue_date || new Date().toISOString().split('T')[0],
-          completion_date: r.issue_date || new Date().toISOString().split('T')[0],
-          expiry_date: null,
-          status: 'valid',
-          verification_token: token,
-          verification_url: `${window.location.origin}/verify/?id=${encodeURIComponent(newId)}`,
-          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-          updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-        });
-      });
-
-      saveLocalData('certificates', all);
-      showToast(`Bulk issue complete. Successfully issued ${count} certificates.`);
-      closeAdminModal('certificateBulkModal');
-      fetchCertificates();
-      fetchDashboardStats();
-      return;
-    }
-
-    // Live Mode Backend
-    try {
-      const res = await apiFetch('../api/admin/certificates.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Bearer ' + authToken
-        },
-        body: `action=bulk_import&records=${encodeURIComponent(JSON.stringify(records))}`
-      });
-      const result = await res.json();
-      if (result && result.success) {
-        showToast(result.message);
-        closeAdminModal('certificateBulkModal');
-        fetchCertificates();
-        fetchDashboardStats();
-      } else {
-        showToast(result.message || 'Bulk import failed', true);
-      }
-    } catch (e) {
-      showToast('Network error during bulk import', true);
-    }
-  };
-
-  // If CSV file selected
-  if (fileInput && fileInput.files && fileInput.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const parsed = parseCsvStringToRecords(e.target.result);
-      processRecords(parsed);
-    };
-    reader.readAsText(fileInput.files[0]);
-    return;
-  }
-
-  // If text pasted
-  if (rawCsv) {
-    const parsed = parseCsvStringToRecords(rawCsv);
-    processRecords(parsed);
-    return;
-  }
-
-  showToast('Please select a CSV file or paste CSV text', true);
-}
-
-function parseCsvStringToRecords(csvText) {
-  const lines = csvText.split(/\r?\n/).filter(Boolean);
-  if (lines.length === 0) return [];
-
-  // Check if first line is header
-  let startIdx = 0;
-  const firstLine = lines[0].toLowerCase();
-  if (firstLine.includes('name') || firstLine.includes('recipient') || firstLine.includes('course')) {
-    startIdx = 1;
-  }
-
-  const records = [];
-  for (let i = startIdx; i < lines.length; i++) {
-    const parts = lines[i].split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
-    if (!parts[0]) continue;
-
-    records.push({
-      recipient_name: parts[0] || '',
-      recipient_email: parts[1] || '',
-      course_name: parts[2] || 'Full Stack Software Engineering',
-      course_duration: parts[3] || '3 Months',
-      issue_date: parts[4] || new Date().toISOString().split('T')[0],
-      certificate_type: parts[5] || 'Course Completion',
-      prefix: parts[6] || 'VYOM-CRT'
-    });
-  }
-  return records;
-}
-
-// =========================================================================
-// CERTIFICATE CSV EXPORT & DOCX GENERATOR SUITE
-// =========================================================================
-
-async function exportCertificatesCsv() {
-  showToast('Preparing certificate registry CSV export...');
-  if (!isDevStaticMode) {
-    try {
-      const res = await apiFetch(`../api/admin/certificates.php?action=export_csv`, {
-        headers: { 'Authorization': 'Bearer ' + (authToken || '') }
-      });
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `vyomantra_certificates_${new Date().toISOString().slice(0, 10)}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        showToast('CSV Export downloaded successfully.');
-        return;
-      }
-    } catch (e) {
-      console.warn('Backend export failed, falling back to local registry data', e);
-    }
-  }
-
-  // Fallback to client data export
-  const all = getLocalData('certificates') || [];
-  if (all.length === 0) {
-    showToast('No certificates found to export', true);
-    return;
-  }
-
-  const headers = ['Certificate ID', 'Recipient Name', 'Recipient Email', 'Type', 'Course/Program', 'Duration', 'Issue Date', 'Status', 'Verification URL'];
-  const rows = all.map(c => [
-    `"${(c.certificate_id || '').replace(/"/g, '""')}"`,
-    `"${(c.recipient_name || '').replace(/"/g, '""')}"`,
-    `"${(c.recipient_email || '').replace(/"/g, '""')}"`,
-    `"${(c.certificate_type || '').replace(/"/g, '""')}"`,
-    `"${(c.course_name || '').replace(/"/g, '""')}"`,
-    `"${(c.course_duration || '').replace(/"/g, '""')}"`,
-    `"${(c.issue_date || '').replace(/"/g, '""')}"`,
-    `"${(c.status || '').replace(/"/g, '""')}"`,
-    `"${(c.verification_url || `${window.location.origin}/verify/?id=${c.certificate_id}`).replace(/"/g, '""')}"`
-  ]);
-
-  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  holder.remove();
+  if (!blob) throw new Error('QR image could not be created.');
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `vyomantra_certificates_${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const link = document.createElement('a'); link.href = url; link.download = safeQrName(name, id); link.click();
   URL.revokeObjectURL(url);
-  showToast('Certificates exported to CSV successfully.');
 }
 
-async function downloadCertificateDocx(certId, mode = 'digital') {
-  await loadCertificateConfiguration();
-  const unmapped = getUnmappedCertificateTemplateFields();
-  if (unmapped.length) {
-    showToast(`Map ${unmapped.length} custom template field(s) in the Certificate Configurator before generating.`, true);
-    return;
-  }
-  const modeLabel = (mode === 'partial') ? 'Manual Sign (Partial)' : 'Complete Digital';
-  showToast(`Generating ${modeLabel} DOCX certificate for ${certId}...`);
+function downloadGeneratedQr() {
+  if (!latestGeneratedCertificate) return;
+  const url = latestGeneratedCertificate.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(latestGeneratedCertificate.certificate_id)}`;
+  downloadCertificateQr(latestGeneratedCertificate.recipient_name, latestGeneratedCertificate.certificate_id, url)
+    .then(() => showToast('Verification QR downloaded.'))
+    .catch(error => showToast(error.message, true));
+}
 
-  // Find cert in local data or preview
-  let cert = null;
-  const all = getLocalData('certificates');
-  if (all && all.length > 0) {
-    cert = all.find(c => c.certificate_id === certId || c.id == certId);
-  }
-  if (!cert && certPreviewCurrent && (certPreviewCurrent.certificate_id === certId || certPreviewCurrent.id == certId)) {
-    cert = certPreviewCurrent;
-  }
-  if (!cert) {
-    cert = { certificate_id: certId, recipient_name: 'Student Candidate', course_name: 'Course Completion', course_duration: '3 Months', issue_date: new Date().toISOString().slice(0, 10) };
-  }
-
-  // 1. Client-Side JSZip engine: instant, completely resilient on port 5500 Live Server & production
-  if (typeof JSZip !== 'undefined') {
-    try {
-      const blob = await generateClientSideDocx(cert, mode);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${cert.certificate_id}_${mode === 'partial' ? 'Manual_Sign' : 'Digital'}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      showToast(`${modeLabel} DOCX certificate generated and downloaded!`);
-      return;
-    } catch (err) {
-      console.warn('Client-side DOCX compilation fallback to API:', err);
-    }
-  }
-
-  // 2. Fallback to PHP API endpoint
-  const downloadUrl = `../api/admin/certificates.php?action=download_docx&id=${encodeURIComponent(certId)}&mode=${encodeURIComponent(mode)}&token=${encodeURIComponent(authToken || '')}`;
+async function uploadFinalCertificateDocx(certificateId, file) {
+  if (!/\.docx$/i.test(file.name)) { showToast('Choose the final certificate as a DOCX file.', true); return; }
+  if (isDevStaticMode) { showToast('DOCX-to-PDF conversion needs the PHP server and LibreOffice converter. Run this on the hosted site.', true); return; }
+  const status = document.getElementById('generatedPdfStatus');
+  if (status) status.textContent = 'Uploading DOCX and preparing the verification PDF…';
+  const body = new FormData(); body.append('action', 'upload_final_docx'); body.append('id', certificateId); body.append('final_docx', file);
   try {
-    const res = await fetch(downloadUrl, {
-      headers: { 'Authorization': 'Bearer ' + (authToken || '') }
-    });
-
-    if (res.ok && res.headers.get('content-type')?.includes('wordprocessingml')) {
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${certId}_${mode === 'partial' ? 'Manual_Sign' : 'Digital'}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      showToast(`${modeLabel} DOCX downloaded successfully.`);
-      return;
-    }
-  } catch (err) {
-    console.warn('API DOCX download failed, trying direct link...', err);
-  }
-
-  // Direct trigger
-  window.open(downloadUrl, '_blank');
-}
-
-async function generateClientSideDocx(cert, mode = 'digital') {
-  if (typeof JSZip === 'undefined') {
-    throw new Error('JSZip library is not loaded');
-  }
-
-  const templateBuffer = await getActiveCertificateTemplateBuffer();
-
-  const zip = await JSZip.loadAsync(templateBuffer);
-  let xml = await zip.file('word/document.xml').async('string');
-
-  const formattedDate = formatDate(cert.issue_date || new Date());
-  const vUrl = cert.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(cert.certificate_id)}`;
-
-  let recipientName = cert.recipient_name || '';
-  let founderSign = cert.signatory_name || 'S.B. Sachin';
-  let directorSign = 'Santhosh Kumar S.';
-  let trainerSign = cert.trainer_name || 'Santhosh S.';
-
-  if (mode === 'partial') {
-    recipientName = (currentCertConfig.recipient_name_partial === 'filled') ? (cert.recipient_name || '') : '____________________________________';
-    founderSign = (currentCertConfig.founder_signature_mode === 'digital') ? (cert.signatory_name || 'S.B. Sachin') : '                    ';
-    directorSign = (currentCertConfig.director_signature_mode === 'digital') ? 'Santhosh Kumar S.' : '                    ';
-    trainerSign = (currentCertConfig.trainer_signature_mode === 'digital') ? (cert.trainer_name || 'Santhosh S.') : '                    ';
-  }
-
-  const fieldValues = {
-    certificate_id: cert.certificate_id || 'VYOM-CRT-2026-00001',
-    recipient_name: recipientName,
-    recipient_email: cert.recipient_email || '',
-    certificate_type: cert.certificate_type || '',
-    course_name: cert.course_name || 'Professional Software Engineering',
-    course_duration: cert.course_duration || '3 Months',
-    issue_date: formattedDate,
-    completion_date: cert.completion_date ? formatDate(cert.completion_date) : formattedDate,
-    expiry_date: cert.expiry_date ? formatDate(cert.expiry_date) : '',
-    verification_url: vUrl,
-    description: cert.description || '',
-    trainer_name: cert.trainer_name || 'Santhosh S.',
-    trainer_designation: cert.trainer_designation || 'Lead Technical Instructor',
-    signatory_name: cert.signatory_name || 'S.B. Sachin',
-    signatory_designation: cert.signatory_designation || 'Founder & CEO',
-    issued_by: cert.issued_by || 'VYOMANTRA TECHNOLOGIES',
-    founder_signature: founderSign,
-    director_signature: directorSign,
-    trainer_signature: trainerSign,
-    qr_code_placeholder: `[ Scan to Verify: ${cert.certificate_id} ]`
-  };
-
-  const replacements = {
-    '{{CERTIFICATE_ID}}': cert.certificate_id || 'VYOM-CRT-2026-00001',
-    '{{RECIPIENT_NAME}}': recipientName,
-    '{{COURSE_NAME}}': cert.course_name || 'Professional Software Engineering',
-    '{{COURSE_DURATION}}': cert.course_duration || '3 Months',
-    '{{ISSUE_DATE}}': formattedDate,
-    '{{COMPLETION_DATE}}': cert.completion_date ? formatDate(cert.completion_date) : formattedDate,
-    '{{VERIFICATION_URL}}': vUrl,
-    '{{QR_CODE}}': `[ Scan to Verify: ${cert.certificate_id} ]`,
-    '{{FOUNDER_SIGNATURE}}': founderSign,
-    '{{DIRECTOR_SIGNATURE}}': directorSign,
-    '{{TRAINER_SIGNATURE}}': trainerSign,
-    '{{DESCRIPTION}}': cert.description || '',
-    '{{TRAINER_NAME}}': cert.trainer_name || 'Santhosh S.',
-    '{{SIGNATORY_NAME}}': cert.signatory_name || 'S.B. Sachin'
-  };
-
-  const mappings = {
-    ...getDefaultCertificateFieldMappings(),
-    ...(currentCertConfig.field_mappings || {})
-  };
-  Object.entries(mappings).forEach(([tag, fieldKey]) => {
-    if (!/^\{\{[A-Z0-9_]+\}\}$/.test(tag) || !fieldKey) return;
-    const value = Object.prototype.hasOwnProperty.call(fieldValues, fieldKey)
-      ? fieldValues[fieldKey]
-      : (cert[fieldKey] ?? '');
-    replacements[tag] = value;
-  });
-
-  const replaceMappedTags = sourceXml => {
-    sourceXml = sourceXml.replace(/\{\{[^}]*?\}\}/gs, tag => tag.replace(/<[^>]+>/g, ''));
-    for (const [tag, val] of Object.entries(replacements)) {
-      sourceXml = sourceXml.split(tag).join(escapeXml(val));
-    }
-    return replaceWordContentControls(sourceXml, mappings, fieldValues, cert);
-  };
-  zip.file('word/document.xml', replaceMappedTags(xml));
-  for (const filename of Object.keys(zip.files).filter(name => /^word\/(header|footer)\d+\.xml$/.test(name))) {
-    const part = await zip.file(filename).async('string');
-    zip.file(filename, replaceMappedTags(part));
-  }
-
-  return await zip.generateAsync({
-    type: 'blob',
-    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  });
-}
-
-function replaceWordContentControls(xml, mappings, fieldValues, cert) {
-  const defaults = getDefaultCertificateFieldMappings();
-  return xml.replace(/<w:sdt(?:\s[^>]*)?>[\s\S]*?<\/w:sdt>/g, controlXml => {
-    const tagMatch = controlXml.match(/<w:tag\b[^>]*w:val="([^"]+)"/);
-    if (!tagMatch) return controlXml;
-    const key = `sdt:${tagMatch[1].replace(/&amp;/g, '&').trim()}`;
-    const fieldKey = mappings[key] || defaults[key];
-    if (!fieldKey || fieldKey === '__keep__') return controlXml;
-    const value = Object.prototype.hasOwnProperty.call(fieldValues, fieldKey)
-      ? fieldValues[fieldKey]
-      : (cert[fieldKey] ?? '');
-    const safeValue = escapeXml(value);
-    return controlXml.replace(/<w:sdtContent(?:\s[^>]*)?>[\s\S]*?<\/w:sdtContent>/, contentXml => {
-      let inserted = false;
-      const filled = contentXml.replace(/(<w:t\b[^>]*>)[\s\S]*?(<\/w:t>)/g, (_match, open, close) => {
-        if (!inserted) {
-          inserted = true;
-          return `${open}${safeValue}${close}`;
-        }
-        return `${open}${close}`;
-      });
-      if (inserted) return filled;
-      return contentXml.replace(/<w:sdtContent(?:\s[^>]*)?>[\s\S]*?<\/w:sdtContent>/,
-        `<w:sdtContent><w:r><w:t xml:space="preserve">${safeValue}</w:t></w:r></w:sdtContent>`);
-    });
-  });
-}
-
-function escapeXml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-function adminDownloadCurrentDocx(mode = 'digital') {
-  if (!certPreviewCurrent || !certPreviewCurrent.certificate_id) {
-    showToast('No active certificate selected', true);
-    return;
-  }
-  downloadCertificateDocx(certPreviewCurrent.certificate_id, mode);
-}
-
-// -------------------------------------------------------------
-// CERTIFICATE CONFIGURATOR LOGIC
-// -------------------------------------------------------------
-let currentCertConfig = {
-  active_template: 'Vyomantra_Master_Certificate_of_Completion.docx',
-  master_template_version: 0,
-  custom_template_uploaded: false,
-  custom_template_name: null,
-  custom_template_size: 0,
-  founder_signature_mode: 'manual',
-  director_signature_mode: 'digital',
-  trainer_signature_mode: 'digital',
-  recipient_name_partial: 'blank',
-  field_mappings: {}
-};
-
-let activeCertificateTemplateFile = null;
-let certificateConfigLoaded = false;
-const CERT_TEMPLATE_DB_NAME = 'vyomantra-certificate-templates';
-const CERT_TEMPLATE_DB_STORE = 'files';
-const CERT_TEMPLATE_DB_KEY = 'active-template';
-
-function getDefaultCertificateFieldMappings() {
-  return {
-    '{{CERTIFICATE_ID}}': 'certificate_id',
-    '{{RECIPIENT_NAME}}': 'recipient_name',
-    '{{RECIPIENT_EMAIL}}': 'recipient_email',
-    '{{CERTIFICATE_TYPE}}': 'certificate_type',
-    '{{COURSE_NAME}}': 'course_name',
-    '{{COURSE_DURATION}}': 'course_duration',
-    '{{ISSUE_DATE}}': 'issue_date',
-    '{{COMPLETION_DATE}}': 'completion_date',
-    '{{EXPIRY_DATE}}': 'expiry_date',
-    '{{VERIFICATION_URL}}': 'verification_url',
-    '{{QR_CODE}}': 'qr_code_placeholder',
-    '{{FOUNDER_SIGNATURE}}': 'founder_signature',
-    '{{DIRECTOR_SIGNATURE}}': 'director_signature',
-    '{{TRAINER_SIGNATURE}}': 'trainer_signature',
-    '{{DESCRIPTION}}': 'description',
-    '{{TRAINER_NAME}}': 'trainer_name',
-    '{{TRAINER_TITLE}}': 'trainer_designation',
-    '{{SIGNATORY_NAME}}': 'signatory_name',
-    '{{SIGNATORY_TITLE}}': 'signatory_designation',
-    'sdt:student_name': 'recipient_name',
-    'sdt:company_name': 'issued_by',
-    'sdt:course_name': 'course_name',
-    'sdt:program_type': 'certificate_type',
-    'sdt:course_description': '__keep__',
-    'sdt:panel_program': 'course_name',
-    'sdt:duration': 'course_duration',
-    'sdt:completion_date': 'completion_date',
-    'sdt:certificate_id': 'certificate_id',
-    'sdt:instructor_name': 'trainer_name',
-    'sdt:instructor_name_title': 'trainer_designation',
-    'sdt:instructor_name_org': 'issued_by',
-    'sdt:founder_name': 'signatory_name',
-    'sdt:founder_name_title': 'signatory_designation',
-    'sdt:founder_name_org': 'issued_by',
-    'sdt:scan_label': '__keep__',
-    'sdt:certificate_id_qr': 'certificate_id',
-    'sdt:side_left_code': '__keep__',
-    'sdt:side_left_learn': '__keep__',
-    'sdt:side_left_create': '__keep__',
-    'sdt:side_left_evolve': '__keep__',
-    'sdt:side_right_learn': '__keep__',
-    'sdt:side_right_build': '__keep__',
-    'sdt:side_right_grow': '__keep__',
-    'sdt:side_right_together': '__keep__',
-    'sdt:website': '__keep__',
-    'sdt:footer_tagline': '__keep__'
-  };
-}
-
-function getUnmappedCertificateTemplateFields() {
-  if (!currentCertConfig.custom_template_uploaded) return [];
-  const mappings = currentCertConfig.field_mappings || {};
-  const defaults = getDefaultCertificateFieldMappings();
-  const fields = [
-    ...(currentCertConfig.template_placeholders || []),
-    ...((currentCertConfig.template_controls || []).map(control => `sdt:${control.tag}`))
-  ];
-  return [...new Set(fields)].filter(tag => !mappings[tag] && !defaults[tag]);
-}
-
-function openCertificateTemplateDb() {
-  return new Promise((resolve, reject) => {
-    if (!window.indexedDB) return reject(new Error('Browser storage is unavailable'));
-    const request = indexedDB.open(CERT_TEMPLATE_DB_NAME, 1);
-    request.onupgradeneeded = () => {
-      if (!request.result.objectStoreNames.contains(CERT_TEMPLATE_DB_STORE)) {
-        request.result.createObjectStore(CERT_TEMPLATE_DB_STORE);
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error('Could not open template storage'));
-  });
-}
-
-async function storeLocalCertificateTemplate(file) {
-  const db = await openCertificateTemplateDb();
-  try {
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction(CERT_TEMPLATE_DB_STORE, 'readwrite');
-      tx.objectStore(CERT_TEMPLATE_DB_STORE).put(file, CERT_TEMPLATE_DB_KEY);
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error || new Error('Could not save uploaded template'));
-      tx.onabort = () => reject(tx.error || new Error('Template save was cancelled'));
-    });
-  } finally {
-    db.close();
-  }
-}
-
-async function readLocalCertificateTemplate() {
-  if (activeCertificateTemplateFile) return activeCertificateTemplateFile;
-  const db = await openCertificateTemplateDb();
-  try {
-    return await new Promise((resolve, reject) => {
-      const request = db.transaction(CERT_TEMPLATE_DB_STORE, 'readonly')
-        .objectStore(CERT_TEMPLATE_DB_STORE).get(CERT_TEMPLATE_DB_KEY);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error || new Error('Could not read uploaded template'));
-    });
-  } finally {
-    db.close();
-  }
-}
-
-async function clearLocalCertificateTemplate() {
-  activeCertificateTemplateFile = null;
-  try {
-    const db = await openCertificateTemplateDb();
-    try {
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction(CERT_TEMPLATE_DB_STORE, 'readwrite');
-        tx.objectStore(CERT_TEMPLATE_DB_STORE).delete(CERT_TEMPLATE_DB_KEY);
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error || new Error('Could not clear uploaded template'));
-      });
-    } finally {
-      db.close();
-    }
-  } catch (error) {
-    console.warn('Could not clear local certificate template cache.', error);
-  }
-}
-
-async function loadCertificateConfiguration() {
-  if (certificateConfigLoaded) return currentCertConfig;
-  let savedConfig = null;
-  try {
-    const saved = localStorage.getItem('vyomantra_cert_config');
-    if (saved) savedConfig = JSON.parse(saved);
-  } catch (error) {
-    console.warn('Saved local certificate settings could not be read.', error);
-  }
-  try {
-    const response = await apiFetch('../api/admin/certificates.php?action=get_template_config');
+    const response = await apiFetch('../api/admin/certificates.php', { method: 'POST', headers: { 'Authorization': `Bearer ${authToken || ''}` }, body });
     const result = await response.json();
-    if (result?.success && result.data) {
-      currentCertConfig = { ...currentCertConfig, ...(savedConfig || {}), ...result.data };
-      if (!result.data.template_placeholders && savedConfig?.template_placeholders) {
-        currentCertConfig.template_placeholders = savedConfig.template_placeholders;
-      }
-      applyMasterCertificateTemplateUpgrade();
-      certificateConfigLoaded = true;
-      return currentCertConfig;
+    if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not convert the uploaded DOCX.');
+    if (latestGeneratedCertificate?.certificate_id === certificateId) {
+      latestGeneratedCertificate.certificate_pdf_url = result.data?.certificate_pdf_url;
+      status.textContent = 'PDF is ready. It will appear on the public verification page.';
     }
+    showToast('Final certificate converted and attached as PDF.');
+    await fetchCertificates();
   } catch (error) {
-    // Static development servers do not provide the PHP configuration API.
+    console.error('Final certificate upload failed:', error);
+    if (status) status.textContent = error.message || 'Upload and conversion failed.';
+    showToast(error.message || 'Upload and conversion failed.', true);
   }
-  if (savedConfig) currentCertConfig = { ...currentCertConfig, ...savedConfig };
-  applyMasterCertificateTemplateUpgrade();
-  certificateConfigLoaded = true;
-  return currentCertConfig;
-}
-
-function applyMasterCertificateTemplateUpgrade() {
-  if (Number(currentCertConfig.master_template_version || 0) >= 1) return;
-  currentCertConfig.active_template = 'Vyomantra_Master_Certificate_of_Completion.docx';
-  currentCertConfig.master_template_version = 1;
-  currentCertConfig.custom_template_uploaded = false;
-  currentCertConfig.custom_template_file = null;
-  currentCertConfig.custom_template_name = null;
-  currentCertConfig.custom_template_size = 0;
-  try { localStorage.setItem('vyomantra_cert_config', JSON.stringify(currentCertConfig)); } catch (_) {}
-}
-
-async function getActiveCertificateTemplateBuffer() {
-  if (currentCertConfig.custom_template_uploaded) {
-    let serverError = null;
-    if (!isDevStaticMode) {
-      try {
-        const response = await apiFetch('../api/admin/certificates.php?action=download_template');
-        if (response.ok) return await response.arrayBuffer();
-        serverError = new Error(`HTTP ${response.status}`);
-      } catch (error) {
-        serverError = error;
-      }
-    }
-
-    try {
-      const localTemplate = await readLocalCertificateTemplate();
-      if (localTemplate) return await localTemplate.arrayBuffer();
-    } catch (error) {
-      console.warn('Local custom template is unavailable; checking the server registry.', error);
-    }
-
-    if (!isDevStaticMode) throw new Error(`The active custom template could not be downloaded from the server${serverError ? `: ${serverError.message}` : '.'}`);
-    throw new Error('The custom template is marked active but its file is missing. Upload it again in the configurator.');
-  }
-
-  const response = await fetch('../templates/certificates/Vyomantra_Master_Certificate_of_Completion.docx');
-  if (!response.ok) throw new Error('The default certificate template could not be read.');
-  return await response.arrayBuffer();
-}
-
-const CERTIFICATE_FIELD_OPTIONS = [
-  ['__keep__', 'Leave template text unchanged'],
-  ['certificate_id', 'Certificate ID'], ['recipient_name', 'Recipient name'],
-  ['recipient_email', 'Recipient email'], ['certificate_type', 'Credential type'],
-  ['course_name', 'Course / program'], ['course_duration', 'Course duration'],
-  ['issue_date', 'Issue date'], ['completion_date', 'Completion date'], ['expiry_date', 'Expiry date'],
-  ['verification_url', 'Verification URL'], ['description', 'Description'],
-  ['trainer_name', 'Trainer name'], ['trainer_designation', 'Trainer title'],
-  ['signatory_name', 'Signatory name'], ['signatory_designation', 'Signatory title'], ['issued_by', 'Issuing organization'],
-  ['founder_signature', 'Founder signature (mode-aware)'],
-  ['director_signature', 'Director signature (mode-aware)'],
-  ['trainer_signature', 'Trainer signature (mode-aware)'],
-  ['qr_code_placeholder', 'QR verification text']
-];
-
-function getCertificateTemplateTags() {
-  return [...new Set([
-    ...Object.keys(getDefaultCertificateFieldMappings()),
-    ...(currentCertConfig.template_placeholders || []),
-    ...((currentCertConfig.template_controls || []).map(control => `sdt:${control.tag}`))
-  ])];
-}
-
-async function scanCertificateTemplateTags(file) {
-  if (typeof JSZip === 'undefined') return { placeholders: [], controls: [] };
-  const zip = await JSZip.loadAsync(file);
-  const tags = new Set();
-  const controls = new Map();
-  const files = Object.keys(zip.files).filter(name => /^word\/(document|header\d+|footer\d+)\.xml$/.test(name));
-  for (const name of files) {
-    const xml = await zip.file(name).async('string');
-    const text = xml.replace(/<[^>]*>/g, '');
-    for (const match of text.matchAll(/\{\{[A-Z0-9_]+\}\}/g)) tags.add(match[0]);
-    for (const match of xml.matchAll(/<w:sdt(?:\s[^>]*)?>([\s\S]*?)<\/w:sdt>/g)) {
-      const tag = match[1].match(/<w:tag\b[^>]*w:val="([^"]+)"/);
-      if (!tag) continue;
-      const alias = match[1].match(/<w:alias\b[^>]*w:val="([^"]+)"/);
-      const controlTag = tag[1].replace(/&amp;/g, '&').trim();
-      if (!controls.has(controlTag)) {
-        controls.set(controlTag, { tag: controlTag, alias: alias ? alias[1].replace(/&amp;/g, '&').trim() : controlTag });
-      }
-    }
-  }
-  return { placeholders: [...tags], controls: [...controls.values()] };
-}
-
-function sampleCertificateFieldValue(fieldKey, sample) {
-  const sampleRecord = sample || {
-    certificate_id: 'VYOM-PY-2026-00001', recipient_name: 'Deepa Narayanan',
-    recipient_email: 'deepa@example.com', certificate_type: 'Course Completion',
-    course_name: 'Python Programming & Applied AI', course_duration: '3 Months',
-    issue_date: '2026-09-28', completion_date: '2026-09-28', expiry_date: '',
-    verification_url: 'https://vyomantratech.com/verify/?id=VYOM-PY-2026-00001',
-    trainer_name: 'Santhosh S.', trainer_designation: 'Lead Technical Instructor',
-    signatory_name: 'S.B. Sachin', signatory_designation: 'Founder & CEO',
-    issued_by: 'VYOMANTRA TECHNOLOGIES',
-    description: 'Completed the required program.'
-  };
-  if (fieldKey === 'issue_date' || fieldKey === 'completion_date' || fieldKey === 'expiry_date') {
-    return sampleRecord[fieldKey] ? formatDate(sampleRecord[fieldKey]) : '—';
-  }
-  if (fieldKey === 'founder_signature') return currentCertConfig.founder_signature_mode === 'manual' ? 'Manual signature line' : (sampleRecord.signatory_name || 'S.B. Sachin');
-  if (fieldKey === 'director_signature') return currentCertConfig.director_signature_mode === 'manual' ? 'Manual signature line' : 'Santhosh Kumar S.';
-  if (fieldKey === 'trainer_signature') return currentCertConfig.trainer_signature_mode === 'manual' ? 'Manual signature line' : (sampleRecord.trainer_name || 'Santhosh S.');
-  if (fieldKey === 'qr_code_placeholder') return `[ QR for ${sampleRecord.certificate_id} ]`;
-  if (fieldKey === '__keep__') return 'Keep existing template text';
-  return sampleRecord[fieldKey] || '—';
-}
-
-function renderCertificateFieldMappings() {
-  const tbody = document.getElementById('certificateFieldMappingsBody');
-  if (!tbody) return;
-  const mappings = currentCertConfig.field_mappings || (currentCertConfig.field_mappings = {});
-  const sample = (getLocalData('certificates') || [])[0];
-  const optionsHtml = '<option value="">Choose a live field…</option>' + CERTIFICATE_FIELD_OPTIONS
-    .map(([key, label]) => `<option value="${key}">${label}</option>`).join('');
-
-  tbody.innerHTML = getCertificateTemplateTags().map(tag => {
-    const selected = mappings[tag] || getDefaultCertificateFieldMappings()[tag] || '';
-    const preview = sampleCertificateFieldValue(selected, sample);
-    const control = tag.startsWith('sdt:')
-      ? (currentCertConfig.template_controls || []).find(item => `sdt:${item.tag}` === tag)
-      : null;
-    const tagLabel = control ? `Word field: ${control.tag}` : tag;
-    const aliasLabel = control?.alias ? `<small style="display:block;color:var(--text-dim);margin-top:3px;">${escapeHtml(control.alias)}</small>` : '';
-    return `<tr>
-      <td><span class="tag-badge">${escapeHtml(tagLabel)}</span>${aliasLabel}</td>
-      <td><select class="admin-select" data-template-map="${escapeHtml(tag)}" style="min-width:210px; width:100%;">${optionsHtml}</select></td>
-      <td data-template-preview="${escapeHtml(tag)}" style="color:var(--cyan);">${escapeHtml(preview)}</td>
-      <td style="color:${tag === '{{RECIPIENT_NAME}}' || tag.includes('SIGNATURE') ? 'var(--amber)' : 'var(--green)'}">${tag === '{{RECIPIENT_NAME}}' ? 'Blank in partial mode if configured' : (tag.includes('SIGNATURE') ? 'Follows signature mode' : 'Filled from certificate')}</td>
-    </tr>`;
-  }).join('');
-
-  tbody.querySelectorAll('[data-template-map]').forEach(select => {
-    const tag = select.dataset.templateMap;
-    select.value = mappings[tag] || getDefaultCertificateFieldMappings()[tag] || '';
-    select.addEventListener('change', () => {
-      mappings[tag] = select.value;
-      const preview = tbody.querySelector(`[data-template-preview="${CSS.escape(tag)}"]`);
-      if (preview) preview.textContent = sampleCertificateFieldValue(select.value, sample);
-    });
-  });
-}
-
-function initConfiguratorEvents() {
-  // Tab switching inside configurator
-  const tabs = document.querySelectorAll('.configurator-tab-btn');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.configurator-panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      const panelId = tab.getAttribute('data-cfg-panel');
-      const panel = document.getElementById(panelId);
-      if (panel) panel.classList.add('active');
-    });
-  });
-
-  // Drag and drop zone
-  const dropZone = document.getElementById('docxDropZone');
-  const fileInput = document.getElementById('inputTemplateDocx');
-
-  if (dropZone && fileInput) {
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        handleDocxTemplateUpload(e.dataTransfer.files[0]);
-      }
-    });
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files[0]) {
-        handleDocxTemplateUpload(e.target.files[0]);
-      }
-    });
-  }
-}
-
-async function openCertificateConfiguratorModal() {
-  await loadCertificateConfiguration();
-  if (!currentCertConfig.template_controls?.length) {
-    try {
-      const activeBuffer = await getActiveCertificateTemplateBuffer();
-      const scan = await scanCertificateTemplateTags(new Blob([activeBuffer]));
-      currentCertConfig.template_controls = scan.controls;
-      currentCertConfig.template_placeholders = scan.placeholders;
-    } catch (error) {
-      console.warn('Could not scan the active default template fields.', error);
-    }
-  }
-  updateConfiguratorUI();
-  openAdminModal('certificateConfiguratorModal');
-}
-
-function updateConfiguratorUI() {
-  const nameEl = document.getElementById('cfgCurrentTemplateName');
-  const metaEl = document.getElementById('cfgTemplateMeta');
-
-  if (currentCertConfig.custom_template_uploaded && currentCertConfig.custom_template_name) {
-    if (nameEl) nameEl.textContent = currentCertConfig.custom_template_name;
-    if (metaEl) metaEl.textContent = `Custom Active Template • Size: ${(currentCertConfig.custom_template_size / 1024).toFixed(1)} KB • Word (.docx)`;
-  } else {
-    if (nameEl) nameEl.textContent = 'Vyomantra_Master_Certificate_of_Completion.docx';
-    if (metaEl) metaEl.textContent = 'Master completion template • Embedded fonts and logo preserved • Word (.docx)';
-  }
-
-  // Update signature button states
-  setSignatureMode('founder', currentCertConfig.founder_signature_mode || 'manual', false);
-  setSignatureMode('director', currentCertConfig.director_signature_mode || 'digital', false);
-  setSignatureMode('trainer', currentCertConfig.trainer_signature_mode || 'digital', false);
-  setNamePartialMode(currentCertConfig.recipient_name_partial || 'blank', false);
-  renderCertificateFieldMappings();
-}
-
-function setSignatureMode(authority, mode, notify = true) {
-  if (authority === 'founder') {
-    currentCertConfig.founder_signature_mode = mode;
-    const digBtn = document.getElementById('sigFounderDigital');
-    const manBtn = document.getElementById('sigFounderManual');
-    const desc = document.getElementById('sigFounderDesc');
-    if (digBtn && manBtn) {
-      if (mode === 'digital') {
-        digBtn.className = 'sig-mode-btn active-digital';
-        manBtn.className = 'sig-mode-btn';
-        if (desc) desc.textContent = 'Founder signature is automatically pre-stamped digitally in all generated outputs.';
-      } else {
-        digBtn.className = 'sig-mode-btn';
-        manBtn.className = 'sig-mode-btn active-manual';
-        if (desc) desc.textContent = 'In partial download mode, founder signature is left blank so it can be physically signed with a pen.';
-      }
-    }
-  } else if (authority === 'director') {
-    currentCertConfig.director_signature_mode = mode;
-    const digBtn = document.getElementById('sigDirectorDigital');
-    const manBtn = document.getElementById('sigDirectorManual');
-    const desc = document.getElementById('sigDirectorDesc');
-    if (digBtn && manBtn) {
-      if (mode === 'digital') {
-        digBtn.className = 'sig-mode-btn active-digital';
-        manBtn.className = 'sig-mode-btn';
-        if (desc) desc.textContent = 'Already digitally embedded in template; will be retained in all generated certificates.';
-      } else {
-        digBtn.className = 'sig-mode-btn';
-        manBtn.className = 'sig-mode-btn active-manual';
-        if (desc) desc.textContent = 'Left blank in partial downloads for manual physical pen signing.';
-      }
-    }
-  } else if (authority === 'trainer') {
-    currentCertConfig.trainer_signature_mode = mode;
-    const digBtn = document.getElementById('sigTrainerDigital');
-    const manBtn = document.getElementById('sigTrainerManual');
-    const desc = document.getElementById('sigTrainerDesc');
-    if (digBtn && manBtn) {
-      if (mode === 'digital') {
-        digBtn.className = 'sig-mode-btn active-digital';
-        manBtn.className = 'sig-mode-btn';
-        if (desc) desc.textContent = 'Already digitally signed in template; preserved across all output documents.';
-      } else {
-        digBtn.className = 'sig-mode-btn';
-        manBtn.className = 'sig-mode-btn active-manual';
-        if (desc) desc.textContent = 'Left blank in partial downloads for manual physical pen signing.';
-      }
-    }
-  }
-
-  if (notify) {
-    showToast(`${authority.charAt(0).toUpperCase() + authority.slice(1)} signature set to ${mode.toUpperCase()}`);
-  }
-}
-
-function setNamePartialMode(mode, notify = true) {
-  currentCertConfig.recipient_name_partial = mode;
-  const blankBtn = document.getElementById('namePartialBlank');
-  const filledBtn = document.getElementById('namePartialFilled');
-  const desc = document.getElementById('namePartialDesc');
-
-  if (blankBtn && filledBtn) {
-    if (mode === 'blank') {
-      blankBtn.className = 'sig-mode-btn active-manual';
-      filledBtn.className = 'sig-mode-btn';
-      if (desc) desc.textContent = 'Leaves candidate name line empty in partial download for manual handwriting or calligraphy.';
-    } else {
-      blankBtn.className = 'sig-mode-btn';
-      filledBtn.className = 'sig-mode-btn active-digital';
-      if (desc) desc.textContent = 'Pre-fills student name even in partial pre-printed download.';
-    }
-  }
-
-  if (notify) {
-    showToast(`Pre-printed candidate name set to ${mode === 'blank' ? 'BLANK (Manual)' : 'FILLED'}`);
-  }
-}
-
-async function handleDocxTemplateUpload(file) {
-  if (!file) return;
-  if (!file.name.toLowerCase().endsWith('.docx')) {
-    showToast('Invalid file format. Please upload a Microsoft Word (.docx) file', true);
-    return;
-  }
-
-  showToast('Checking DOCX template and its field tags...');
-
-  let templateScan;
-  try {
-    templateScan = await scanCertificateTemplateTags(file);
-  } catch (error) {
-    showToast('This DOCX could not be read. Please choose a valid Word template.', true);
-    return;
-  }
-
-  activeCertificateTemplateFile = file;
-  try {
-    await storeLocalCertificateTemplate(file);
-  } catch (error) {
-    if (isDevStaticMode) {
-      showToast(`Could not store the uploaded template in this browser: ${error.message}`, true);
-      return;
-    }
-    console.warn('Could not cache custom template locally; the server copy will be used.', error);
-  }
-
-  const formData = new FormData();
-  formData.append('action', 'upload_template');
-  formData.append('template_file', file);
-
-  if (isDevStaticMode) {
-    currentCertConfig.custom_template_uploaded = true;
-    currentCertConfig.custom_template_name = file.name;
-    currentCertConfig.custom_template_size = file.size;
-    currentCertConfig.custom_template_file = null;
-    currentCertConfig.template_placeholders = templateScan.placeholders;
-    currentCertConfig.template_controls = templateScan.controls;
-    currentCertConfig.field_mappings = currentCertConfig.field_mappings || getDefaultCertificateFieldMappings();
-    certificateConfigLoaded = true;
-    localStorage.setItem('vyomantra_cert_config', JSON.stringify(currentCertConfig));
-    updateConfiguratorUI();
-    showToast(`Custom template ready. Detected ${templateScan.placeholders.length} placeholder(s) and ${templateScan.controls.length} Word field(s).`);
-    return;
-  }
-
-  try {
-    const res = await apiFetch('../api/admin/certificates.php', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + (authToken || '') },
-      body: formData
-    });
-    const result = await res.json();
-    if (result && result.success) {
-      currentCertConfig.custom_template_uploaded = true;
-      currentCertConfig.custom_template_name = file.name;
-      currentCertConfig.custom_template_size = file.size;
-      currentCertConfig.custom_template_file = result.data?.path || currentCertConfig.custom_template_file || null;
-      currentCertConfig.template_placeholders = templateScan.placeholders;
-      currentCertConfig.template_controls = templateScan.controls;
-      currentCertConfig.field_mappings = currentCertConfig.field_mappings || getDefaultCertificateFieldMappings();
-      certificateConfigLoaded = true;
-      localStorage.setItem('vyomantra_cert_config', JSON.stringify(currentCertConfig));
-      updateConfiguratorUI();
-      showToast(`Custom template uploaded. Detected ${templateScan.placeholders.length} placeholder(s) and ${templateScan.controls.length} Word field(s). Map them before generating.`);
-    } else {
-      showToast(result.message || 'Template upload failed', true);
-    }
-  } catch (e) {
-    currentCertConfig.custom_template_uploaded = false;
-    showToast('Template upload failed. The custom file was not activated.', true);
-  }
-}
-
-async function saveCertificateConfiguration() {
-  const unmapped = getUnmappedCertificateTemplateFields();
-  if (unmapped.length) {
-    document.querySelectorAll('.configurator-tab-btn').forEach(tab => tab.classList.toggle('active', tab.dataset.cfgPanel === 'panelMapping'));
-    document.querySelectorAll('.configurator-panel').forEach(panel => panel.classList.toggle('active', panel.id === 'panelMapping'));
-    showToast(`Choose a live certificate field for: ${unmapped.join(', ')}`, true);
-    return;
-  }
-  localStorage.setItem('vyomantra_cert_config', JSON.stringify(currentCertConfig));
-  certificateConfigLoaded = true;
-
-  try {
-    const res = await apiFetch('../api/admin/certificates.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + (authToken || '')
-      },
-      body: JSON.stringify({
-        action: 'save_template_config',
-        ...currentCertConfig
-      })
-    });
-    const result = await res.json();
-    if (result && result.success) {
-      showToast('Certificate configuration saved & active!');
-      closeAdminModal('certificateConfiguratorModal');
-      return;
-    }
-  } catch (e) {}
-
-  showToast('Configuration applied and saved to registry.');
-  closeAdminModal('certificateConfiguratorModal');
-}
-
-function downloadActiveTemplateFile() {
-  const url = `../api/admin/certificates.php?action=download_template&token=${encodeURIComponent(authToken || '')}`;
-  window.open(url, '_blank');
-}
-
-async function resetDefaultDocxTemplate() {
-  if (!confirm('Are you sure you want to revert back to the default Vyomantra Course Certificate template?')) return;
-  try {
-    const res = await apiFetch('../api/admin/certificates.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Bearer ' + (authToken || '')
-      },
-      body: 'action=reset_template'
-    });
-    const result = await res.json();
-    if (result && result.success) {
-      currentCertConfig = result.data;
-    }
-  } catch (e) {
-    currentCertConfig.custom_template_uploaded = false;
-    currentCertConfig.custom_template_name = null;
-  }
-
-  localStorage.setItem('vyomantra_cert_config', JSON.stringify(currentCertConfig));
-  await clearLocalCertificateTemplate();
-  certificateConfigLoaded = true;
-  updateConfiguratorUI();
-  showToast('Reset to default Vyomantra template.');
-}
-
-function testSampleDocxGeneration() {
-  const all = getLocalData('certificates');
-  const sampleId = (all && all.length > 0) ? all[0].certificate_id : 'VYOM-PY-2026-00001';
-  downloadCertificateDocx(sampleId, 'partial');
 }
 
 // Explicit Window Method Bindings for Inline HTML Event Compatibility
@@ -3974,32 +2345,8 @@ window.openCourseModal = openCourseModal;
 window.deleteCourse = deleteCourse;
 window.updateCourseStatus = updateCourseStatus;
 window.handleSaveCourse = handleSaveCourse;
-window.downloadCertificateDocx = downloadCertificateDocx;
-window.adminDownloadCurrentDocx = adminDownloadCurrentDocx;
-window.openCertificatePreview = openCertificatePreview;
-window.openCertificateEditModal = openCertificateEditModal;
-window.openCertificateRevokeModal = openCertificateRevokeModal;
-window.confirmCertificateRevocation = confirmCertificateRevocation;
-window.deleteCertificate = deleteCertificate;
-window.restoreCertificate = restoreCertificate;
-window.adminCopyCertId = adminCopyCertId;
-window.adminDownloadCertPdf = adminDownloadCertPdf;
-window.adminDownloadCurrentPdf = adminDownloadCurrentPdf;
-window.adminPrintCurrentCert = adminPrintCurrentCert;
-window.adminDownloadCurrentQr = adminDownloadCurrentQr;
-window.adminCopyCurrentVerifyUrl = adminCopyCurrentVerifyUrl;
-window.adminPromptRevokeCurrent = adminPromptRevokeCurrent;
-window.openCertificateConfiguratorModal = openCertificateConfiguratorModal;
-window.saveCertificateConfiguration = saveCertificateConfiguration;
-window.setSignatureMode = setSignatureMode;
-window.setNamePartialMode = setNamePartialMode;
-window.testSampleDocxGeneration = testSampleDocxGeneration;
-window.downloadActiveTemplateFile = downloadActiveTemplateFile;
-window.resetDefaultDocxTemplate = resetDefaultDocxTemplate;
 window.openAdminModal = openAdminModal;
 window.closeAdminModal = closeAdminModal;
-window.openCertificateCreateModal = openCertificateCreateModal;
-window.exportCertificatesCsv = exportCertificatesCsv;
 
 // Install the click router as soon as this body-end script loads. It must not
 // depend on the async authentication/setup path finishing first.

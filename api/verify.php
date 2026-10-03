@@ -185,6 +185,7 @@ $publicCertificate = [
     'status'                => $status,
     'issued_by'             => $foundCert['issued_by'] ?? 'VYOMANTRA TECHNOLOGIES',
     'verification_url'      => SITE_URL . '/verify/?id=' . urlencode($foundCert['certificate_id']),
+    'certificate_pdf_url'   => $foundCert['certificate_pdf_url'] ?? null,
     'template_id'           => $foundCert['template_id'] ?? 'vyomantra_premium_v1',
     'revoked_at'            => ($status === 'revoked') ? ($foundCert['revoked_at'] ?? null) : null,
     'revocation_reason'     => ($status === 'revoked') ? ($foundCert['revocation_reason'] ?? 'Revoked by Issuing Authority') : null,

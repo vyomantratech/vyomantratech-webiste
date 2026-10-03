@@ -1,7 +1,7 @@
 /**
  * Vyomantra Technologies - Public Certificate Verification Engine
  * Handles QR scan landing, manual ID lookup, verification status rendering,
- * live A4 landscape certificate preview, dynamic QR rendering, and PDF generation.
+ * certificate record verification and download of the uploaded certificate PDF.
  */
 
 // Clean Extensionless URLs: Strip .html immediately from browser address bar
@@ -89,6 +89,11 @@ async function verifyCertificate(certId, method = 'MANUAL_ID') {
 
     if (res.status === 404) {
       const data = await res.json().catch(() => ({}));
+      const fallbackCert = checkLocalFallback(certId);
+      if (fallbackCert) {
+        renderVerifiedCertificate(fallbackCert, 'Certificate Verified via local cache.');
+        return;
+      }
       renderNotFoundState(certId, data.message);
       return;
     }
@@ -118,7 +123,7 @@ function checkLocalFallback(queryId) {
   const upperQuery = queryId.toUpperCase().trim();
 
   // 1. Check localStorage
-  const localList = JSON.parse(localStorage.getItem('vyomantra_certificates') || '[]');
+  const localList = JSON.parse(localStorage.getItem('vyomantra_admin_certificates') || localStorage.getItem('vyomantra_certificates') || '[]');
   const matchLocal = localList.find(c => 
     (c.certificate_id && c.certificate_id.toUpperCase() === upperQuery) || 
     (c.verification_token === queryId)
@@ -254,34 +259,14 @@ function renderVerifiedCertificate(cert, customMsg) {
   document.getElementById('resIssueDate').textContent = formatDate(cert.issue_date);
   document.getElementById('resIssuedBy').textContent = cert.issued_by || 'VYOMANTRA TECHNOLOGIES';
 
-  // Populate Live Certificate Document Preview
-  document.getElementById('certBadgeId').textContent = cert.certificate_id || '--';
-  document.getElementById('certDocTypeLabel').textContent = (cert.certificate_type || 'CREDENTIAL').toUpperCase();
-  document.getElementById('certDocTitle').textContent = `CERTIFICATE OF ${(cert.certificate_type || 'COMPLETION').toUpperCase()}`;
-  document.getElementById('certDocRecipient').textContent = cert.recipient_name || '--';
-  document.getElementById('certDocCourse').textContent = cert.course_name || '--';
-  document.getElementById('certDocDescription').textContent = cert.description || 'Successfully demonstrated proficiency in modern software engineering principles and architectural excellence.';
-
-  document.getElementById('certDocTrainerName').textContent = cert.trainer_name || 'Santhosh S';
-  document.getElementById('certDocTrainerTitle').textContent = cert.trainer_designation || 'Lead Technical Instructor';
-  document.getElementById('certDocTrainerSign').textContent = (cert.trainer_name || 'Santhosh S.').replace(/ [A-Z]$/, ' S.');
-
-  document.getElementById('certDocSignatoryName').textContent = cert.signatory_name || 'S.B. Sachin';
-  document.getElementById('certDocSignatoryTitle').textContent = cert.signatory_designation || 'Founder & CEO';
-  document.getElementById('certDocCeoSign').textContent = cert.signatory_name || 'S.B. Sachin';
-
-  document.getElementById('certDocIssueDate').textContent = formatDate(cert.issue_date);
-  document.getElementById('certDocMetaId').textContent = cert.certificate_id || '--';
-
-  const hostDomain = window.location.host || 'vyomantratech.com';
-  document.getElementById('certDocVerifyDomain').textContent = `${hostDomain}/verify`;
-
-  const tokenSnippet = cert.verification_token ? cert.verification_token.substring(0, 16).toUpperCase() : 'VYOM-SECURE';
-  document.getElementById('certDocSecurityToken').textContent = tokenSnippet;
-
-  // Render Dynamic High-Resolution QR Code
-  renderQrCode(cert.certificate_id);
-
+  const pdfLink = document.getElementById('downloadUploadedCertificatePdf');
+  const pdfNote = document.getElementById('certificatePdfPendingNote');
+  const hasPublicPdf = Boolean(cert.certificate_pdf_url && status === 'valid');
+  if (pdfLink) {
+    pdfLink.href = hasPublicPdf ? cert.certificate_pdf_url : '#';
+    pdfLink.style.display = hasPublicPdf ? 'inline-flex' : 'none';
+  }
+  if (pdfNote) pdfNote.style.display = status === 'valid' && !hasPublicPdf ? 'inline' : 'none';
   // Update Page Title
   document.title = `Verified: ${cert.certificate_id} - ${cert.recipient_name} | VYOMANTRA TECHNOLOGIES`;
 
@@ -304,7 +289,6 @@ function renderNotFoundState(certId, msg) {
   const desc = document.getElementById('statusDescription');
   const icon = document.getElementById('statusIcon');
   const pill = document.getElementById('statusPill');
-  const preview = document.getElementById('certPreviewContainer');
 
   if (banner) banner.className = 'status-banner not_found';
   headline.textContent = 'Certificate Not Found';
@@ -319,38 +303,7 @@ function renderNotFoundState(certId, msg) {
   document.getElementById('resCourseName').textContent = '--';
   document.getElementById('resIssueDate').textContent = '--';
 
-  if (preview) preview.style.display = 'none';
   document.title = `Certificate Not Found (${certId}) | VYOMANTRA TECHNOLOGIES`;
-}
-
-// Generate QR Code into container
-function renderQrCode(certId) {
-  const qrBox = document.getElementById('certDocQrBox');
-  if (!qrBox) return;
-
-  qrBox.innerHTML = '';
-
-  const siteOrigin = window.location.origin;
-  const verifyUrl = `${siteOrigin}/verify/?id=${encodeURIComponent(certId)}`;
-
-  if (typeof QRCode !== 'undefined') {
-    new QRCode(qrBox, {
-      text: verifyUrl,
-      width: 76,
-      height: 76,
-      colorDark: '#050711',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
-  } else {
-    // Fallback QR API if local library fails to load
-    const img = document.createElement('img');
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=76x76&data=${encodeURIComponent(verifyUrl)}&margin=1`;
-    img.alt = 'Certificate Verification QR';
-    img.width = 76;
-    img.height = 76;
-    qrBox.appendChild(img);
-  }
 }
 
 // Show / Hide Views
@@ -358,8 +311,6 @@ function showSearchView() {
   document.getElementById('searchViewSection').style.display = 'block';
   document.getElementById('verifyResultSection').style.display = 'none';
   document.getElementById('verifyLoadingSection').style.display = 'none';
-  const preview = document.getElementById('certPreviewContainer');
-  if (preview) preview.style.display = 'flex';
   document.title = 'Official Certificate Verification | VYOMANTRA TECHNOLOGIES';
   const inputEl = document.getElementById('certInputId');
   if (inputEl) {
@@ -389,40 +340,15 @@ function formatDate(dateStr) {
   }
 }
 
-// PDF Download
+// Download only the final PDF uploaded by the issuing authority.
 function downloadCertificatePdf() {
-  if (!currentCertData) return;
-  const element = document.getElementById('certRenderDoc');
-  if (!element) return;
-
-  showToast('Generating high-resolution official PDF certificate...');
-
-  const fileName = `${currentCertData.certificate_id}_Vyomantra_Certificate.pdf`;
-
-  if (typeof html2pdf !== 'undefined') {
-    const opt = {
-      margin: 0,
-      filename: fileName,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
-    html2pdf().set(opt).from(element).save().then(() => {
-      showToast('Certificate PDF downloaded successfully.');
-    }).catch(err => {
-      console.error(err);
-      window.print();
-    });
-  } else {
-    window.print();
+  const pdfUrl = currentCertData?.certificate_pdf_url;
+  if (!pdfUrl) {
+    showToast('The issuer has not uploaded the final certificate PDF yet.');
+    return;
   }
+  window.open(pdfUrl, '_blank', 'noopener');
 }
-
-// Print Certificate
-function printCertificateDoc() {
-  window.print();
-}
-
 // Copy Shareable URL
 function copyVerificationShareUrl() {
   if (!currentCertData) return;
