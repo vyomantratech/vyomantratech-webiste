@@ -1573,4 +1573,175 @@ textarea.form-control {
   50% { transform: translateY(3px); }
 }
 
+/* ===================================================================
+   GOVERNMENT OF INDIA UDYAM MSME TRUST BADGE & ACCREDITATION STYLES
+   =================================================================== */
+.msme-footer-card {
+  margin-top: 1.5rem;
+  background: radial-gradient(130% 130% at 0% 0%, rgba(0, 240, 255, 0.08) 0%, rgba(5, 7, 19, 0.85) 100%);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 14px;
+  padding: 0.85rem 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.95rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 240, 255, 0.06);
+  max-width: 100%;
+}
+
+.msme-footer-card:hover {
+  border-color: var(--cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 240, 255, 0.22);
+}
+
+.msme-emblem-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.msme-emblem-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.msme-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.msme-tag {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.msme-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.msme-reg-id {
+  font-family: 'JetBrains Mono', var(--font-mono, monospace);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.msme-reg-id strong {
+  color: #ffffff;
+}
+
+.msme-ext-icon {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-left: auto;
+  transition: color 0.2s;
+  padding-left: 0.5rem;
+}
+
+.msme-footer-card:hover .msme-ext-icon {
+  color: var(--cyan);
+}
+
+/* MSME Hero Badge (Pill) */
+.msme-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+  transition: all 0.25s ease;
+  width: fit-content;
+}
+
+.msme-hero-pill:hover {
+  border-color: var(--cyan);
+  background: rgba(0, 240, 255, 0.12);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.msme-hero-pill img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
+}
+
+/* MSME About Page Accreditation Banner */
+.msme-about-card {
+  background: radial-gradient(100% 100% at 0% 0%, rgba(0, 240, 255, 0.08) 0%, rgba(5, 7, 20, 0.8) 100%);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 20px;
+  padding: 2.25rem 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 240, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin: 3rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.msme-about-emblem {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 240, 255, 0.25);
+}
+
+.msme-about-emblem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.msme-about-text {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .msme-about-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.75rem 1.25rem;
+    gap: 1.25rem;
+  }
+}
+
+
 
