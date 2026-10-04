@@ -6,6 +6,10 @@
 Options -MultiViews
 DirectoryIndex index.html index.php
 
+# Enforce UTF-8 charset on all responses to prevent font/character encoding corruption
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html .css .js .json .php
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

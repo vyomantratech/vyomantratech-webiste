@@ -158,7 +158,7 @@ function populateHeaderUser(user) {
   if (nameEl) nameEl.textContent = user.full_name || user.username || 'Administrator';
   if (roleEl) {
     roleEl.innerHTML = (user.role === 'super_admin') 
-      ? `Super Admin ${isDevStaticMode ? '<span style="color:#22c55e; margin-left:4px; font-size:0.68rem; font-weight:700;">â— LOCAL DEV</span>' : '<span style="color:#00f0ff; margin-left:4px; font-size:0.68rem;">â— LIVE DB</span>'}`
+      ? `Super Admin ${isDevStaticMode ? '<span style="color:#22c55e; margin-left:6px; font-size:0.68rem; font-weight:700;">&bull; LOCAL DEV</span>' : '<span style="color:#00f0ff; margin-left:6px; font-size:0.68rem; font-weight:700;">&bull; LIVE DB</span>'}`
       : 'Editor';
   }
   if (avatarEl) {
@@ -316,7 +316,7 @@ function updateStatsUI(data) {
   setTxt('statQuotesNew', (data.quotes?.new || 0) + ' New');
 
   setTxt('statCoursesTotal', data.courses?.total || 0);
-  setTxt('statCoursesRevenue', 'â‚¹' + Number(data.courses?.total_revenue || 0).toLocaleString('en-IN'));
+  setTxt('statCoursesRevenue', '\u20B9' + Number(data.courses?.total_revenue || 0).toLocaleString('en-IN'));
 
   setTxt('statApplicantsTotal', data.careers?.total_applicants || 0);
   setTxt('statApplicantsReviewing', (data.careers?.applied || 0) + ' New');
@@ -390,7 +390,7 @@ function renderLocalStats() {
     activity: [
       ...contacts.slice(0, 3).map(c => ({ type: 'contact', title: c.name, subtitle: c.service, status: c.status, created_at: c.created_at })),
       ...quotes.slice(0, 2).map(q => ({ type: 'quote', title: q.name, subtitle: q.company || q.service, status: q.status, created_at: q.created_at })),
-      ...courses.slice(0, 2).map(c => ({ type: 'course', title: c.student_name, subtitle: `${c.course_name} (â‚¹${c.amount_paid})`, status: c.payment_status, created_at: c.created_at })),
+      ...courses.slice(0, 2).map(c => ({ type: 'course', title: c.student_name, subtitle: `${c.course_name} (\u20B9${c.amount_paid})`, status: c.payment_status, created_at: c.created_at })),
       ...applicants.slice(0, 2).map(a => ({ type: 'career', title: a.name, subtitle: a.role_applied, status: a.status, created_at: a.created_at }))
     ].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 8)
   };
@@ -818,7 +818,7 @@ async function fetchCourseRegistrations() {
         <div style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;">${escapeHtml(c.course_mode || 'Live Online')}</div>
       </td>
       <td style="font-weight:700; color:var(--green); font-size:0.95rem;">
-        â‚¹${Number(c.amount_paid || 649).toLocaleString('en-IN')}
+        &#8377;${Number(c.amount_paid || 649).toLocaleString('en-IN')}
       </td>
       <td>
         <span style="font-family:var(--font-mono); color:#fff; font-size:0.85rem; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">
@@ -1415,8 +1415,8 @@ async function fetchCoursesCMS() {
         <div style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;">${escapeHtml(c.mode || 'Live Online')}</div>
       </td>
       <td>
-        <div style="color:var(--cyan); font-weight:700; font-size:0.95rem;">â‚¹${Number(c.fee || 649).toLocaleString('en-IN')}</div>
-        ${c.original_fee ? `<div style="font-size:0.75rem; color:var(--text-dim); text-decoration:line-through;">â‚¹${Number(c.original_fee).toLocaleString('en-IN')}</div>` : ''}
+        <div style="color:var(--cyan); font-weight:700; font-size:0.95rem;">&#8377;${Number(c.fee || 649).toLocaleString('en-IN')}</div>
+        ${c.original_fee ? `<div style="font-size:0.75rem; color:var(--text-dim); text-decoration:line-through;">&#8377;${Number(c.original_fee).toLocaleString('en-IN')}</div>` : ''}
       </td>
       <td>
         <span style="color:var(--cyan); font-weight:700; font-size:0.95rem;">${c.student_count || 0}</span> students
@@ -1772,7 +1772,7 @@ function openJobModal(job) {
     document.getElementById('jobDatePosted').value = new Date().toISOString().split('T')[0];
     document.getElementById('jobLocationText').value = 'Dharmapuri, TN / Hybrid';
     document.getElementById('jobCompensationText').value = 'Competitive CTC';
-    document.getElementById('jobExpText').value = '1 â€“ 3+ Years Experience';
+    document.getElementById('jobExpText').value = '1 - 3+ Years Experience';
   }
 
   openAdminModal('jobEditorModal');
@@ -2091,6 +2091,8 @@ async function handleCertificateAction(event) {
       await copyCertificateText(button.dataset.certUrl, 'Verification link copied');
     } else if (button.dataset.certAction === 'revoke' || button.dataset.certAction === 'reinstate') {
       await changeCertificateStatus(button.dataset.certId, button.dataset.certAction);
+    } else if (button.dataset.certAction === 'delete') {
+      await deleteCertificate(button.dataset.certId);
     }
   } catch (error) {
     console.error('Certificate action failed:', error);
@@ -2120,6 +2122,39 @@ async function changeCertificateStatus(certificateId, action) {
   }
   showToast(action === 'revoke' ? `${certificateId} revoked.` : `${certificateId} reinstated.`);
   await fetchCertificates();
+}
+
+async function deleteCertificate(certificateId) {
+  if (!certificateId) return;
+  const confirmed = window.confirm(`Permanently delete certificate "${certificateId}"?\n\nThis will remove the verification record and any uploaded certificate files. This action cannot be undone.`);
+  if (!confirmed) return;
+
+  try {
+    if (isDevStaticMode) {
+      let all = getLocalData('certificates') || [];
+      all = all.filter(c => c.certificate_id !== certificateId && String(c.id) !== certificateId);
+      saveLocalData('certificates', all);
+    } else {
+      const body = new FormData();
+      body.append('action', 'delete');
+      body.append('certificate_id', certificateId);
+      const response = await apiFetch('../api/admin/certificates.php', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken || ''}` },
+        body
+      });
+      const result = await response.json();
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message || 'Could not delete the certificate.');
+      }
+    }
+    showToast(`Certificate ${certificateId} deleted.`);
+    await fetchCertificates();
+    fetchDashboardStats();
+  } catch (error) {
+    console.error('Delete certificate failed:', error);
+    showToast(error.message || 'Could not delete the certificate.', true);
+  }
 }
 
 async function fetchCertificates() {
@@ -2177,16 +2212,17 @@ function renderCertificatesTable(certificates, total) {
     const st = String(cert.status || 'valid').toLowerCase();
     const stColor = st === 'valid' ? '#10b981' : (st === 'revoked' ? '#ef4444' : '#f59e0b');
     const actionBtn = st === 'revoked'
-      ? `<button type="button" class="btn btn-outline btn-sm" data-cert-action="reinstate" data-cert-id="${id}">Reinstate</button>`
-      : `<button type="button" class="btn btn-outline btn-sm" data-cert-action="revoke" data-cert-id="${id}" style="color:#ef4444;border-color:#ef4444;">Revoke</button>`;
+      ? `<button type="button" class="btn btn-outline btn-sm" data-cert-action="reinstate" data-cert-id="${id}" title="Reinstate Certificate">Reinstate</button>`
+      : `<button type="button" class="btn btn-outline btn-sm" data-cert-action="revoke" data-cert-id="${id}" style="color:#f59e0b;border-color:rgba(245,158,11,0.5);" title="Revoke Certificate">Revoke</button>`;
+    const deleteBtn = `<button type="button" class="btn btn-outline btn-sm" data-cert-action="delete" data-cert-id="${id}" title="Permanently delete certificate" style="color:#ef4444;border-color:rgba(239,68,68,0.5);"><i class="fas fa-trash-alt"></i></button>`;
     return `<tr>
-      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} Â· ${escapeHtml(cert.program_type || '')} Â· ${escapeHtml(cert.certificate_type || 'Certificate')} Â· ${escapeHtml(cert.recognition || '')}</div></td>
+      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} &bull; ${escapeHtml(cert.program_type || '')} &bull; ${escapeHtml(cert.certificate_type || 'Certificate')} &bull; ${escapeHtml(cert.recognition || '')}</div></td>
       <td><div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;"><strong class="cert-id-badge">${id}</strong><button type="button" class="btn-action-icon" data-cert-action="copy-id" data-cert-id="${id}" title="Copy ID"><i class="fas fa-copy"></i></button></div><div style="font-size:.72rem;color:var(--text-dim);margin-top:4px;">Token: ${token}</div></td>
       <td><span style="font-weight:700;font-size:.78rem;color:${stColor};text-transform:uppercase;">${escapeHtml(st)}</span></td>
       <td>${escapeHtml(formatDate(cert.issue_date))}</td>
       <td><button type="button" class="btn btn-outline btn-sm" data-cert-action="download-qr" data-cert-name="${safeName}" data-cert-id="${id}" data-cert-url="${url}"><i class="fas fa-qrcode"></i> Download QR</button><button type="button" class="btn-action-icon" data-cert-action="copy-token" data-cert-token="${token}" title="Copy token"><i class="fas fa-key"></i></button><button type="button" class="btn-action-icon" data-cert-action="copy-url" data-cert-url="${url}" title="Copy verification link"><i class="fas fa-link"></i></button></td>
       <td>${pdfUrl ? `<a class="btn btn-outline btn-sm" href="${pdfUrl}" download><i class="fas fa-file-pdf"></i> Download File</a>` : `<label class="btn btn-outline btn-sm" style="cursor:pointer;"><i class="fas fa-upload"></i> Upload DOCX / PDF<input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;"></label><div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;">Not uploaded yet</div>`}</td>
-      <td>${actionBtn}</td>
+      <td><div style="display:inline-flex;gap:.35rem;align-items:center;">${actionBtn}${deleteBtn}</div></td>
     </tr>`;
   }).join('');
   tbody.querySelectorAll('[data-cert-upload]').forEach(input => input.addEventListener('change', async () => {
@@ -2200,7 +2236,7 @@ function updateCertPagination(total) {
   const previous = document.getElementById('btnPrevCertPage');
   const next = document.getElementById('btnNextCertPage');
   const start = total ? certCurrentPage * CERTS_PAGE_SIZE + 1 : 0;
-  if (summary) summary.textContent = `Showing ${start}â€“${Math.min((certCurrentPage + 1) * CERTS_PAGE_SIZE, total)} of ${total} records`;
+  if (summary) summary.textContent = `Showing ${start} - ${Math.min((certCurrentPage + 1) * CERTS_PAGE_SIZE, total)} of ${total} records`;
   if (previous) previous.disabled = certCurrentPage === 0;
   if (next) next.disabled = (certCurrentPage + 1) * CERTS_PAGE_SIZE >= total;
 }
@@ -2370,6 +2406,7 @@ window.updateCourseStatus = updateCourseStatus;
 window.handleSaveCourse = handleSaveCourse;
 window.openAdminModal = openAdminModal;
 window.closeAdminModal = closeAdminModal;
+window.deleteCertificate = deleteCertificate;
 
 // Install the click router as soon as this body-end script loads. It must not
 // depend on the async authentication/setup path finishing first.

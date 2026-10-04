@@ -403,6 +403,63 @@ if ($action === 'revoke' || $action === 'reinstate') {
 }
 
 // =========================================================================
+// DELETE CERTIFICATE (Permanently remove verification record & attached files)
+// =========================================================================
+if ($action === 'delete') {
+    $cid = trim($_POST['certificate_id'] ?? $_POST['id'] ?? '');
+    if ($cid === '') {
+        sendResponse(false, 'Certificate ID is required for deletion.', [], 400);
+    }
+
+    $deleted = false;
+
+    // 1. Delete from MySQL database if connected
+    if ($pdo) {
+        try {
+            $st = $pdo->prepare("DELETE FROM certificates WHERE certificate_id = :cid OR id = :id");
+            $st->execute([':cid' => $cid, ':id' => $cid]);
+            if ($st->rowCount() > 0) {
+                $deleted = true;
+            }
+        } catch (\PDOException $e) {
+            error_log('Certificate delete DB error: ' . $e->getMessage());
+        }
+    }
+
+    // 2. Delete from local JSON fallback if present
+    $records = getLocalCerts();
+    $origCount = count($records);
+    $records = array_values(array_filter($records, function ($c) use ($cid) {
+        return ($c['certificate_id'] ?? '') !== $cid && (string)($c['id'] ?? '') !== $cid;
+    }));
+    if (count($records) < $origCount) {
+        saveLocalCerts($records);
+        $deleted = true;
+    }
+
+    // 3. Remove any attached files (.pdf, .docx) from uploads directory
+    $safeId = preg_replace('/[^A-Za-z0-9_-]/', '_', $cid);
+    $certDir = dirname(__DIR__, 2) . '/uploads/certificates';
+    $filesToClean = [
+        $certDir . '/' . $safeId . '_final.pdf',
+        $certDir . '/' . $safeId . '_final.docx',
+        $certDir . '/' . $safeId . '.pdf',
+        $certDir . '/' . $safeId . '.docx',
+    ];
+    foreach ($filesToClean as $file) {
+        if (file_exists($file)) {
+            @unlink($file);
+        }
+    }
+
+    if (!$deleted) {
+        sendResponse(false, "Certificate record $cid not found or already deleted.", [], 404);
+    }
+
+    sendResponse(true, "Certificate $cid has been permanently deleted.", ['certificate_id' => $cid]);
+}
+
+// =========================================================================
 // Attach the manually completed DOCX and publish its converted PDF on verification.
 if ($action === 'upload_final_docx') {
     $id = trim($_POST['id'] ?? '');
