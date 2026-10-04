@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Vyomantra Technologies - Admin Control Center Engine
  * Unified Dual-Mode Architecture:
  * - Live Mode: Connects to Hostinger PHP MySQL REST APIs (/api/admin/*.php)
@@ -2049,6 +2049,7 @@ function debounce(func, wait) {
 const CERTS_PAGE_SIZE = 25;
 let certCurrentPage = 0;
 let latestGeneratedCertificate = null;
+let currentCertificatesList = [];
 
 function initCertificatesManager() {
   const saveButton = document.getElementById('btnSaveCertificate');
@@ -2056,6 +2057,7 @@ function initCertificatesManager() {
   const previousButton = document.getElementById('btnPrevCertPage');
   const nextButton = document.getElementById('btnNextCertPage');
   const qrButton = document.getElementById('btnDownloadGeneratedQr');
+  const viewFieldsButton = document.getElementById('btnViewGeneratedFilledFields');
   const uploadButton = document.getElementById('btnUploadFinalDocx');
   const uploadInput = document.getElementById('generatedFinalDocx');
 
@@ -2064,6 +2066,11 @@ function initCertificatesManager() {
   previousButton?.addEventListener('click', () => { if (certCurrentPage > 0) { certCurrentPage--; fetchCertificates(); } });
   nextButton?.addEventListener('click', () => { certCurrentPage++; fetchCertificates(); });
   qrButton?.addEventListener('click', downloadGeneratedQr);
+  viewFieldsButton?.addEventListener('click', () => {
+    if (latestGeneratedCertificate?.certificate_id) {
+      openCertFillDetailsModal(latestGeneratedCertificate.certificate_id);
+    }
+  });
   document.querySelectorAll('[data-copy-generated]').forEach(button => button.addEventListener('click', () => {
     const field = document.getElementById(`generatedCert${button.dataset.copyGenerated.charAt(0).toUpperCase()}${button.dataset.copyGenerated.slice(1)}`);
     if (field) copyCertificateText(field.value, `${button.dataset.copyGenerated.toUpperCase()} copied`);
@@ -2083,6 +2090,8 @@ async function handleCertificateAction(event) {
   try {
     if (button.dataset.certAction === 'download-qr') {
       await downloadCertificateQr(button.dataset.certName, button.dataset.certId, button.dataset.certUrl);
+    } else if (button.dataset.certAction === 'view-details') {
+      await openCertFillDetailsModal(button.dataset.certId);
     } else if (button.dataset.certAction === 'copy-id') {
       await copyCertificateText(button.dataset.certId, 'Certificate ID copied');
     } else if (button.dataset.certAction === 'copy-token') {
@@ -2174,6 +2183,7 @@ async function fetchCertificates() {
     const needle = search.toLowerCase();
     const filtered = all.filter(cert => !needle || `${cert.certificate_id} ${cert.recipient_name} ${cert.course_name}`.toLowerCase().includes(needle))
       .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+    currentCertificatesList = all;
     renderCertificatesTable(filtered.slice(offset, offset + CERTS_PAGE_SIZE), filtered.length);
     updateCertPagination(filtered.length);
     return;
@@ -2185,6 +2195,7 @@ async function fetchCertificates() {
     const result = await response.json();
     if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not load certificate records.');
     const certificates = result.data?.certificates || [];
+    currentCertificatesList = certificates;
     renderCertificatesTable(certificates, result.data?.total || 0);
     updateCertPagination(result.data?.total || 0);
     const badge = document.getElementById('countBadgeCertificates');
@@ -2216,7 +2227,15 @@ function renderCertificatesTable(certificates, total) {
       : `<button type="button" class="btn btn-outline btn-sm" data-cert-action="revoke" data-cert-id="${id}" style="color:#f59e0b;border-color:rgba(245,158,11,0.5);" title="Revoke Certificate">Revoke</button>`;
     const deleteBtn = `<button type="button" class="btn btn-outline btn-sm" data-cert-action="delete" data-cert-id="${id}" title="Permanently delete certificate" style="color:#ef4444;border-color:rgba(239,68,68,0.5);"><i class="fas fa-trash-alt"></i></button>`;
     return `<tr>
-      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} &bull; ${escapeHtml(cert.program_type || '')} &bull; ${escapeHtml(cert.certificate_type || 'Certificate')} &bull; ${escapeHtml(cert.recognition || '')}</div></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.25rem;">
+          <strong style="color:#fff;font-size:0.95rem;">${name}</strong>
+          <button type="button" class="btn btn-outline btn-sm btn-view-cert-details" data-cert-action="view-details" data-cert-id="${id}" title="View all filled certificate fields for editing template" style="padding:2px 8px;font-size:0.72rem;line-height:1.2;border-color:rgba(0,240,255,0.45);color:var(--cyan);border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(0,240,255,0.06);transition:all 0.2s;">
+            <i class="fas fa-list-alt"></i> View More
+          </button>
+        </div>
+        <div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} &bull; ${escapeHtml(cert.program_type || '')} &bull; ${escapeHtml(cert.certificate_type || 'Certificate')} &bull; ${escapeHtml(cert.recognition || '')}</div>
+      </td>
       <td><div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;"><strong class="cert-id-badge">${id}</strong><button type="button" class="btn-action-icon" data-cert-action="copy-id" data-cert-id="${id}" title="Copy ID"><i class="fas fa-copy"></i></button></div><div style="font-size:.72rem;color:var(--text-dim);margin-top:4px;">Token: ${token}</div></td>
       <td><span style="font-weight:700;font-size:.78rem;color:${stColor};text-transform:uppercase;">${escapeHtml(st)}</span></td>
       <td>${escapeHtml(formatDate(cert.issue_date))}</td>
@@ -2289,6 +2308,7 @@ async function saveCertificate() {
       certificate = result.data?.certificate;
     }
     if (!certificate) throw new Error('The registry did not return the generated verification details.');
+    currentCertificatesList.unshift(certificate);
     form.reset();
     const today = new Date().toISOString().slice(0, 10);
     document.getElementById('certIssueDate').value = today;
@@ -2399,6 +2419,393 @@ async function uploadFinalCertificateDocx(certificateId, file) {
   }
 }
 
+// =========================================================================
+// 12. CERTIFICATE FILL ASSISTANT (FIELD VIEWER & ONE-CLICK COPY HELPER)
+// =========================================================================
+async function openCertFillDetailsModal(certificateId) {
+  if (!certificateId) return;
+
+  // Search cached memory
+  let cert = currentCertificatesList.find(c => (c.certificate_id === certificateId || String(c.id) === String(certificateId)));
+
+  if (!cert && latestGeneratedCertificate && (latestGeneratedCertificate.certificate_id === certificateId || String(latestGeneratedCertificate.id) === String(certificateId))) {
+    cert = latestGeneratedCertificate;
+  }
+
+  if (!cert && isDevStaticMode) {
+    const all = getLocalData('certificates') || [];
+    cert = all.find(c => (c.certificate_id === certificateId || String(c.id) === String(certificateId)));
+  }
+
+  // If not found in cache, fetch via API
+  if (!cert && !isDevStaticMode) {
+    try {
+      const res = await apiFetch(`../api/admin/certificates.php?action=list&search=${encodeURIComponent(certificateId)}&limit=1`);
+      const result = await res.json().catch(() => null);
+      if (result?.success && result?.data?.certificates?.length) {
+        cert = result.data.certificates.find(c => c.certificate_id === certificateId || String(c.id) === String(certificateId)) || result.data.certificates[0];
+      }
+    } catch (e) {
+      console.error('Error fetching certificate details', e);
+    }
+  }
+
+  if (!cert) {
+    showToast('Certificate record not found.', true);
+    return;
+  }
+
+  renderCertFillDetailsModal(cert);
+  openAdminModal('certFillDetailsModal');
+}
+
+function renderCertFillDetailsModal(cert) {
+  const container = document.getElementById('certFillDetailsBody');
+  if (!container) return;
+
+  const id = cert.certificate_id || '';
+  const recipientName = cert.recipient_name || '';
+  const safeName = recipientName || 'Certificate';
+  const recipientEmail = cert.recipient_email || '';
+  const courseName = cert.course_name || '';
+  const certType = cert.certificate_type || 'Completion';
+  const certTitleHeader = `Certificate of ${certType}`;
+  const programType = cert.program_type || 'Training Program';
+  const recognition = cert.recognition || 'Completed';
+  const duration = cert.course_duration || '1 Month';
+  const mentorName = cert.trainer_name || 'Santhosh S';
+  const mentorDesignation = cert.trainer_designation || 'Lead Technical Instructor';
+  const signatoryName = cert.signatory_name || 'S.B. Sachin';
+  const signatoryDesignation = cert.signatory_designation || 'Founder & CEO';
+  const issueDateRaw = cert.issue_date || '';
+  const issueDateFormatted = formatDate(issueDateRaw);
+  const completionDateRaw = cert.completion_date || issueDateRaw;
+  const completionDateFormatted = formatDate(completionDateRaw);
+  const token = cert.verification_token || '';
+  const url = cert.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(id)}`;
+  const notes = cert.private_notes || '';
+  const status = String(cert.status || 'valid').toUpperCase();
+  const statusColor = status === 'VALID' ? '#22c55e' : (status === 'REVOKED' ? '#ef4444' : '#f59e0b');
+
+  // Text summary ready to paste into design software / word
+  const allFormattedText = [
+    `=== VYOMANTRA TECHNOLOGIES - CERTIFICATE DATA ===`,
+    `Recipient Name     : ${recipientName}`,
+    `Program / Course   : ${courseName}`,
+    `Certificate Header : ${certTitleHeader}`,
+    `Program Category   : ${programType}`,
+    `Recognition / Role : ${recognition}`,
+    `Program Duration   : ${duration}`,
+    `Date of Issue      : ${issueDateFormatted} (${issueDateRaw})`,
+    `Completion Date    : ${completionDateFormatted} (${completionDateRaw})`,
+    `Mentor / Instructor: ${mentorName} (${mentorDesignation})`,
+    `Authorized By      : ${signatoryName} (${signatoryDesignation})`,
+    `Certificate ID     : ${id}`,
+    `Verification Link  : ${url}`,
+    `Security Token     : ${token}`,
+    recipientEmail ? `Recipient Email    : ${recipientEmail}` : '',
+    notes ? `Internal Notes     : ${notes}` : '',
+    `Record Status      : ${status}`,
+    `=================================================`
+  ].filter(Boolean).join('\n');
+
+  container.innerHTML = `
+    <!-- Top Hero Card with Recipient and Quick Actions -->
+    <div style="background: linear-gradient(135deg, rgba(0,240,255,0.08) 0%, rgba(139,92,246,0.06) 100%); border: 1px solid rgba(0,240,255,0.25); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--cyan); font-weight:700; margin-bottom:0.25rem;">
+            <i class="fas fa-user-graduate" style="margin-right:4px;"></i> Certificate Recipient
+          </div>
+          <div style="font-size:1.4rem; font-weight:800; color:#fff; font-family:var(--font-heading); display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+            <span>${escapeHtml(recipientName)}</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(recipientName)}" data-copy-name="Recipient Name" style="padding:3px 10px; font-size:0.75rem; border-radius:20px; border:1px solid rgba(0,240,255,0.4); color:var(--cyan); background:rgba(0,240,255,0.08); cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy Name
+            </button>
+            <span style="font-size:0.72rem; padding:2px 8px; border-radius:12px; background:rgba(34,197,94,0.12); color:${statusColor}; border:1px solid ${statusColor}; font-weight:700;">
+              ${escapeHtml(status)}
+            </span>
+          </div>
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.35rem;">
+            ID: <strong style="color:var(--cyan); font-family:var(--font-mono);">${escapeHtml(id)}</strong>
+            ${recipientEmail ? ` &bull; <span style="color:var(--text-dim);">${escapeHtml(recipientEmail)}</span>` : ''}
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+          <button type="button" class="btn btn-primary btn-sm" id="btnModalCopyAll" style="font-size:0.8rem; padding:0.45rem 0.85rem;">
+            <i class="fas fa-copy"></i> Copy All for Canva/Word
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" id="btnModalDownloadCertQr" style="font-size:0.8rem; padding:0.45rem 0.85rem;">
+            <i class="fas fa-qrcode"></i> Download QR PNG
+          </button>
+          <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="font-size:0.8rem; padding:0.45rem 0.85rem; text-decoration:none;">
+            <i class="fas fa-external-link-alt"></i> Verify Page
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Exact Text Needed on Certificate Template -->
+    <div style="margin-bottom:1.5rem;">
+      <h4 style="margin:0 0 0.75rem; font-size:0.92rem; text-transform:uppercase; letter-spacing:0.06em; color:#fff; display:flex; align-items:center; gap:0.45rem;">
+        <i class="fas fa-pen-fancy" style="color:var(--cyan);"></i> Certificate Template Fields (What to type into Canva / Word)
+      </h4>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:0.85rem;">
+
+        <!-- Recipient Name -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Recipient Name (Candidate)</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(recipientName)}" data-copy-name="Recipient Name" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:1.05rem; font-weight:700; color:#fff;">${escapeHtml(recipientName)}</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Primary name line on certificate</div>
+        </div>
+
+        <!-- Course / Program Name -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Program / Course Title</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(courseName)}" data-copy-name="Program Title" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:1rem; font-weight:700; color:var(--cyan);">${escapeHtml(courseName)}</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Under "for successfully completing..."</div>
+        </div>
+
+        <!-- Certificate Type Header -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Certificate Title (Header)</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(certTitleHeader)}" data-copy-name="Certificate Header" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(certTitleHeader)}</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Top heading on the certificate</div>
+        </div>
+
+        <!-- Program Type & Recognition -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Program Type &amp; Recognition</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(programType + ' - ' + recognition)}" data-copy-name="Program Type & Recognition" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(programType)} &bull; ${escapeHtml(recognition)}</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Category &amp; participation result</div>
+        </div>
+
+        <!-- Duration -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Program Duration</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(duration)}" data-copy-name="Duration" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(duration)}</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Duration mentioned in body text</div>
+        </div>
+
+        <!-- Issue Date -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Date of Issue</span>
+            <div style="display:flex; gap:0.25rem;">
+              <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(issueDateFormatted)}" data-copy-name="Formatted Date" title="Copy formatted (e.g. 04 Oct 2026)" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+                <i class="fas fa-copy"></i> Formatted
+              </button>
+              <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(issueDateRaw)}" data-copy-name="Raw Date" title="Copy ISO date (YYYY-MM-DD)" style="background:rgba(255,255,255,0.05); border:1px solid var(--border-admin); color:var(--text-muted); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+                Raw
+              </button>
+            </div>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(issueDateFormatted)} <span style="font-size:0.78rem; font-weight:400; color:var(--text-dim);">(${escapeHtml(issueDateRaw)})</span></div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Issued date on certificate</div>
+        </div>
+
+        <!-- Completion Date -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Completion Date</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(completionDateFormatted)}" data-copy-name="Completion Date" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(completionDateFormatted)} <span style="font-size:0.78rem; font-weight:400; color:var(--text-dim);">(${escapeHtml(completionDateRaw)})</span></div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Program completion date</div>
+        </div>
+
+        <!-- Mentor / Lead Instructor -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Mentor / Program Lead</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(mentorName)}" data-copy-name="Mentor Name" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(mentorName)}</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Left signature block (${escapeHtml(mentorDesignation)})</div>
+        </div>
+
+        <!-- Authorized Signatory / Director -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Authorized Signatory</span>
+            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(signatoryName)}" data-copy-name="Signatory Name" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(signatoryName)}</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Right signature block (${escapeHtml(signatoryDesignation)})</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section 2: Verification, QR & Security Metadata -->
+    <div style="display:grid; grid-template-columns:minmax(280px, 1.3fr) minmax(220px, 0.7fr); gap:1.25rem; align-items:start;">
+      
+      <!-- Security Credential Fields -->
+      <div>
+        <h4 style="margin:0 0 0.75rem; font-size:0.92rem; text-transform:uppercase; letter-spacing:0.06em; color:#fff; display:flex; align-items:center; gap:0.45rem;">
+          <i class="fas fa-shield-alt" style="color:var(--cyan);"></i> Verification &amp; Security Credentials
+        </h4>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+
+          <!-- Certificate ID -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.75rem 0.9rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; font-weight:600;">Certificate ID (Serial No.)</span>
+              <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(id)}" data-copy-name="Certificate ID" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+                <i class="fas fa-copy"></i> Copy ID
+              </button>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.95rem; font-weight:700; color:var(--cyan);">${escapeHtml(id)}</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Printed near QR code on certificate</div>
+          </div>
+
+          <!-- Public Verification URL -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.75rem 0.9rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; font-weight:600;">Verification URL</span>
+              <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(url)}" data-copy-name="Verification URL" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+                <i class="fas fa-copy"></i> Copy Link
+              </button>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.8rem; color:#fff; word-break:break-all;">${escapeHtml(url)}</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">URL opened when student scans the QR code</div>
+          </div>
+
+          <!-- Verification Token -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.75rem 0.9rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <span style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; font-weight:600;">Security Token</span>
+              <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(token)}" data-copy-name="Security Token" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+                <i class="fas fa-copy"></i> Copy Token
+              </button>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:0.78rem; color:var(--text-muted); word-break:break-all;">${escapeHtml(token || 'N/A')}</div>
+          </div>
+
+          <!-- Private Notes (if any) -->
+          ${notes ? `
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.75rem 0.9rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                <span style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; font-weight:600;">Internal Admin Notes</span>
+                <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(notes)}" data-copy-name="Admin Notes" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+              </div>
+              <div style="font-size:0.85rem; color:#fff;">${escapeHtml(notes)}</div>
+            </div>
+          ` : ''}
+
+        </div>
+      </div>
+
+      <!-- Live QR Code Widget & Download -->
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:10px; padding:1.25rem; text-align:center;">
+        <h4 style="margin:0 0 0.5rem; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; color:#fff;">
+          <i class="fas fa-qrcode" style="color:var(--cyan);"></i> Certificate QR Code
+        </h4>
+        <p style="margin:0 0 0.85rem; font-size:0.75rem; color:var(--text-muted);">
+          Insert this QR image onto your certificate template for 1-click verification.
+        </p>
+
+        <div id="modalCertQrPreviewBox" style="display:flex; justify-content:center; align-items:center; background:#ffffff; border-radius:8px; padding:10px; width:max-content; margin:0 auto 1rem; box-shadow:0 4px 15px rgba(0,0,0,0.4);">
+          <!-- QR Canvas / Img renders here -->
+        </div>
+
+        <button type="button" class="btn btn-primary btn-sm" id="btnModalDownloadQrInWidget" style="width:100%; margin-bottom:0.5rem; font-size:0.82rem; padding:0.45rem;">
+          <i class="fas fa-download"></i> Download QR PNG (600x600)
+        </button>
+        <button type="button" class="btn btn-outline btn-sm btn-copy-field" data-copy-val="${escapeHtml(url)}" data-copy-name="QR Verification Link" style="width:100%; font-size:0.8rem; padding:0.4rem;">
+          <i class="fas fa-link"></i> Copy QR Link
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  // Render QR Code in modal widget
+  const qrBox = document.getElementById('modalCertQrPreviewBox');
+  if (qrBox && typeof QRCode !== 'undefined') {
+    qrBox.replaceChildren();
+    new QRCode(qrBox, {
+      text: url,
+      width: 160,
+      height: 160,
+      colorDark: '#07111d',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  // Bind single field copy buttons inside modal
+  container.querySelectorAll('.btn-copy-field').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const val = btn.dataset.copyVal || '';
+      const name = btn.dataset.copyName || 'Value';
+      await copyCertificateText(val, `${name} copied to clipboard`);
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = `<i class="fas fa-check" style="color:#22c55e;"></i> Copied!`;
+      setTimeout(() => { btn.innerHTML = originalHtml; }, 1500);
+    });
+  });
+
+  // Bind "Copy All" button
+  const copyAllBtn = document.getElementById('btnModalCopyAll');
+  if (copyAllBtn) {
+    copyAllBtn.addEventListener('click', async () => {
+      await copyCertificateText(allFormattedText, 'All certificate fields copied for Canva/Word!');
+      const orig = copyAllBtn.innerHTML;
+      copyAllBtn.innerHTML = `<i class="fas fa-check" style="color:#22c55e;"></i> All Copied!`;
+      setTimeout(() => { copyAllBtn.innerHTML = orig; }, 1800);
+    });
+  }
+
+  // Bind QR Download buttons
+  const triggerQrDownload = async () => {
+    try {
+      await downloadCertificateQr(safeName, id, url);
+      showToast('High-resolution QR code downloaded.');
+    } catch (err) {
+      showToast(err.message || 'QR download failed', true);
+    }
+  };
+
+  document.getElementById('btnModalDownloadCertQr')?.addEventListener('click', triggerQrDownload);
+  document.getElementById('btnModalDownloadQrInWidget')?.addEventListener('click', triggerQrDownload);
+}
+
 // Explicit Window Method Bindings for Inline HTML Event Compatibility
 window.openCourseModal = openCourseModal;
 window.deleteCourse = deleteCourse;
@@ -2407,6 +2814,7 @@ window.handleSaveCourse = handleSaveCourse;
 window.openAdminModal = openAdminModal;
 window.closeAdminModal = closeAdminModal;
 window.deleteCertificate = deleteCertificate;
+window.openCertFillDetailsModal = openCertFillDetailsModal;
 
 // Install the click router as soon as this body-end script loads. It must not
 // depend on the async authentication/setup path finishing first.

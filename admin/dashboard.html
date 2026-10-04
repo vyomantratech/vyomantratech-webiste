@@ -608,7 +608,10 @@
             <div class="form-group"><label class="form-label">Certificate ID</label><div style="display:flex;gap:.5rem;"><input id="generatedCertId" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="id">Copy</button></div></div>
             <div class="form-group"><label class="form-label">Verification token</label><div style="display:flex;gap:.5rem;"><input id="generatedCertToken" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="token">Copy</button></div></div>
             <div class="form-group"><label class="form-label">Verification link</label><div style="display:flex;gap:.5rem;"><input id="generatedCertUrl" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="url">Copy</button></div></div>
-            <button type="button" class="btn btn-outline" id="btnDownloadGeneratedQr"><i class="fas fa-download"></i> Download QR PNG</button>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <button type="button" class="btn btn-outline" id="btnDownloadGeneratedQr"><i class="fas fa-download"></i> Download QR PNG</button>
+              <button type="button" class="btn btn-outline" id="btnViewGeneratedFilledFields" style="color:var(--cyan);border-color:rgba(0,240,255,0.4);"><i class="fas fa-list-alt"></i> View Filled Details</button>
+            </div>
             <hr style="border-color:var(--border-admin);margin:1.1rem 0;">
             <label class="form-label" for="generatedFinalDocx">Final certificate DOCX (optional)</label>
             <input type="file" id="generatedFinalDocx" class="form-control" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
@@ -911,6 +914,34 @@
        CERTIFICATE MANAGEMENT MODALS
        ========================================================================= -->
 
+  <!-- Certificate Fill Details Assistant Modal -->
+  <div class="admin-modal-backdrop" id="certFillDetailsModal">
+    <div class="admin-modal-card modal-lg" style="max-width: 900px;">
+      <div class="admin-modal-header" style="background: rgba(0, 240, 255, 0.03);">
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem; color: #fff;">
+            <i class="fas fa-certificate" style="color: var(--cyan);"></i> Certificate Fill Assistant
+          </h3>
+          <p style="margin: 0.25rem 0 0; font-size: 0.8rem; color: var(--text-muted);">
+            All fields filled for this certificate record &mdash; copy values directly into your Word, Canva, or Photoshop template.
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeAdminModal('certFillDetailsModal')">&times;</button>
+      </div>
+
+      <div class="admin-modal-body" id="certFillDetailsBody" style="padding: 1.25rem 1.5rem; overflow-y: auto; max-height: calc(90vh - 140px);">
+        <!-- Populated dynamically by openCertFillDetailsModal() in admin.js -->
+      </div>
+
+      <div class="admin-modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="font-size: 0.8rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.4rem;">
+          <i class="fas fa-info-circle" style="color: var(--cyan);"></i> Tip: Use <strong>Copy All for Canva/Word</strong> to paste all certificate lines at once.
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('certFillDetailsModal')">Done</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Box -->
   <div id="adminToast">
     <i class="fas fa-check-circle" style="color: var(--cyan);"></i>
@@ -918,7 +949,7 @@
   </div>
 
   <!-- Admin JS Script -->
-  <script src="js/admin.js?v=2.9.0"></script>
+  <script src="js/admin.js?v=3.0.0"></script>
 </body>
 
 </html>
