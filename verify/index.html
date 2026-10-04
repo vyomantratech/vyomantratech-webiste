@@ -516,34 +516,18 @@
         <i class="fas fa-award" style="font-size: 2.75rem; color: var(--cyan); margin-bottom: 1rem; filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.4));"></i>
         <h1 class="search-title">Certificate Verification</h1>
         <p class="search-subtitle">
-          Official authentication portal for course, training, internship, and workshop credentials issued by VYOMANTRA TECHNOLOGIES.
+          Official authentication portal for training, course, internship, hackathon, event and achievement certificates issued by VYOMANTRA TECHNOLOGIES.
         </p>
 
         <form id="verifySearchForm" class="verify-search-form" onsubmit="event.preventDefault(); handleManualSearch();">
           <div class="search-input-group">
             <i class="fas fa-search"></i>
-            <input type="text" id="certInputId" class="verify-input" placeholder="e.g. VYOM-PY-2026-00001" required autocomplete="off" spellcheck="false">
+            <input type="text" id="certInputId" class="verify-input" placeholder="e.g. VYOM-CRS-2026-00001-X7K9" required autocomplete="off" spellcheck="false">
           </div>
           <button type="submit" id="btnVerifySubmit" class="verify-submit-btn">
             <i class="fas fa-shield-alt"></i> VERIFY CREDENTIAL
           </button>
         </form>
-
-        <!-- Quick Demo Chips -->
-        <div class="quick-test-section">
-          <span>Quick Sample Credentials to Test:</span>
-          <div class="quick-chips">
-            <span class="quick-chip" onclick="quickFill('VYOM-PY-2026-00001')" title="Python Course - VALID">
-              <i class="fas fa-check-circle" style="color:#10b981;"></i> VYOM-PY-2026-00001
-            </span>
-            <span class="quick-chip" onclick="quickFill('VYOM-INT-2026-00002')" title="Internship - VALID">
-              <i class="fas fa-briefcase" style="color:#00f0ff;"></i> VYOM-INT-2026-00002
-            </span>
-            <span class="quick-chip" onclick="quickFill('VYOM-WKS-2026-00004')" title="Workshop - REVOKED">
-              <i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> VYOM-WKS-2026-00004 (Revoked)
-            </span>
-          </div>
-        </div>
 
       </div>
     </div>
@@ -576,25 +560,37 @@
       </div>
 
       <!-- Key Details Summary Grid -->
-      <div class="details-grid">
+      <div class="details-grid" id="detailsGrid">
         <div class="detail-item-box">
           <div class="detail-item-label"><i class="fas fa-id-card"></i> Certificate ID</div>
           <div class="detail-item-value mono" id="resCertId">--</div>
         </div>
-        <div class="detail-item-box">
+        <div class="detail-item-box" data-detail>
           <div class="detail-item-label"><i class="fas fa-user"></i> Recipient Name</div>
           <div class="detail-item-value" id="resRecipientName">--</div>
         </div>
-        <div class="detail-item-box">
-          <div class="detail-item-label"><i class="fas fa-certificate"></i> Credential Type</div>
+        <div class="detail-item-box" data-detail>
+          <div class="detail-item-label"><i class="fas fa-certificate"></i> Certificate Type</div>
           <div class="detail-item-value" id="resCertType">--</div>
         </div>
-        <div class="detail-item-box">
-          <div class="detail-item-label"><i class="fas fa-graduation-cap"></i> Program / Course</div>
+        <div class="detail-item-box" data-detail>
+          <div class="detail-item-label"><i class="fas fa-graduation-cap"></i> Program / Event</div>
           <div class="detail-item-value" id="resCourseName">--</div>
         </div>
-        <div class="detail-item-box">
-          <div class="detail-item-label"><i class="fas fa-calendar-check"></i> Issue Date</div>
+        <div class="detail-item-box" data-detail>
+          <div class="detail-item-label"><i class="fas fa-layer-group"></i> Program Type</div>
+          <div class="detail-item-value" id="resProgramType">--</div>
+        </div>
+        <div class="detail-item-box" data-detail>
+          <div class="detail-item-label"><i class="fas fa-award"></i> Recognition</div>
+          <div class="detail-item-value" id="resRecognition">--</div>
+        </div>
+        <div class="detail-item-box" data-detail>
+          <div class="detail-item-label"><i class="fas fa-clock"></i> Duration</div>
+          <div class="detail-item-value" id="resDuration">--</div>
+        </div>
+        <div class="detail-item-box" data-detail>
+          <div class="detail-item-label"><i class="fas fa-calendar-check"></i> Date of Issue</div>
           <div class="detail-item-value" id="resIssueDate">--</div>
         </div>
         <div class="detail-item-box">
@@ -605,10 +601,10 @@
 
       <!-- Verification actions -->
       <div class="verify-actions-bar">
-        <a type="button" class="btn-action-primary" id="downloadUploadedCertificatePdf" href="#" download style="display:none;">
-          <i class="fas fa-file-pdf"></i> Download Uploaded Certificate (PDF)
+        <a class="btn-action-primary" id="downloadUploadedCertificatePdf" href="#" rel="noopener" style="display:none;">
+          <i class="fas fa-file-pdf"></i> Download Certificate (PDF)
         </a>
-        <span id="certificatePdfPendingNote" style="display:none;color:var(--text-muted);font-size:.85rem;">The issuing authority has not uploaded a certificate PDF.</span>
+        <span id="certificatePdfPendingNote" style="display:none;color:var(--text-muted);font-size:.85rem;">A digital copy of this certificate is not available for download yet.</span>
         <button type="button" class="btn-action-secondary" onclick="copyVerificationShareUrl()">
           <i class="fas fa-share-alt"></i> Share Verification Link
         </button>

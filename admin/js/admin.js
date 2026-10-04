@@ -2110,11 +2110,37 @@ async function handleCertificateAction(event) {
       await copyCertificateText(button.dataset.certToken, 'Verification token copied');
     } else if (button.dataset.certAction === 'copy-url') {
       await copyCertificateText(button.dataset.certUrl, 'Verification link copied');
+    } else if (button.dataset.certAction === 'revoke' || button.dataset.certAction === 'reinstate') {
+      await changeCertificateStatus(button.dataset.certId, button.dataset.certAction);
     }
   } catch (error) {
     console.error('Certificate action failed:', error);
     showToast('Certificate action failed. Please try again.', true);
   }
+}
+
+// Revoke (asks for a reason) or reinstate a certificate. The PDF is kept; public access is blocked while revoked.
+async function changeCertificateStatus(certificateId, action) {
+  let reason = '';
+  if (action === 'revoke') {
+    reason = (window.prompt(`Reason for revoking ${certificateId}? (kept private, never shown publicly)`) || '').trim();
+    if (!reason) { showToast('Revoke cancelled: a reason is required.', true); return; }
+  } else if (!window.confirm(`Reinstate ${certificateId} as valid?`)) {
+    return;
+  }
+  if (isDevStaticMode) {
+    const all = getLocalData('certificates') || [];
+    all.forEach(c => { if (c.certificate_id === certificateId) { c.status = action === 'revoke' ? 'revoked' : 'valid'; c.revocation_reason = action === 'revoke' ? reason : null; } });
+    saveLocalData('certificates', all);
+  } else {
+    const body = new FormData();
+    body.append('action', action); body.append('certificate_id', certificateId); body.append('reason', reason);
+    const response = await apiFetch('../api/admin/certificates.php', { method: 'POST', headers: { 'Authorization': `Bearer ${authToken || ''}` }, body });
+    const result = await response.json();
+    if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not update the certificate status.');
+  }
+  showToast(action === 'revoke' ? `${certificateId} revoked.` : `${certificateId} reinstated.`);
+  await fetchCertificates();
 }
 
 async function fetchCertificates() {
@@ -2159,7 +2185,7 @@ function renderCertificatesTable(certificates, total) {
   const tbody = document.getElementById('certificatesTableBody');
   if (!tbody) return;
   if (!certificates.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-dim);">No verification records found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-dim);">No verification records found.</td></tr>';
     return;
   }
   tbody.innerHTML = certificates.map(cert => {
@@ -2168,13 +2194,20 @@ function renderCertificatesTable(certificates, total) {
     const safeName = escapeHtml(cert.recipient_name || 'Certificate');
     const url = escapeHtml(cert.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(cert.certificate_id || '')}`);
     const token = escapeHtml(cert.verification_token || '');
-    const pdfUrl = cert.certificate_pdf_url ? escapeHtml(cert.certificate_pdf_url) : '';
+    const pdfUrl = cert.certificate_pdf_url ? `../api/download.php?id=${encodeURIComponent(cert.certificate_id || '')}` : '';
+    const st = String(cert.status || 'valid').toLowerCase();
+    const stColor = st === 'valid' ? '#10b981' : (st === 'revoked' ? '#ef4444' : '#f59e0b');
+    const actionBtn = st === 'revoked'
+      ? `<button type="button" class="btn btn-outline btn-sm" data-cert-action="reinstate" data-cert-id="${id}">Reinstate</button>`
+      : `<button type="button" class="btn btn-outline btn-sm" data-cert-action="revoke" data-cert-id="${id}" style="color:#ef4444;border-color:#ef4444;">Revoke</button>`;
     return `<tr>
-      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} · ${escapeHtml(cert.certificate_type || 'Certificate')}</div></td>
+      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} · ${escapeHtml(cert.program_type || '')} · ${escapeHtml(cert.certificate_type || 'Certificate')} · ${escapeHtml(cert.recognition || '')}</div></td>
       <td><div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;"><strong class="cert-id-badge">${id}</strong><button type="button" class="btn-action-icon" data-cert-action="copy-id" data-cert-id="${id}" title="Copy ID"><i class="fas fa-copy"></i></button></div><div style="font-size:.72rem;color:var(--text-dim);margin-top:4px;">Token: ${token}</div></td>
+      <td><span style="font-weight:700;font-size:.78rem;color:${stColor};text-transform:uppercase;">${escapeHtml(st)}</span></td>
       <td>${escapeHtml(formatDate(cert.issue_date))}</td>
       <td><button type="button" class="btn btn-outline btn-sm" data-cert-action="download-qr" data-cert-name="${safeName}" data-cert-id="${id}" data-cert-url="${url}"><i class="fas fa-qrcode"></i> Download QR</button><button type="button" class="btn-action-icon" data-cert-action="copy-token" data-cert-token="${token}" title="Copy token"><i class="fas fa-key"></i></button><button type="button" class="btn-action-icon" data-cert-action="copy-url" data-cert-url="${url}" title="Copy verification link"><i class="fas fa-link"></i></button></td>
       <td>${pdfUrl ? `<a class="btn btn-outline btn-sm" href="${pdfUrl}" download><i class="fas fa-file-pdf"></i> Download PDF</a>` : `<label class="btn btn-outline btn-sm" style="cursor:pointer;"><i class="fas fa-upload"></i> Upload final DOCX<input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;"></label><div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;">PDF not uploaded</div>`}</td>
+      <td>${actionBtn}</td>
     </tr>`;
   }).join('');
   tbody.querySelectorAll('[data-cert-upload]').forEach(input => input.addEventListener('change', async () => {
@@ -2204,25 +2237,32 @@ async function saveCertificate() {
     let certificate;
     if (isDevStaticMode) {
       const all = getLocalData('certificates') || [];
-      const prefix = String(formData.get('prefix') || 'VYOM-CRT');
+      const prefixByType = { 'Training Program': 'VYOM-CRS', 'Internship': 'VYOM-INT', 'Hackathon': 'VYOM-HCK', 'Workshop': 'VYOM-WRK', 'Webinar': 'VYOM-EVT', 'Competition': 'VYOM-EVT' };
+      const prefix = prefixByType[String(formData.get('program_type') || 'Training Program')] || 'VYOM-CRS';
       const issueDate = String(formData.get('issue_date') || new Date().toISOString().slice(0, 10));
       const year = new Date(`${issueDate}T00:00:00`).getFullYear();
-      const matcher = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-${year}-(\\d+)$`);
+      const matcher = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-${year}-(\\d+)(?:-[A-Z0-9]{4})?$`);
       const sequence = all.reduce((max, item) => Math.max(max, Number((item.certificate_id || '').match(matcher)?.[1] || 0)), 0) + 1;
-      const certificateId = `${prefix}-${year}-${String(sequence).padStart(5, '0')}`;
+      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const suffixBytes = new Uint8Array(4); crypto.getRandomValues(suffixBytes);
+      const suffix = [...suffixBytes].map(v => alphabet[v % alphabet.length]).join('');
+      const certificateId = `${prefix}-${year}-${String(sequence).padStart(5, '0')}-${suffix}`;
       const random = new Uint8Array(16);
       crypto.getRandomValues(random);
       const token = [...random].map(value => value.toString(16).padStart(2, '0')).join('');
       certificate = {
         id: Date.now(), certificate_id: certificateId, verification_token: token,
-        verification_url: `${window.location.origin}/verify/?id=${encodeURIComponent(certificateId)}`,
-        certificate_type: String(formData.get('certificate_type') || 'Course Completion'), prefix,
+        verification_url: `${window.location.origin}/verify/?id=${token}`,
+        certificate_type: String(formData.get('certificate_type') || 'Completion'),
+        program_type: String(formData.get('program_type') || 'Training Program'),
+        recognition: String(formData.get('recognition') || 'Completed'), prefix,
+        trainer_name: String(formData.get('trainer_name') || '').trim(),
         recipient_name: String(formData.get('recipient_name') || '').trim(),
         recipient_email: String(formData.get('recipient_email') || '').trim(),
         course_name: String(formData.get('course_name') || '').trim(),
         course_duration: String(formData.get('course_duration') || '').trim(),
         issue_date: issueDate, completion_date: String(formData.get('completion_date') || issueDate),
-        description: String(formData.get('description') || '').trim(), status: 'valid',
+        private_notes: String(formData.get('private_notes') || '').trim(), status: 'valid',
         issued_by: 'VYOMANTRA TECHNOLOGIES', created_at: new Date().toISOString()
       };
       all.unshift(certificate);

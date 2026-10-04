@@ -1,0 +1,10 @@
+# Private runtime data - never commit
+data/admin_session.json
+data/certificates.json
+data/certificate_logs.json
+logs/*
+!logs/.htaccess
+!logs/.gitkeep
+uploads/certificates/*.pdf
+uploads/payments/*
+uploads/resumes/*

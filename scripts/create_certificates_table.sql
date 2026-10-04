@@ -8,8 +8,10 @@ SET time_zone = "+05:30";
 CREATE TABLE IF NOT EXISTS `certificates` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `certificate_id` VARCHAR(60) NOT NULL UNIQUE,
-  `certificate_type` VARCHAR(80) NOT NULL DEFAULT 'Course Completion',
-  `prefix` VARCHAR(25) NOT NULL DEFAULT 'VYOM-CRT',
+  `certificate_type` VARCHAR(80) NOT NULL DEFAULT 'Completion',
+  `program_type` VARCHAR(40) NOT NULL DEFAULT 'Training Program',
+  `recognition` VARCHAR(40) NOT NULL DEFAULT 'Completed',
+  `prefix` VARCHAR(25) NOT NULL DEFAULT 'VYOM-CRS',
   `recipient_name` VARCHAR(150) NOT NULL,
   `recipient_email` VARCHAR(150) DEFAULT NULL,
   `course_name` VARCHAR(180) NOT NULL,

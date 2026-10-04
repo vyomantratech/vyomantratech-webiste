@@ -15,6 +15,9 @@ DirectoryIndex index.html index.php
   RewriteCond %{HTTP:Authorization} ^(.*)
   RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
+  # 0. Never serve the .git folder
+  RewriteRule ^\.git - [F,L]
+
   # 1. Force HTTPS on Production (exclude localhost / 127.0.0.1)
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP_HOST} !^localhost(:\d+)?$
@@ -50,3 +53,20 @@ DirectoryIndex index.html index.php
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
+
+# Block private files that must never be downloaded directly
+# (data/, logs/, uploads/certificates/, scratch/, scripts/, templates/ also have their own .htaccess)
+<FilesMatch "(?i)(\.(sql|md|mjs|log)$|^custom_template_downloaded\.docx$)">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+<FilesMatch "^\.git">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>

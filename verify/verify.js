@@ -45,15 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Quick fill from demo chips
-function quickFill(id) {
-  const inputEl = document.getElementById('certInputId');
-  if (inputEl) {
-    inputEl.value = id;
-    verifyCertificate(id, 'MANUAL_ID');
-  }
-}
-
 // Manual search form submit
 function handleManualSearch() {
   const inputEl = document.getElementById('certInputId');
@@ -67,133 +58,27 @@ function handleManualSearch() {
   verifyCertificate(certId, 'MANUAL_ID');
 }
 
-// Main verification request
+// Main verification request (server is the only source of truth)
 async function verifyCertificate(certId, method = 'MANUAL_ID') {
   showLoadingView();
 
   try {
     const endpoint = `../api/verify.php?id=${encodeURIComponent(certId)}&method=${encodeURIComponent(method)}`;
-    const res = await fetch(endpoint, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
+    const res = await fetch(endpoint, { method: 'GET', headers: { 'Accept': 'application/json' } });
+    const data = await res.json().catch(() => null);
 
-    // Check if server returned valid response
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.data) {
-        renderVerifiedCertificate(data.data, data.message);
-        return;
-      }
-    }
-
-    if (res.status === 404) {
-      const data = await res.json().catch(() => ({}));
-      const fallbackCert = checkLocalFallback(certId);
-      if (fallbackCert) {
-        renderVerifiedCertificate(fallbackCert, 'Certificate Verified via local cache.');
-        return;
-      }
-      renderNotFoundState(certId, data.message);
+    if (res.status === 429) {
+      renderNotFoundState(certId, 'Too many attempts. Please wait a minute and try again.');
       return;
     }
-
-    // Static Server / Local Dev Fallback if PHP not responding
-    const fallbackCert = checkLocalFallback(certId);
-    if (fallbackCert) {
-      renderVerifiedCertificate(fallbackCert, 'Certificate Verified via local cache.');
+    if (res.ok && data && data.data && data.data.status) {
+      renderVerifiedCertificate(data.data, data.message);
       return;
     }
-
-    renderNotFoundState(certId, 'We could not find an official certificate matching this Certificate ID.');
-
+    renderNotFoundState(certId, 'No certificate found with this ID. It may be invalid.');
   } catch (err) {
-    // Network or static environment fallback
-    const fallbackCert = checkLocalFallback(certId);
-    if (fallbackCert) {
-      renderVerifiedCertificate(fallbackCert, 'Certificate Verified via local offline registry.');
-    } else {
-      renderNotFoundState(certId, 'We could not find an official certificate matching this Certificate ID.');
-    }
+    renderNotFoundState(certId, 'We could not reach the verification service. Please try again.');
   }
-}
-
-// Local dev static fallback for offline / Live Server
-function checkLocalFallback(queryId) {
-  const upperQuery = queryId.toUpperCase().trim();
-
-  // 1. Check localStorage
-  const localList = JSON.parse(localStorage.getItem('vyomantra_admin_certificates') || localStorage.getItem('vyomantra_certificates') || '[]');
-  const matchLocal = localList.find(c => 
-    (c.certificate_id && c.certificate_id.toUpperCase() === upperQuery) || 
-    (c.verification_token === queryId)
-  );
-  if (matchLocal) return matchLocal;
-
-  // 2. Built-in seed mock records for zero-dependency local testing
-  const seedMock = [
-    {
-      certificate_id: "VYOM-PY-2026-00001",
-      recipient_name: "Kavitha R",
-      certificate_type: "Course Completion",
-      course_name: "Advanced Python & Applied Artificial Intelligence",
-      course_duration: "3 Months (120 Hours)",
-      description: "Successfully demonstrated mastery in core Python data structures, asynchronous programming, REST APIs with FastAPI, and integration of neural network inference pipelines.",
-      trainer_name: "Santhosh S",
-      trainer_designation: "Lead Technical Instructor",
-      signatory_name: "S.B. Sachin",
-      signatory_designation: "Founder & CEO",
-      issue_date: "2026-09-15",
-      completion_date: "2026-09-12",
-      expiry_date: null,
-      status: "valid",
-      issued_by: "VYOMANTRA TECHNOLOGIES",
-      verification_url: window.location.origin + "/verify/?id=VYOM-PY-2026-00001",
-      verification_token: "a1f9e83b27c645e90d81b34c89efa712"
-    },
-    {
-      certificate_id: "VYOM-INT-2026-00002",
-      recipient_name: "Aravindhan M",
-      certificate_type: "Internship Certificate",
-      course_name: "Full Stack Software Engineering Internship",
-      course_duration: "6 Months Intensive",
-      description: "Completed software development engineering internship actively architecting enterprise microservices, high-performance UI components, and real-time database transactions.",
-      trainer_name: "Naveen Kumar",
-      trainer_designation: "Head of Engineering",
-      signatory_name: "S.B. Sachin",
-      signatory_designation: "Founder & CEO",
-      issue_date: "2026-08-30",
-      completion_date: "2026-08-28",
-      expiry_date: null,
-      status: "valid",
-      issued_by: "VYOMANTRA TECHNOLOGIES",
-      verification_url: window.location.origin + "/verify/?id=VYOM-INT-2026-00002",
-      verification_token: "7c34b89e120fa54398de17a4c9b83f01"
-    },
-    {
-      certificate_id: "VYOM-WKS-2026-00004",
-      recipient_name: "Dinesh Kumar K",
-      certificate_type: "Workshop Certificate",
-      course_name: "Cloud Native DevOps & Containerization Workshop",
-      course_duration: "2 Days Boot-Camp",
-      description: "Participated in hands-on Docker orchestration, Kubernetes cluster management, and CI/CD automated deployment pipelines.",
-      trainer_name: "Sivaperumal M",
-      trainer_designation: "Cloud Infrastructure Lead",
-      signatory_name: "S.B. Sachin",
-      signatory_designation: "Founder & CEO",
-      issue_date: "2026-07-10",
-      completion_date: "2026-07-10",
-      expiry_date: null,
-      status: "revoked",
-      issued_by: "VYOMANTRA TECHNOLOGIES",
-      revoked_at: "2026-08-01 10:00:00",
-      revocation_reason: "Course unfulfilled and non-attendance during the formal examination session.",
-      verification_url: window.location.origin + "/verify/?id=VYOM-WKS-2026-00004",
-      verification_token: "bb89a12c45def67098124bc4590ea321"
-    }
-  ];
-
-  return seedMock.find(c => c.certificate_id.toUpperCase() === upperQuery) || null;
 }
 
 // Render verified certificate
@@ -207,6 +92,8 @@ function renderVerifiedCertificate(cert, customMsg) {
   if (resultSec) resultSec.style.display = 'block';
 
   const status = (cert.status || 'valid').toLowerCase();
+  const gridEl = document.getElementById('detailsGrid');
+  if (gridEl) gridEl.style.display = '';
 
   // Status Banner
   const banner = document.getElementById('statusBanner');
@@ -229,7 +116,7 @@ function renderVerifiedCertificate(cert, customMsg) {
     if (ribbon) ribbon.style.display = 'none';
   } else if (status === 'revoked') {
     headline.textContent = 'Certificate Revoked';
-    desc.textContent = `This certificate was revoked by VYOMANTRA TECHNOLOGIES. Reason: ${cert.revocation_reason || 'Administrative Review'}.`;
+    desc.textContent = 'This certificate has been revoked by VYOMANTRA TECHNOLOGIES and is no longer valid.';
     icon.className = 'fas fa-exclamation-triangle';
     pill.textContent = 'REVOKED';
     pill.style.color = '#ef4444';
@@ -240,7 +127,7 @@ function renderVerifiedCertificate(cert, customMsg) {
     }
   } else if (status === 'expired') {
     headline.textContent = 'Certificate Expired';
-    desc.textContent = `The validity period for this credential has elapsed (Expiry: ${cert.expiry_date || 'Past'}).`;
+    desc.textContent = 'The validity period for this credential has elapsed.';
     icon.className = 'fas fa-clock';
     pill.textContent = 'EXPIRED';
     pill.style.color = '#f59e0b';
@@ -251,24 +138,32 @@ function renderVerifiedCertificate(cert, customMsg) {
     }
   }
 
-  // Populate Key Details Grid
-  document.getElementById('resCertId').textContent = cert.certificate_id || '--';
-  document.getElementById('resRecipientName').textContent = cert.recipient_name || '--';
-  document.getElementById('resCertType').textContent = cert.certificate_type || 'Course Completion';
-  document.getElementById('resCourseName').textContent = cert.course_name || '--';
-  document.getElementById('resIssueDate').textContent = formatDate(cert.issue_date);
-  document.getElementById('resIssuedBy').textContent = cert.issued_by || 'VYOMANTRA TECHNOLOGIES';
+  // Populate Key Details Grid (revoked certificates show status only)
+  const showDetails = status !== 'revoked';
+  document.querySelectorAll('#detailsGrid [data-detail]').forEach(el => { el.style.display = showDetails ? '' : 'none'; });
+  setText('resCertId', cert.certificate_id);
+  setText('resIssuedBy', cert.issued_by || 'VYOMANTRA TECHNOLOGIES');
+  if (showDetails) {
+    setText('resRecipientName', cert.recipient_name);
+    setText('resCertType', cert.certificate_type);
+    setText('resCourseName', cert.program_name);
+    setText('resProgramType', cert.program_type);
+    setText('resRecognition', cert.recognition);
+    setText('resDuration', cert.duration);
+    setText('resIssueDate', formatDate(cert.issue_date));
+  }
 
+  // Digital copy: valid certificates only, served by api/download.php (storage path stays hidden)
   const pdfLink = document.getElementById('downloadUploadedCertificatePdf');
   const pdfNote = document.getElementById('certificatePdfPendingNote');
-  const hasPublicPdf = Boolean(cert.certificate_pdf_url && status === 'valid');
+  const hasPublicPdf = Boolean(cert.pdf_available && cert.download_url && status === 'valid');
   if (pdfLink) {
-    pdfLink.href = hasPublicPdf ? cert.certificate_pdf_url : '#';
+    pdfLink.href = hasPublicPdf ? cert.download_url : '#';
     pdfLink.style.display = hasPublicPdf ? 'inline-flex' : 'none';
   }
   if (pdfNote) pdfNote.style.display = status === 'valid' && !hasPublicPdf ? 'inline' : 'none';
   // Update Page Title
-  document.title = `Verified: ${cert.certificate_id} - ${cert.recipient_name} | VYOMANTRA TECHNOLOGIES`;
+  document.title = `Certificate ${cert.certificate_id} | VYOMANTRA TECHNOLOGIES`;
 
   // Scroll smoothly to results
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -297,11 +192,12 @@ function renderNotFoundState(certId, msg) {
   pill.textContent = 'NOT FOUND';
   pill.style.color = '#ef4444';
 
-  document.getElementById('resCertId').textContent = certId || '--';
-  document.getElementById('resRecipientName').textContent = 'Record Not Found';
-  document.getElementById('resCertType').textContent = '--';
-  document.getElementById('resCourseName').textContent = '--';
-  document.getElementById('resIssueDate').textContent = '--';
+  const grid = document.getElementById('detailsGrid');
+  if (grid) grid.style.display = 'none';
+  const pdfLink = document.getElementById('downloadUploadedCertificatePdf');
+  const pdfNote = document.getElementById('certificatePdfPendingNote');
+  if (pdfLink) pdfLink.style.display = 'none';
+  if (pdfNote) pdfNote.style.display = 'none';
 
   document.title = `Certificate Not Found (${certId}) | VYOMANTRA TECHNOLOGIES`;
 }
@@ -329,6 +225,11 @@ function hideLoadingView() {
   document.getElementById('verifyLoadingSection').style.display = 'none';
 }
 
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = (value === undefined || value === null || value === '') ? '--' : value;
+}
+
 // Date Formatter
 function formatDate(dateStr) {
   if (!dateStr) return '--';
@@ -340,20 +241,11 @@ function formatDate(dateStr) {
   }
 }
 
-// Download only the final PDF uploaded by the issuing authority.
-function downloadCertificatePdf() {
-  const pdfUrl = currentCertData?.certificate_pdf_url;
-  if (!pdfUrl) {
-    showToast('The issuer has not uploaded the final certificate PDF yet.');
-    return;
-  }
-  window.open(pdfUrl, '_blank', 'noopener');
-}
 // Copy Shareable URL
 function copyVerificationShareUrl() {
   if (!currentCertData) return;
   const siteOrigin = window.location.origin;
-  const url = `${siteOrigin}/verify/?id=${encodeURIComponent(currentCertData.certificate_id)}`;
+  const url = window.location.href;
   navigator.clipboard.writeText(url).then(() => {
     showToast('Verification URL copied to clipboard.');
   }).catch(() => {

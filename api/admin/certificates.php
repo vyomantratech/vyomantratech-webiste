@@ -34,24 +34,42 @@ function saveLocalCerts($certs) {
     @file_put_contents($jsonFile, json_encode($certs, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 }
 
-// Helper to generate next unique collision-safe Certificate ID
+// Allowed values (kept in sync with admin dashboard + certificate template)
+const CERT_TYPES = ['Completion', 'Participation', 'Achievement', 'Internship', 'Excellence', 'Appreciation'];
+const CERT_PROGRAM_TYPES = ['Training Program', 'Internship', 'Hackathon', 'Workshop', 'Webinar', 'Competition'];
+const CERT_RECOGNITIONS = ['Completed', 'Participant', 'Winner', 'Runner-up', 'Intern', 'Volunteer'];
+
+// ID prefix by program type: CRS, INT, HCK, EVT, WRK
+function certPrefixForProgramType($programType) {
+    $map = [
+        'Training Program' => 'VYOM-CRS',
+        'Internship'       => 'VYOM-INT',
+        'Hackathon'        => 'VYOM-HCK',
+        'Workshop'         => 'VYOM-WRK',
+        'Webinar'          => 'VYOM-EVT',
+        'Competition'      => 'VYOM-EVT'
+    ];
+    return $map[$programType] ?? 'VYOM-CRS';
+}
+
+// Helper to generate next unique collision-safe, hard-to-guess Certificate ID
+// Format: PREFIX-YYYY-NNNNN-XXXX  (XXXX = random suffix so IDs cannot be enumerated)
 function generateNextCertificateId($pdo, $prefix, $year) {
-    $prefix = strtoupper(trim($prefix ?: 'VYOM-CRT'));
+    $prefix = strtoupper(trim($prefix ?: 'VYOM-CRS'));
     $year = (int)($year ?: date('Y'));
     $searchPattern = $prefix . '-' . $year . '-%';
+    $matcher = '/^' . preg_quote($prefix . '-' . $year . '-', '/') . '(\d+)(?:-[A-Z0-9]{4})?$/';
 
     $maxSeq = 0;
 
     // Check DB
     if ($pdo) {
         try {
-            $stmt = $pdo->prepare("SELECT certificate_id FROM certificates WHERE certificate_id LIKE :pat ORDER BY id DESC");
+            $stmt = $pdo->prepare("SELECT certificate_id FROM certificates WHERE certificate_id LIKE :pat");
             $stmt->execute([':pat' => $searchPattern]);
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $parts = explode('-', $row['certificate_id']);
-                $seq = (int)end($parts);
-                if ($seq > $maxSeq) {
-                    $maxSeq = $seq;
+                if (preg_match($matcher, $row['certificate_id'], $m)) {
+                    $maxSeq = max($maxSeq, (int)$m[1]);
                 }
             }
         } catch (\PDOException $e) {
@@ -62,33 +80,30 @@ function generateNextCertificateId($pdo, $prefix, $year) {
     // Check JSON fallback
     $certs = getLocalCerts();
     foreach ($certs as $c) {
-        $cid = $c['certificate_id'] ?? '';
-        if (strpos($cid, $prefix . '-' . $year . '-') === 0) {
-            $parts = explode('-', $cid);
-            $seq = (int)end($parts);
-            if ($seq > $maxSeq) {
-                $maxSeq = $seq;
-            }
+        if (preg_match($matcher, $c['certificate_id'] ?? '', $m)) {
+            $maxSeq = max($maxSeq, (int)$m[1]);
         }
     }
 
-    // Generate collision-safe ID
+    $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     do {
         $maxSeq++;
-        $newId = sprintf("%s-%04d-%05d", $prefix, $year, $maxSeq);
-        // Ensure absolutely unique
+        $suffix = '';
+        for ($i = 0; $i < 4; $i++) {
+            $suffix .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+        $newId = sprintf("%s-%04d-%05d-%s", $prefix, $year, $maxSeq, $suffix);
         $existsInDb = false;
         if ($pdo) {
-            $check = $pdo->prepare("SELECT COUNT(*) FROM certificates WHERE certificate_id = :id");
-            $check->execute([':id' => $newId]);
-            $existsInDb = ((int)$check->fetchColumn() > 0);
+            try {
+                $check = $pdo->prepare("SELECT COUNT(*) FROM certificates WHERE certificate_id = :id");
+                $check->execute([':id' => $newId]);
+                $existsInDb = ((int)$check->fetchColumn() > 0);
+            } catch (\PDOException $e) { /* fallback */ }
         }
         $existsInJson = false;
         foreach ($certs as $c) {
-            if (($c['certificate_id'] ?? '') === $newId) {
-                $existsInJson = true;
-                break;
-            }
+            if (($c['certificate_id'] ?? '') === $newId) { $existsInJson = true; break; }
         }
     } while ($existsInDb || $existsInJson);
 
@@ -208,8 +223,10 @@ if ($action === 'list') {
 if ($action === 'create') {
     $recipientName        = trim($_POST['recipient_name'] ?? '');
     $recipientEmail       = trim($_POST['recipient_email'] ?? '');
-    $certificateType      = trim($_POST['certificate_type'] ?? 'Course Completion');
-    $prefix               = trim($_POST['prefix'] ?? 'VYOM-CRT');
+    $certificateType      = trim($_POST['certificate_type'] ?? 'Completion');
+    $programType          = trim($_POST['program_type'] ?? 'Training Program');
+    $recognition          = trim($_POST['recognition'] ?? 'Completed');
+    $prefix               = trim($_POST['prefix'] ?? '') ?: certPrefixForProgramType($programType);
     $courseName           = trim($_POST['course_name'] ?? '');
     $courseDuration       = trim($_POST['course_duration'] ?? '3 Months');
     $description          = trim($_POST['description'] ?? '');
@@ -224,7 +241,13 @@ if ($action === 'create') {
     $privateNotes         = trim($_POST['private_notes'] ?? '');
 
     if (empty($recipientName) || empty($courseName)) {
-        sendResponse(false, 'Recipient Full Name and Course/Program Name are mandatory.', [], 400);
+        sendResponse(false, 'Recipient Full Name and Program / Event Name are mandatory.', [], 400);
+    }
+    if (!in_array($certificateType, CERT_TYPES, true) || !in_array($programType, CERT_PROGRAM_TYPES, true) || !in_array($recognition, CERT_RECOGNITIONS, true)) {
+        sendResponse(false, 'Invalid certificate type, program type or recognition value.', [], 400);
+    }
+    if (!preg_match('/^[A-Z0-9-]{3,25}$/', strtoupper($prefix))) {
+        sendResponse(false, 'Invalid ID prefix.', [], 400);
     }
 
     // Auto-generate unique Certificate ID
@@ -233,11 +256,14 @@ if ($action === 'create') {
 
     // Auto-generate cryptographically secure token & verification URL
     $verificationToken = bin2hex(random_bytes(16));
-    $verificationUrl   = SITE_URL . '/verify/?id=' . urlencode($certificateId);
+    // QR / link carries the long random token, not the printed ID, so links cannot be guessed
+    $verificationUrl   = SITE_URL . '/verify/?id=' . $verificationToken;
 
     $record = [
         'certificate_id'        => $certificateId,
         'certificate_type'      => $certificateType,
+        'program_type'          => $programType,
+        'recognition'           => $recognition,
         'prefix'                => $prefix,
         'recipient_name'        => $recipientName,
         'recipient_email'       => $recipientEmail,
@@ -272,13 +298,13 @@ if ($action === 'create') {
         try {
             $stmt = $pdo->prepare("
                 INSERT INTO certificates (
-                    certificate_id, certificate_type, prefix, recipient_name, recipient_email,
+                    certificate_id, certificate_type, program_type, recognition, prefix, recipient_name, recipient_email,
                     course_name, course_duration, description, trainer_name, trainer_designation,
                     signatory_name, signatory_designation, issue_date, completion_date, expiry_date,
                     status, verification_token, verification_url, template_id, issued_by, private_notes,
                     created_at, updated_at
                 ) VALUES (
-                    :cid, :ctype, :prefix, :rname, :remail,
+                    :cid, :ctype, :ptype, :recog, :prefix, :rname, :remail,
                     :cname, :cdur, :desc, :tname, :tdesig,
                     :sname, :sdesig, :idate, :cdate, :edate,
                     :status, :token, :vurl, :tempid, :issuedby, :pnotes,
@@ -288,6 +314,8 @@ if ($action === 'create') {
             $stmt->execute([
                 ':cid'      => $certificateId,
                 ':ctype'    => $certificateType,
+                ':ptype'    => $programType,
+                ':recog'    => $recognition,
                 ':prefix'   => $prefix,
                 ':rname'    => $recipientName,
                 ':remail'   => $recipientEmail,
@@ -326,6 +354,52 @@ if ($action === 'create') {
     sendResponse(true, "Certificate $certificateId created successfully.", [
         'certificate' => $record
     ], 201);
+}
+
+// =========================================================================
+// REVOKE / REINSTATE (file is kept; public access is blocked while revoked)
+// =========================================================================
+if ($action === 'revoke' || $action === 'reinstate') {
+    $cid = trim($_POST['certificate_id'] ?? '');
+    $reason = trim($_POST['reason'] ?? '');
+    if ($cid === '') sendResponse(false, 'Certificate ID is required.', [], 400);
+    if ($action === 'revoke' && $reason === '') sendResponse(false, 'Please enter a reason for revoking.', [], 400);
+
+    $newStatus = $action === 'revoke' ? 'revoked' : 'valid';
+    $adminName = is_array($adminUser ?? null) ? (string)($adminUser['username'] ?? 'admin') : 'admin';
+    $found = false;
+
+    if ($pdo) {
+        try {
+            if ($action === 'revoke') {
+                $st = $pdo->prepare("UPDATE certificates SET status='revoked', revoked_at=NOW(), revoked_by=:by, revocation_reason=:why, updated_at=NOW() WHERE certificate_id=:cid");
+                $st->execute([':by' => $adminName, ':why' => $reason, ':cid' => $cid]);
+            } else {
+                $st = $pdo->prepare("UPDATE certificates SET status='valid', revoked_at=NULL, revoked_by=NULL, revocation_reason=NULL, updated_at=NOW() WHERE certificate_id=:cid");
+                $st->execute([':cid' => $cid]);
+            }
+            $found = $st->rowCount() > 0;
+        } catch (\PDOException $e) {
+            error_log('Revoke/reinstate DB error: ' . $e->getMessage());
+        }
+    }
+
+    $records = getLocalCerts();
+    foreach ($records as &$rec) {
+        if (($rec['certificate_id'] ?? '') === $cid) {
+            $rec['status'] = $newStatus;
+            $rec['revoked_at'] = $action === 'revoke' ? date('Y-m-d H:i:s') : null;
+            $rec['revoked_by'] = $action === 'revoke' ? $adminName : null;
+            $rec['revocation_reason'] = $action === 'revoke' ? $reason : null;
+            $rec['updated_at'] = date('Y-m-d H:i:s');
+            $found = true;
+        }
+    }
+    unset($rec);
+    saveLocalCerts($records);
+
+    if (!$found) sendResponse(false, 'Certificate record not found.', [], 404);
+    sendResponse(true, "Certificate $cid is now $newStatus.", ['certificate_id' => $cid, 'status' => $newStatus]);
 }
 
 // =========================================================================
