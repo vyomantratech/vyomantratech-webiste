@@ -83,17 +83,29 @@ function certEffectiveStatus($cert) {
     return $status;
 }
 
-/** Absolute path of the stored certificate PDF, or null. Never exposed publicly. */
+/** Absolute path of the stored certificate file (PDF or DOCX), or null. Never exposed publicly. */
 function certPdfPath($cert) {
+    $info = certGetUploadInfo($cert);
+    return $info ? $info['path'] : null;
+}
+
+/**
+ * Returns array ['path'=>..., 'ext'=>..., 'mime'=>...] for the stored certificate file,
+ * or null if no valid file exists. Supports both .pdf and .docx uploads.
+ */
+function certGetUploadInfo($cert) {
     $stored = $cert['certificate_pdf_url'] ?? '';
     if (!$stored) return null;
     $name = basename((string)parse_url($stored, PHP_URL_PATH));
     $name = rawurldecode($name);
-    if (!preg_match('/^[A-Za-z0-9_.-]+\.pdf$/', $name)) return null;
-    $path = realpath(__DIR__ . '/../uploads/certificates/' . $name);
+    // Accept .pdf or .docx only
+    if (!preg_match('/^[A-Za-z0-9_.\-]+\.(pdf|docx)$/i', $name, $m)) return null;
+    $ext  = strtolower($m[1]);
+    $mime = ($ext === 'pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     $base = realpath(__DIR__ . '/../uploads/certificates');
+    $path = realpath(__DIR__ . '/../uploads/certificates/' . $name);
     if (!$path || !$base || strpos($path, $base . DIRECTORY_SEPARATOR) !== 0 || !is_file($path)) return null;
-    return $path;
+    return ['path' => $path, 'ext' => $ext, 'mime' => $mime, 'name' => $name];
 }
 
 /** Audit log. Stores a hashed IP and no user-agent (no personal data). */

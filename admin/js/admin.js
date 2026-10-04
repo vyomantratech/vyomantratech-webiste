@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Vyomantra Technologies - Admin Control Center Engine
  * Unified Dual-Mode Architecture:
  * - Live Mode: Connects to Hostinger PHP MySQL REST APIs (/api/admin/*.php)
@@ -158,7 +158,7 @@ function populateHeaderUser(user) {
   if (nameEl) nameEl.textContent = user.full_name || user.username || 'Administrator';
   if (roleEl) {
     roleEl.innerHTML = (user.role === 'super_admin') 
-      ? `Super Admin ${isDevStaticMode ? '<span style="color:#22c55e; margin-left:4px; font-size:0.68rem; font-weight:700;">● LOCAL DEV</span>' : '<span style="color:#00f0ff; margin-left:4px; font-size:0.68rem;">● LIVE DB</span>'}`
+      ? `Super Admin ${isDevStaticMode ? '<span style="color:#22c55e; margin-left:4px; font-size:0.68rem; font-weight:700;">â— LOCAL DEV</span>' : '<span style="color:#00f0ff; margin-left:4px; font-size:0.68rem;">â— LIVE DB</span>'}`
       : 'Editor';
   }
   if (avatarEl) {
@@ -316,7 +316,7 @@ function updateStatsUI(data) {
   setTxt('statQuotesNew', (data.quotes?.new || 0) + ' New');
 
   setTxt('statCoursesTotal', data.courses?.total || 0);
-  setTxt('statCoursesRevenue', '₹' + Number(data.courses?.total_revenue || 0).toLocaleString('en-IN'));
+  setTxt('statCoursesRevenue', 'â‚¹' + Number(data.courses?.total_revenue || 0).toLocaleString('en-IN'));
 
   setTxt('statApplicantsTotal', data.careers?.total_applicants || 0);
   setTxt('statApplicantsReviewing', (data.careers?.applied || 0) + ' New');
@@ -390,7 +390,7 @@ function renderLocalStats() {
     activity: [
       ...contacts.slice(0, 3).map(c => ({ type: 'contact', title: c.name, subtitle: c.service, status: c.status, created_at: c.created_at })),
       ...quotes.slice(0, 2).map(q => ({ type: 'quote', title: q.name, subtitle: q.company || q.service, status: q.status, created_at: q.created_at })),
-      ...courses.slice(0, 2).map(c => ({ type: 'course', title: c.student_name, subtitle: `${c.course_name} (₹${c.amount_paid})`, status: c.payment_status, created_at: c.created_at })),
+      ...courses.slice(0, 2).map(c => ({ type: 'course', title: c.student_name, subtitle: `${c.course_name} (â‚¹${c.amount_paid})`, status: c.payment_status, created_at: c.created_at })),
       ...applicants.slice(0, 2).map(a => ({ type: 'career', title: a.name, subtitle: a.role_applied, status: a.status, created_at: a.created_at }))
     ].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 8)
   };
@@ -818,7 +818,7 @@ async function fetchCourseRegistrations() {
         <div style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;">${escapeHtml(c.course_mode || 'Live Online')}</div>
       </td>
       <td style="font-weight:700; color:var(--green); font-size:0.95rem;">
-        ₹${Number(c.amount_paid || 649).toLocaleString('en-IN')}
+        â‚¹${Number(c.amount_paid || 649).toLocaleString('en-IN')}
       </td>
       <td>
         <span style="font-family:var(--font-mono); color:#fff; font-size:0.85rem; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">
@@ -1415,8 +1415,8 @@ async function fetchCoursesCMS() {
         <div style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;">${escapeHtml(c.mode || 'Live Online')}</div>
       </td>
       <td>
-        <div style="color:var(--cyan); font-weight:700; font-size:0.95rem;">₹${Number(c.fee || 649).toLocaleString('en-IN')}</div>
-        ${c.original_fee ? `<div style="font-size:0.75rem; color:var(--text-dim); text-decoration:line-through;">₹${Number(c.original_fee).toLocaleString('en-IN')}</div>` : ''}
+        <div style="color:var(--cyan); font-weight:700; font-size:0.95rem;">â‚¹${Number(c.fee || 649).toLocaleString('en-IN')}</div>
+        ${c.original_fee ? `<div style="font-size:0.75rem; color:var(--text-dim); text-decoration:line-through;">â‚¹${Number(c.original_fee).toLocaleString('en-IN')}</div>` : ''}
       </td>
       <td>
         <span style="color:var(--cyan); font-weight:700; font-size:0.95rem;">${c.student_count || 0}</span> students
@@ -1772,7 +1772,7 @@ function openJobModal(job) {
     document.getElementById('jobDatePosted').value = new Date().toISOString().split('T')[0];
     document.getElementById('jobLocationText').value = 'Dharmapuri, TN / Hybrid';
     document.getElementById('jobCompensationText').value = 'Competitive CTC';
-    document.getElementById('jobExpText').value = '1 – 3+ Years Experience';
+    document.getElementById('jobExpText').value = '1 â€“ 3+ Years Experience';
   }
 
   openAdminModal('jobEditorModal');
@@ -2180,12 +2180,12 @@ function renderCertificatesTable(certificates, total) {
       ? `<button type="button" class="btn btn-outline btn-sm" data-cert-action="reinstate" data-cert-id="${id}">Reinstate</button>`
       : `<button type="button" class="btn btn-outline btn-sm" data-cert-action="revoke" data-cert-id="${id}" style="color:#ef4444;border-color:#ef4444;">Revoke</button>`;
     return `<tr>
-      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} · ${escapeHtml(cert.program_type || '')} · ${escapeHtml(cert.certificate_type || 'Certificate')} · ${escapeHtml(cert.recognition || '')}</div></td>
+      <td><strong>${name}</strong><div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(cert.course_name || '')} Â· ${escapeHtml(cert.program_type || '')} Â· ${escapeHtml(cert.certificate_type || 'Certificate')} Â· ${escapeHtml(cert.recognition || '')}</div></td>
       <td><div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;"><strong class="cert-id-badge">${id}</strong><button type="button" class="btn-action-icon" data-cert-action="copy-id" data-cert-id="${id}" title="Copy ID"><i class="fas fa-copy"></i></button></div><div style="font-size:.72rem;color:var(--text-dim);margin-top:4px;">Token: ${token}</div></td>
       <td><span style="font-weight:700;font-size:.78rem;color:${stColor};text-transform:uppercase;">${escapeHtml(st)}</span></td>
       <td>${escapeHtml(formatDate(cert.issue_date))}</td>
       <td><button type="button" class="btn btn-outline btn-sm" data-cert-action="download-qr" data-cert-name="${safeName}" data-cert-id="${id}" data-cert-url="${url}"><i class="fas fa-qrcode"></i> Download QR</button><button type="button" class="btn-action-icon" data-cert-action="copy-token" data-cert-token="${token}" title="Copy token"><i class="fas fa-key"></i></button><button type="button" class="btn-action-icon" data-cert-action="copy-url" data-cert-url="${url}" title="Copy verification link"><i class="fas fa-link"></i></button></td>
-      <td>${pdfUrl ? `<a class="btn btn-outline btn-sm" href="${pdfUrl}" download><i class="fas fa-file-pdf"></i> Download PDF</a>` : `<label class="btn btn-outline btn-sm" style="cursor:pointer;"><i class="fas fa-upload"></i> Upload final DOCX<input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;"></label><div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;">PDF not uploaded</div>`}</td>
+      <td>${pdfUrl ? `<a class="btn btn-outline btn-sm" href="${pdfUrl}" download><i class="fas fa-file-pdf"></i> Download File</a>` : `<label class="btn btn-outline btn-sm" style="cursor:pointer;"><i class="fas fa-upload"></i> Upload DOCX / PDF<input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;"></label><div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;">Not uploaded yet</div>`}</td>
       <td>${actionBtn}</td>
     </tr>`;
   }).join('');
@@ -2200,7 +2200,7 @@ function updateCertPagination(total) {
   const previous = document.getElementById('btnPrevCertPage');
   const next = document.getElementById('btnNextCertPage');
   const start = total ? certCurrentPage * CERTS_PAGE_SIZE + 1 : 0;
-  if (summary) summary.textContent = `Showing ${start}–${Math.min((certCurrentPage + 1) * CERTS_PAGE_SIZE, total)} of ${total} records`;
+  if (summary) summary.textContent = `Showing ${start}â€“${Math.min((certCurrentPage + 1) * CERTS_PAGE_SIZE, total)} of ${total} records`;
   if (previous) previous.disabled = certCurrentPage === 0;
   if (next) next.disabled = (certCurrentPage + 1) * CERTS_PAGE_SIZE >= total;
 }
@@ -2337,25 +2337,29 @@ function downloadGeneratedQr() {
 }
 
 async function uploadFinalCertificateDocx(certificateId, file) {
-  if (!/\.docx$/i.test(file.name)) { showToast('Choose the final certificate as a DOCX file.', true); return; }
-  if (isDevStaticMode) { showToast('DOCX-to-PDF conversion needs the PHP server and LibreOffice converter. Run this on the hosted site.', true); return; }
+  const isPdf  = /\.pdf$/i.test(file.name);
+  const isDocx = /\.docx$/i.test(file.name);
+  if (!isPdf && !isDocx) { showToast('Please choose a .pdf or .docx certificate file.', true); return; }
+  if (isDevStaticMode && isDocx) { showToast('DOCX upload requires the PHP server. Upload a PDF, or use the live site.', true); return; }
   const status = document.getElementById('generatedPdfStatus');
-  if (status) status.textContent = 'Uploading DOCX and preparing the verification PDF…';
-  const body = new FormData(); body.append('action', 'upload_final_docx'); body.append('id', certificateId); body.append('final_docx', file);
+  if (status) status.textContent = isPdf ? 'Uploading PDF...' : 'Uploading DOCX...';
+  const action = isPdf ? 'upload_final_pdf' : 'upload_final_docx';
+  const fieldName = isPdf ? 'final_pdf' : 'final_docx';
+  const body = new FormData(); body.append('action', action); body.append('id', certificateId); body.append(fieldName, file);
   try {
     const response = await apiFetch('../api/admin/certificates.php', { method: 'POST', headers: { 'Authorization': `Bearer ${authToken || ''}` }, body });
     const result = await response.json();
-    if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not convert the uploaded DOCX.');
+    if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not upload the certificate file.');
     if (latestGeneratedCertificate?.certificate_id === certificateId) {
       latestGeneratedCertificate.certificate_pdf_url = result.data?.certificate_pdf_url;
-      status.textContent = 'PDF is ready. It will appear on the public verification page.';
+      if (status) status.textContent = 'Certificate file ready. It will appear on the public verification page.';
     }
-    showToast('Final certificate converted and attached as PDF.');
+    showToast(isPdf ? 'PDF uploaded and attached.' : 'DOCX uploaded and attached.');
     await fetchCertificates();
   } catch (error) {
-    console.error('Final certificate upload failed:', error);
-    if (status) status.textContent = error.message || 'Upload and conversion failed.';
-    showToast(error.message || 'Upload and conversion failed.', true);
+    console.error('Certificate file upload failed:', error);
+    if (status) status.textContent = error.message || 'Upload failed.';
+    showToast(error.message || 'Upload failed.', true);
   }
 }
 

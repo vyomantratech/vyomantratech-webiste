@@ -153,15 +153,24 @@ function renderVerifiedCertificate(cert, customMsg) {
     setText('resIssueDate', formatDate(cert.issue_date));
   }
 
-  // Digital copy: valid certificates only, served by api/download.php (storage path stays hidden)
+  // Digital copy download button: works for both PDF and DOCX uploads
   const pdfLink = document.getElementById('downloadUploadedCertificatePdf');
   const pdfNote = document.getElementById('certificatePdfPendingNote');
-  const hasPublicPdf = Boolean(cert.pdf_available && cert.download_url && status === 'valid');
+  const hasFile = Boolean(cert.pdf_available && cert.download_url && status === 'valid');
   if (pdfLink) {
-    pdfLink.href = hasPublicPdf ? cert.download_url : '#';
-    pdfLink.style.display = hasPublicPdf ? 'inline-flex' : 'none';
+    if (hasFile) {
+      const isDocx = (cert.file_type === 'docx');
+      const icon   = isDocx ? 'fa-file-word' : 'fa-file-pdf';
+      const label  = isDocx ? 'Download Certificate (DOCX)' : 'Download Certificate (PDF)';
+      pdfLink.innerHTML = `<i class="fas ${icon}"></i> ${label}`;
+      pdfLink.href = cert.download_url;
+      pdfLink.setAttribute('download', '');
+      pdfLink.style.display = 'inline-flex';
+    } else {
+      pdfLink.style.display = 'none';
+    }
   }
-  if (pdfNote) pdfNote.style.display = status === 'valid' && !hasPublicPdf ? 'inline' : 'none';
+  if (pdfNote) pdfNote.style.display = status === 'valid' && !hasFile ? 'inline' : 'none';
   // Update Page Title
   document.title = `Certificate ${cert.certificate_id} | VYOMANTRA TECHNOLOGIES`;
 

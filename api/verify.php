@@ -54,7 +54,9 @@ if ($status === 'revoked') {
     ], 200);
 }
 
-$pdfAvailable = ($status === 'valid') && certPdfPath($cert) !== null;
+$uploadInfo  = ($status === 'valid') ? certGetUploadInfo($cert) : null;
+$pdfAvailable = ($uploadInfo !== null);
+$fileType     = $uploadInfo ? $uploadInfo['ext'] : null; // 'pdf' or 'docx'
 
 // Explicit allow-list (do not "return the row minus some fields").
 $public = [
@@ -69,6 +71,7 @@ $public = [
     'issue_date'       => $cert['issue_date'],
     'issued_by'        => 'VYOMANTRA TECHNOLOGIES',
     'pdf_available'    => $pdfAvailable,
+    'file_type'        => $fileType,
     'download_url'     => $pdfAvailable ? (SITE_URL . '/api/download.php?id=' . rawurlencode($cert['certificate_id'])) : null,
     'verified_at'      => date('c')
 ];

@@ -438,7 +438,31 @@ if ($action === 'upload_final_docx') {
         }
     }
     if ($soffice === '' || !is_executable($soffice) || !function_exists('proc_open')) {
-        sendResponse(false, 'DOCX-to-PDF conversion is not available on this server. Install LibreOffice and set CERTIFICATE_SOFFICE_BIN to its executable.', [], 503);
+        // LibreOffice not available: store the DOCX directly as the certificate file.
+        // Public download will serve the DOCX (via api/download.php which accepts both PDF and DOCX).
+        $certificateId = (string)($certificate['certificate_id'] ?? $id);
+        $safeId    = preg_replace('/[^A-Za-z0-9_-]/', '_', $certificateId);
+        $targetDir = dirname(__DIR__, 2) . '/uploads/certificates';
+        if (!is_dir($targetDir) && !@mkdir($targetDir, 0755, true)) sendResponse(false, 'Could not prepare certificate storage.', [], 500);
+        $fileName = $safeId . '_final.docx';
+        $destPath = $targetDir . '/' . $fileName;
+        if (!move_uploaded_file($upload['tmp_name'], $destPath)) sendResponse(false, 'Could not save the DOCX file.', [], 500);
+        $fileUrl = rtrim(SITE_URL, '/') . '/uploads/certificates/' . rawurlencode($fileName);
+        if ($pdo) {
+            try {
+                $update = $pdo->prepare('UPDATE certificates SET certificate_pdf_url = :url, updated_at = NOW() WHERE certificate_id = :cid');
+                $update->execute([':url' => $fileUrl, ':cid' => $certificateId]);
+            } catch (\PDOException $e) {}
+        }
+        $recs = getLocalCerts();
+        foreach ($recs as &$r) {
+            if (($r['certificate_id'] ?? '') === $certificateId) { $r['certificate_pdf_url'] = $fileUrl; $r['updated_at'] = date('Y-m-d H:i:s'); }
+        }
+        unset($r);
+        saveLocalCerts($recs);
+        sendResponse(true, 'DOCX uploaded and attached (PDF conversion unavailable on this server; DOCX will be served for download).', [
+            'certificate_id' => $certificateId, 'certificate_pdf_url' => $fileUrl,
+        ]);
     }
 
     $zip = new ZipArchive();
@@ -514,6 +538,72 @@ if ($action === 'upload_final_docx') {
     }
     if ($conversionError !== null) sendResponse(false, $conversionError, [], 500);
     sendResponse(true, 'Final DOCX uploaded and converted to PDF.', $conversionResult);
+}
+
+// =========================================================================
+// Direct upload: store .pdf or .docx as-is (no LibreOffice needed).
+// Works on all shared hosting. Served via api/download.php for public download.
+// =========================================================================
+if ($action === 'upload_final_pdf') {
+    $id     = trim($_POST['id'] ?? '');
+    $upload = $_FILES['final_pdf'] ?? $_FILES['final_docx'] ?? null;
+    if ($id === '' || !$upload || ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        sendResponse(false, 'Choose a PDF or DOCX file for a valid certificate record.', [], 400);
+    }
+    $ext = strtolower(pathinfo($upload['name'] ?? '', PATHINFO_EXTENSION));
+    if (!in_array($ext, ['pdf', 'docx'], true)) {
+        sendResponse(false, 'Only PDF and DOCX files are accepted.', [], 400);
+    }
+    if (($upload['size'] ?? 0) < 1 || $upload['size'] > 20 * 1024 * 1024) {
+        sendResponse(false, 'File must be smaller than 20 MB.', [], 400);
+    }
+
+    $certificate = null;
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare('SELECT * FROM certificates WHERE certificate_id = :cid OR id = :id LIMIT 1');
+            $stmt->execute([':cid' => $id, ':id' => $id]);
+            $certificate = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (\PDOException $e) {
+            sendResponse(false, 'Could not load the certificate record.', [], 500);
+        }
+    }
+    if (!$certificate) {
+        foreach (getLocalCerts() as $record) {
+            if (($record['certificate_id'] ?? '') === $id || (string)($record['id'] ?? '') === $id) { $certificate = $record; break; }
+        }
+    }
+    if (!$certificate) sendResponse(false, 'Certificate record not found.', [], 404);
+
+    $certificateId = (string)$certificate['certificate_id'];
+    $safeId   = preg_replace('/[^A-Za-z0-9_-]/', '_', $certificateId);
+    $targetDir = dirname(__DIR__, 2) . '/uploads/certificates';
+    if (!is_dir($targetDir) && !@mkdir($targetDir, 0755, true)) sendResponse(false, 'Could not prepare certificate storage.', [], 500);
+
+    $fileName = $safeId . '_final.' . $ext;
+    $destPath = $targetDir . '/' . $fileName;
+    if (!move_uploaded_file($upload['tmp_name'], $destPath)) sendResponse(false, 'Could not save the uploaded file.', [], 500);
+
+    $fileUrl = rtrim(SITE_URL, '/') . '/uploads/certificates/' . rawurlencode($fileName);
+    if ($pdo) {
+        try {
+            $update = $pdo->prepare('UPDATE certificates SET certificate_pdf_url = :url, updated_at = NOW() WHERE certificate_id = :cid');
+            $update->execute([':url' => $fileUrl, ':cid' => $certificateId]);
+        } catch (\PDOException $e) {}
+    }
+    $records = getLocalCerts();
+    foreach ($records as &$record) {
+        if (($record['certificate_id'] ?? '') === $certificateId) {
+            $record['certificate_pdf_url'] = $fileUrl;
+            $record['updated_at'] = date('Y-m-d H:i:s');
+        }
+    }
+    unset($record);
+    saveLocalCerts($records);
+    sendResponse(true, strtoupper($ext) . ' file uploaded and attached to the certificate.', [
+        'certificate_id'      => $certificateId,
+        'certificate_pdf_url' => $fileUrl,
+    ]);
 }
 
 sendResponse(false, 'Invalid certificate action specified.', [], 400);
