@@ -2052,6 +2052,7 @@ let latestGeneratedCertificate = null;
 let currentCertificatesList = [];
 
 function initCertificatesManager() {
+  const form = document.getElementById('certificateEditorForm');
   const saveButton = document.getElementById('btnSaveCertificate');
   const searchInput = document.getElementById('searchCerts');
   const previousButton = document.getElementById('btnPrevCertPage');
@@ -2060,6 +2061,62 @@ function initCertificatesManager() {
   const viewFieldsButton = document.getElementById('btnViewGeneratedFilledFields');
   const uploadButton = document.getElementById('btnUploadFinalDocx');
   const uploadInput = document.getElementById('generatedFinalDocx');
+  const btnCloseGen = document.getElementById('btnCloseGeneratedPanel');
+  const btnFillPython = document.getElementById('btnFillCoursePython');
+  const durationInput = document.getElementById('certCourseDuration');
+  const issueDateInput = document.getElementById('certIssueDate');
+
+  // Set initial default form values matching 1month_python course.docx
+  if (issueDateInput && !issueDateInput.value) {
+    issueDateInput.value = new Date().toISOString().slice(0, 10);
+  }
+  if (durationInput && !durationInput.value) {
+    durationInput.value = '1 Month';
+  }
+  const mentorNameInput = document.getElementById('certMentorName');
+  if (mentorNameInput && !mentorNameInput.value) mentorNameInput.value = 'Santhosh S';
+  const mentorTitleInput = document.getElementById('certMentorTitle');
+  if (mentorTitleInput && !mentorTitleInput.value) mentorTitleInput.value = 'Program Lead';
+  const signatoryNameInput = document.getElementById('certSignatoryName');
+  if (signatoryNameInput && !signatoryNameInput.value) signatoryNameInput.value = 'S.B. Sachin';
+  const signatoryTitleInput = document.getElementById('certSignatoryTitle');
+  if (signatoryTitleInput && !signatoryTitleInput.value) signatoryTitleInput.value = 'Founder & CEO';
+
+  // Wire Python with AI quick-fill button
+  btnFillPython?.addEventListener('click', () => {
+    const courseInput = document.getElementById('certCourseName');
+    if (courseInput) courseInput.value = 'Advanced Python & Applied AI Engineering';
+    if (durationInput) durationInput.value = '1 Month';
+    document.querySelectorAll('[data-duration-val]').forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.durationVal === '1 Month');
+    });
+    showToast('Applied: Advanced Python & Applied AI Engineering (1 Month)');
+  });
+
+  // Wire duration chips
+  document.querySelectorAll('[data-duration-val]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (durationInput) durationInput.value = chip.dataset.durationVal;
+      document.querySelectorAll('[data-duration-val]').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+
+  // Keep duration chips synced if typed manually
+  durationInput?.addEventListener('input', () => {
+    const val = durationInput.value.trim().toLowerCase();
+    document.querySelectorAll('[data-duration-val]').forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.durationVal.toLowerCase() === val);
+    });
+  });
+
+  // Wire close generated panel button
+  btnCloseGen?.addEventListener('click', () => {
+    const panel = document.getElementById('generatedCertificatePanel');
+    const grid = document.getElementById('certWorkflowGrid');
+    if (panel) panel.style.display = 'none';
+    if (grid) grid.classList.remove('has-generated');
+  });
 
   saveButton?.addEventListener('click', saveCertificate);
   searchInput?.addEventListener('input', debounce(() => { certCurrentPage = 0; fetchCertificates(); }, 250));
@@ -2290,13 +2347,17 @@ async function saveCertificate() {
         certificate_type: String(formData.get('certificate_type') || 'Completion'),
         program_type: String(formData.get('program_type') || 'Training Program'),
         recognition: String(formData.get('recognition') || 'Completed'), prefix,
-        trainer_name: String(formData.get('trainer_name') || '').trim(),
+        trainer_name: String(formData.get('trainer_name') || 'Santhosh S').trim(),
+        trainer_designation: String(formData.get('trainer_designation') || 'Program Lead').trim(),
+        signatory_name: String(formData.get('signatory_name') || 'S.B. Sachin').trim(),
+        signatory_designation: String(formData.get('signatory_designation') || 'Founder & CEO').trim(),
         recipient_name: String(formData.get('recipient_name') || '').trim(),
         recipient_email: String(formData.get('recipient_email') || '').trim(),
         course_name: String(formData.get('course_name') || '').trim(),
-        course_duration: String(formData.get('course_duration') || '').trim(),
+        course_duration: String(formData.get('course_duration') || '1 Month').trim(),
         issue_date: issueDate, completion_date: String(formData.get('completion_date') || issueDate),
         private_notes: String(formData.get('private_notes') || '').trim(), status: 'valid',
+        template_id: '1month_python_course',
         issued_by: 'VYOMANTRA TECHNOLOGIES', created_at: new Date().toISOString()
       };
       all.unshift(certificate);
@@ -2311,9 +2372,25 @@ async function saveCertificate() {
     currentCertificatesList.unshift(certificate);
     form.reset();
     const today = new Date().toISOString().slice(0, 10);
-    document.getElementById('certIssueDate').value = today;
-    document.getElementById('certCompletionDate').value = today;
-    document.getElementById('certStatus').value = 'valid';
+    const issueInput = document.getElementById('certIssueDate');
+    const compInput = document.getElementById('certCompletionDate');
+    const statusInput = document.getElementById('certStatus');
+    const durationInput = document.getElementById('certCourseDuration');
+    const mentorNameInput = document.getElementById('certMentorName');
+    const mentorTitleInput = document.getElementById('certMentorTitle');
+    const signNameInput = document.getElementById('certSignatoryName');
+    const signTitleInput = document.getElementById('certSignatoryTitle');
+    if (issueInput) issueInput.value = today;
+    if (compInput) compInput.value = '';
+    if (statusInput) statusInput.value = 'valid';
+    if (durationInput) durationInput.value = '1 Month';
+    if (mentorNameInput) mentorNameInput.value = 'Santhosh S';
+    if (mentorTitleInput) mentorTitleInput.value = 'Program Lead';
+    if (signNameInput) signNameInput.value = 'S.B. Sachin';
+    if (signTitleInput) signTitleInput.value = 'Founder & CEO';
+    document.querySelectorAll('[data-duration-val]').forEach(c => {
+      c.classList.toggle('active', c.dataset.durationVal === '1 Month');
+    });
     showGeneratedCertificate(certificate);
     showToast(`Verification record ${certificate.certificate_id} created.`);
     await fetchCertificates();
@@ -2329,6 +2406,7 @@ async function saveCertificate() {
 function showGeneratedCertificate(certificate) {
   latestGeneratedCertificate = certificate;
   const panel = document.getElementById('generatedCertificatePanel');
+  const grid = document.getElementById('certWorkflowGrid');
   const id = certificate.certificate_id;
   const url = certificate.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(id)}`;
   document.getElementById('generatedCertId').value = id;
@@ -2339,6 +2417,7 @@ function showGeneratedCertificate(certificate) {
   qrBox.replaceChildren();
   if (typeof QRCode !== 'undefined') new QRCode(qrBox, { text: url, width: 190, height: 190, colorDark: '#07111d', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
   if (panel) panel.style.display = 'block';
+  if (grid) grid.classList.add('has-generated');
   document.getElementById('generatedFinalDocx').value = '';
   panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -2474,7 +2553,7 @@ function renderCertFillDetailsModal(cert) {
   const recognition = cert.recognition || 'Completed';
   const duration = cert.course_duration || '1 Month';
   const mentorName = cert.trainer_name || 'Santhosh S';
-  const mentorDesignation = cert.trainer_designation || 'Lead Technical Instructor';
+  const mentorDesignation = cert.trainer_designation || 'Program Lead';
   const signatoryName = cert.signatory_name || 'S.B. Sachin';
   const signatoryDesignation = cert.signatory_designation || 'Founder & CEO';
   const issueDateRaw = cert.issue_date || '';
@@ -2487,23 +2566,24 @@ function renderCertFillDetailsModal(cert) {
   const status = String(cert.status || 'valid').toUpperCase();
   const statusColor = status === 'VALID' ? '#22c55e' : (status === 'REVOKED' ? '#ef4444' : '#f59e0b');
 
-  // Text summary ready to paste into design software / word
+  // Text summary ready to paste into Word template / Canva
   const allFormattedText = [
     `=== VYOMANTRA TECHNOLOGIES - CERTIFICATE DATA ===`,
-    `Recipient Name     : ${recipientName}`,
-    `Program / Course   : ${courseName}`,
-    `Certificate Header : ${certTitleHeader}`,
-    `Program Category   : ${programType}`,
-    `Recognition / Role : ${recognition}`,
-    `Program Duration   : ${duration}`,
-    `Date of Issue      : ${issueDateFormatted} (${issueDateRaw})`,
-    `Completion Date    : ${completionDateFormatted} (${completionDateRaw})`,
-    `Mentor / Instructor: ${mentorName} (${mentorDesignation})`,
-    `Authorized By      : ${signatoryName} (${signatoryDesignation})`,
-    `Certificate ID     : ${id}`,
-    `Verification Link  : ${url}`,
-    `Security Token     : ${token}`,
-    recipientEmail ? `Recipient Email    : ${recipientEmail}` : '',
+    `Template Match     : assets/1month_python course.docx`,
+    `-------------------------------------------------`,
+    `[RECIPIENT NAME]   : ${recipientName}`,
+    `[PROGRAM / EVENT]  : ${courseName}`,
+    `OF [TYPE]          : ${certTitleHeader}`,
+    `[PROGRAM TYPE]     : ${programType}`,
+    `RECOGNITION: [ROLE]: ${recognition}`,
+    `DURATION           : ${duration}`,
+    `DATE OF ISSUE      : ${issueDateFormatted} (${issueDateRaw})`,
+    `[MENTOR / LEAD]    : ${mentorName} (${mentorDesignation})`,
+    `[FOUNDER NAME]     : ${signatoryName} (${signatoryDesignation})`,
+    `CERTIFICATE ID     : ${id}`,
+    `SCAN TO VERIFY     : ${url}`,
+    `SECURITY TOKEN     : ${token}`,
+    recipientEmail ? `Candidate Email    : ${recipientEmail}` : '',
     notes ? `Internal Notes     : ${notes}` : '',
     `Record Status      : ${status}`,
     `=================================================`
@@ -2515,7 +2595,7 @@ function renderCertFillDetailsModal(cert) {
       <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
         <div>
           <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--cyan); font-weight:700; margin-bottom:0.25rem;">
-            <i class="fas fa-user-graduate" style="margin-right:4px;"></i> Certificate Recipient
+            <i class="fas fa-user-graduate" style="margin-right:4px;"></i> Certificate Recipient <span class="cert-template-tag">[RECIPIENT NAME]</span>
           </div>
           <div style="font-size:1.4rem; font-weight:800; color:#fff; font-family:var(--font-heading); display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
             <span>${escapeHtml(recipientName)}</span>
@@ -2534,7 +2614,7 @@ function renderCertFillDetailsModal(cert) {
 
         <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
           <button type="button" class="btn btn-primary btn-sm" id="btnModalCopyAll" style="font-size:0.8rem; padding:0.45rem 0.85rem;">
-            <i class="fas fa-copy"></i> Copy All for Canva/Word
+            <i class="fas fa-copy"></i> Copy All for Word / Canva
           </button>
           <button type="button" class="btn btn-outline btn-sm" id="btnModalDownloadCertQr" style="font-size:0.8rem; padding:0.45rem 0.85rem;">
             <i class="fas fa-qrcode"></i> Download QR PNG
@@ -2549,74 +2629,74 @@ function renderCertFillDetailsModal(cert) {
     <!-- Section 1: Exact Text Needed on Certificate Template -->
     <div style="margin-bottom:1.5rem;">
       <h4 style="margin:0 0 0.75rem; font-size:0.92rem; text-transform:uppercase; letter-spacing:0.06em; color:#fff; display:flex; align-items:center; gap:0.45rem;">
-        <i class="fas fa-pen-fancy" style="color:var(--cyan);"></i> Certificate Template Fields (What to type into Canva / Word)
+        <i class="fas fa-pen-fancy" style="color:var(--cyan);"></i> Certificate Template Fields (Matches 1month_python course.docx)
       </h4>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:0.85rem;">
 
         <!-- Recipient Name -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Recipient Name (Candidate)</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Candidate Name <span class="cert-template-tag">[RECIPIENT NAME]</span></span>
             <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(recipientName)}" data-copy-name="Recipient Name" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
           <div style="font-size:1.05rem; font-weight:700; color:#fff;">${escapeHtml(recipientName)}</div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Primary name line on certificate</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Under &ldquo;PROUDLY PRESENTED TO&rdquo;</div>
         </div>
 
         <!-- Course / Program Name -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Program / Course Title</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Course Title <span class="cert-template-tag">[PROGRAM / EVENT NAME]</span></span>
             <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(courseName)}" data-copy-name="Program Title" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
           <div style="font-size:1rem; font-weight:700; color:var(--cyan);">${escapeHtml(courseName)}</div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Under "for successfully completing..."</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Under &ldquo;in recognition of&rdquo;</div>
         </div>
 
         <!-- Certificate Type Header -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Certificate Title (Header)</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Title Header <span class="cert-template-tag">OF [TYPE]</span></span>
             <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(certTitleHeader)}" data-copy-name="Certificate Header" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
           <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(certTitleHeader)}</div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Top heading on the certificate</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Top main header line</div>
         </div>
 
         <!-- Program Type & Recognition -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Program Type &amp; Recognition</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Role &amp; Category <span class="cert-template-tag">RECOGNITION: [RESULT]</span></span>
             <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(programType + ' - ' + recognition)}" data-copy-name="Program Type & Recognition" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
           <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(programType)} &bull; ${escapeHtml(recognition)}</div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Category &amp; participation result</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Under course title in metadata row</div>
         </div>
 
         <!-- Duration -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Program Duration</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Duration <span class="cert-template-tag">DURATION: [DURATION]</span></span>
             <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(duration)}" data-copy-name="Duration" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
           <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(duration)}</div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Duration mentioned in body text</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Middle metadata badge</div>
         </div>
 
         <!-- Issue Date -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Date of Issue</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Date of Issue <span class="cert-template-tag">DATE OF ISSUE: [DD MMM YYYY]</span></span>
             <div style="display:flex; gap:0.25rem;">
               <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(issueDateFormatted)}" data-copy-name="Formatted Date" title="Copy formatted (e.g. 04 Oct 2026)" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
                 <i class="fas fa-copy"></i> Formatted
@@ -2627,43 +2707,31 @@ function renderCertFillDetailsModal(cert) {
             </div>
           </div>
           <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(issueDateFormatted)} <span style="font-size:0.78rem; font-weight:400; color:var(--text-dim);">(${escapeHtml(issueDateRaw)})</span></div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Issued date on certificate</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Issued date pill on template</div>
         </div>
 
-        <!-- Completion Date -->
+        <!-- Mentor / Program Lead -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Completion Date</span>
-            <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(completionDateFormatted)}" data-copy-name="Completion Date" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
-              <i class="fas fa-copy"></i> Copy
-            </button>
-          </div>
-          <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(completionDateFormatted)} <span style="font-size:0.78rem; font-weight:400; color:var(--text-dim);">(${escapeHtml(completionDateRaw)})</span></div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Program completion date</div>
-        </div>
-
-        <!-- Mentor / Lead Instructor -->
-        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Mentor / Program Lead</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Left Signatory <span class="cert-template-tag">[MENTOR / LEAD NAME]</span></span>
             <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(mentorName)}" data-copy-name="Mentor Name" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
           <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(mentorName)}</div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Left signature block (${escapeHtml(mentorDesignation)})</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Above <strong>${escapeHtml(mentorDesignation).toUpperCase()}</strong> &bull; VYOMANTRA</div>
         </div>
 
-        <!-- Authorized Signatory / Director -->
+        <!-- Authorized Signatory / Founder & CEO -->
         <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-admin); border-radius:8px; padding:0.85rem 1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
-            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Authorized Signatory</span>
+            <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:600;">Right Signatory <span class="cert-template-tag">[FOUNDER NAME]</span></span>
             <button type="button" class="btn-copy-field" data-copy-val="${escapeHtml(signatoryName)}" data-copy-name="Signatory Name" style="background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); color:var(--cyan); border-radius:4px; font-size:0.72rem; padding:2px 7px; cursor:pointer;">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
           <div style="font-size:0.95rem; font-weight:700; color:#fff;">${escapeHtml(signatoryName)}</div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Right signature block (${escapeHtml(signatoryDesignation)})</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Above <strong>${escapeHtml(signatoryDesignation).toUpperCase()}</strong> &bull; VYOMANTRA</div>
         </div>
 
       </div>

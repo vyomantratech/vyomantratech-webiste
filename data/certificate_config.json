@@ -1,0 +1,22 @@
+{
+  "active_template": "1month_python course.docx",
+  "custom_template_uploaded": true,
+  "custom_template_file": "1month_python course.docx",
+  "custom_template_name": "1month_python course.docx",
+  "founder_signature_mode": "digital",
+  "director_signature_mode": "digital",
+  "trainer_signature_mode": "digital",
+  "recipient_name_partial": "filled",
+  "field_mappings": {
+    "[RECIPIENT NAME]": "recipient_name",
+    "[PROGRAM / EVENT NAME]": "course_name",
+    "[PROGRAM TYPE]": "program_type",
+    "[TYPE]": "certificate_type",
+    "[RESULT / ROLE]": "recognition",
+    "[DURATION]": "course_duration",
+    "[DD MMM YYYY]": "issue_date",
+    "[MENTOR / LEAD NAME]": "trainer_name",
+    "[FOUNDER NAME]": "signatory_name",
+    "VYOM-CRS-2026-0001": "certificate_id"
+  }
+}

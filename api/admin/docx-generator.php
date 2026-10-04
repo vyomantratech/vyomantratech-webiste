@@ -226,11 +226,30 @@ class VyomantraDocxEngine {
 
         $qrTextRepresentation = "[ QR Code: $certId ]";
 
-        // Placeholders map
+        $cType = strtoupper($cert['certificate_type'] ?? 'Completion');
+        $pType = $cert['program_type'] ?? 'Training Program';
+        $recog = $cert['recognition'] ?? 'Completed';
+
+        // Placeholders map - supports both {{TAG}} and [TAG] from 1month_python course.docx
         $replacements = [
+            // Square bracket placeholders (Directly matches assets/1month_python course.docx)
+            '[TYPE]'                  => htmlspecialchars($cType, ENT_XML1, 'UTF-8'),
+            '[RECIPIENT NAME]'        => htmlspecialchars($recipientName, ENT_XML1, 'UTF-8'),
+            '[PROGRAM / EVENT NAME]'  => htmlspecialchars($courseName, ENT_XML1, 'UTF-8'),
+            '[PROGRAM TYPE]'          => htmlspecialchars($pType, ENT_XML1, 'UTF-8'),
+            '[RESULT / ROLE]'         => htmlspecialchars($recog, ENT_XML1, 'UTF-8'),
+            '[DURATION]'              => htmlspecialchars($courseDuration, ENT_XML1, 'UTF-8'),
+            '[DD MMM YYYY]'           => htmlspecialchars($issueDate, ENT_XML1, 'UTF-8'),
+            '[MENTOR / LEAD NAME]'    => htmlspecialchars($trainerSign, ENT_XML1, 'UTF-8'),
+            '[FOUNDER NAME]'          => htmlspecialchars($founderSign, ENT_XML1, 'UTF-8'),
+            'VYOM-CRS-2026-0001'      => htmlspecialchars($certId, ENT_XML1, 'UTF-8'),
+
+            // Standard Curly Braces placeholders
             '{{CERTIFICATE_ID}}'      => htmlspecialchars($certId, ENT_XML1, 'UTF-8'),
             '{{RECIPIENT_NAME}}'     => htmlspecialchars($recipientName, ENT_XML1, 'UTF-8'),
             '{{COURSE_NAME}}'        => htmlspecialchars($courseName, ENT_XML1, 'UTF-8'),
+            '{{PROGRAM_TYPE}}'       => htmlspecialchars($pType, ENT_XML1, 'UTF-8'),
+            '{{RECOGNITION}}'        => htmlspecialchars($recog, ENT_XML1, 'UTF-8'),
             '{{COURSE_DURATION}}'    => htmlspecialchars($courseDuration, ENT_XML1, 'UTF-8'),
             '{{ISSUE_DATE}}'         => htmlspecialchars($issueDate, ENT_XML1, 'UTF-8'),
             '{{COMPLETION_DATE}}'    => htmlspecialchars($completionDate, ENT_XML1, 'UTF-8'),
@@ -240,9 +259,9 @@ class VyomantraDocxEngine {
             '{{DIRECTOR_SIGNATURE}}' => htmlspecialchars($directorSign, ENT_XML1, 'UTF-8'),
             '{{TRAINER_SIGNATURE}}'  => htmlspecialchars($trainerSign, ENT_XML1, 'UTF-8'),
             '{{DESCRIPTION}}'        => htmlspecialchars($cert['description'] ?? '', ENT_XML1, 'UTF-8'),
-            '{{TRAINER_NAME}}'       => htmlspecialchars($cert['trainer_name'] ?? 'Santhosh S.', ENT_XML1, 'UTF-8'),
+            '{{TRAINER_NAME}}'       => htmlspecialchars($cert['trainer_name'] ?? 'Santhosh S', ENT_XML1, 'UTF-8'),
             '{{SIGNATORY_NAME}}'     => htmlspecialchars($cert['signatory_name'] ?? 'S.B. Sachin', ENT_XML1, 'UTF-8'),
-            '{{TRAINER_TITLE}}'      => htmlspecialchars($cert['trainer_designation'] ?? 'Lead Technical Instructor', ENT_XML1, 'UTF-8'),
+            '{{TRAINER_TITLE}}'      => htmlspecialchars($cert['trainer_designation'] ?? 'Program Lead', ENT_XML1, 'UTF-8'),
             '{{SIGNATORY_TITLE}}'    => htmlspecialchars($cert['signatory_designation'] ?? 'Founder & CEO', ENT_XML1, 'UTF-8')
         ];
 

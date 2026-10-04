@@ -725,7 +725,7 @@ body.admin-body {
 }
 
 /* ==========================================================================
-   CERTIFICATE REGISTRY
+   CERTIFICATE REGISTRY & WORKFLOW (NON-COLLAPSING GRID)
    ========================================================================== */
 
 .cert-id-badge {
@@ -737,13 +737,86 @@ body.admin-body {
   letter-spacing: -0.01em;
 }
 
-.certificate-workflow-grid > * { min-width: 0; }
+.certificate-workflow-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
 
-@media (max-width: 860px) {
-  .certificate-workflow-grid { grid-template-columns: minmax(0, 1fr) !important; }
+.certificate-workflow-grid > * {
+  min-width: 0;
+  width: 100%;
+}
+
+.certificate-workflow-grid.has-generated {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+}
+
+@media (max-width: 1100px) {
+  .certificate-workflow-grid.has-generated {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.cert-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cert-field-row-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cert-field-row-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cert-template-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--cyan);
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.cert-chip-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-admin);
+  color: var(--text-muted);
+  border-radius: 14px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cert-chip-btn:hover, .cert-chip-btn.active {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: rgba(0, 240, 255, 0.4);
+  color: var(--cyan);
+}
+
+.cert-signature-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-admin);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
 }
 
 @media (max-width: 520px) {
   #view-certificates .admin-card { padding: 0.85rem !important; }
-  #view-certificates .certificate-workflow-grid [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: minmax(0, 1fr) !important; }
 }

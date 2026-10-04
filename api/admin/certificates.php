@@ -228,10 +228,10 @@ if ($action === 'create') {
     $recognition          = trim($_POST['recognition'] ?? 'Completed');
     $prefix               = trim($_POST['prefix'] ?? '') ?: certPrefixForProgramType($programType);
     $courseName           = trim($_POST['course_name'] ?? '');
-    $courseDuration       = trim($_POST['course_duration'] ?? '3 Months');
+    $courseDuration       = trim($_POST['course_duration'] ?? '1 Month');
     $description          = trim($_POST['description'] ?? '');
     $trainerName          = trim($_POST['trainer_name'] ?? 'Santhosh S');
-    $trainerDesignation   = trim($_POST['trainer_designation'] ?? 'Lead Technical Instructor');
+    $trainerDesignation   = trim($_POST['trainer_designation'] ?? 'Program Lead');
     $signatoryName        = trim($_POST['signatory_name'] ?? 'S.B. Sachin');
     $signatoryDesignation = trim($_POST['signatory_designation'] ?? 'Founder & CEO');
     $issueDate            = trim($_POST['issue_date'] ?? date('Y-m-d'));
@@ -282,7 +282,8 @@ if ($action === 'create') {
         'verification_url'      => $verificationUrl,
         'qr_code_url'           => null,
         'certificate_pdf_url'   => null,
-        'template_id'           => 'vyomantra_premium_v1',
+        'final_docx_url'        => null,
+        'template_id'           => '1month_python_course',
         'issued_by'             => 'VYOMANTRA TECHNOLOGIES',
         'private_notes'         => $privateNotes,
         'revoked_at'            => null,
@@ -332,7 +333,7 @@ if ($action === 'create') {
                 ':status'   => $status,
                 ':token'    => $verificationToken,
                 ':vurl'     => $verificationUrl,
-                ':tempid'   => 'vyomantra_premium_v1',
+                ':tempid'   => '1month_python_course',
                 ':issuedby' => 'VYOMANTRA TECHNOLOGIES',
                 ':pnotes'   => $privateNotes
             ]);

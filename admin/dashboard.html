@@ -579,44 +579,214 @@
            TAB 7: CERTIFICATES MANAGEMENT VIEW
            ===================================================================== -->
       <section class="admin-tab-view" id="view-certificates">
-        <div class="certificate-workflow-grid" style="display:grid;grid-template-columns:minmax(320px,1fr) minmax(320px,0.9fr);gap:1rem;align-items:start;">
-          <form id="certificateEditorForm" class="admin-card" style="padding:1.25rem;">
-            <h2 style="margin:0 0 0.35rem;color:#fff;font-size:1.05rem;">Create verification record</h2>
-            <p style="margin:0 0 1.1rem;color:var(--text-muted);font-size:0.82rem;">Enter the certificate details. The registry will create its ID, private token, verification link, and QR code.</p>
+        <div class="certificate-workflow-grid" id="certWorkflowGrid">
+          <form id="certificateEditorForm" class="admin-card" style="padding:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem; border-bottom:1px solid var(--border-admin); padding-bottom:1rem;">
+              <div>
+                <h2 style="margin:0 0 0.3rem; color:#fff; font-size:1.15rem; display:flex; align-items:center; gap:0.5rem;">
+                  <i class="fas fa-certificate" style="color:var(--cyan);"></i> Issue Certificate &amp; Verification QR
+                </h2>
+                <p style="margin:0; color:var(--text-muted); font-size:0.83rem;">
+                  Template: <strong style="color:var(--cyan);">1month_python course.docx</strong> &bull; Creates ID, cryptographic token, verification URL &amp; QR.
+                </p>
+              </div>
+              <span class="badge-pill badge-purple" style="font-size:0.75rem; padding:4px 10px; display:inline-flex; align-items:center; gap:5px;">
+                <i class="fas fa-file-word"></i> 1-Month Python Template
+              </span>
+            </div>
+
             <input type="hidden" id="certEditId" name="id" value="0">
             <input type="hidden" id="certStatus" name="status" value="valid">
-            <div class="form-group"><label class="form-label" for="certType">Certificate type (OF ...)</label><select id="certType" name="certificate_type" class="form-control" required><option value="Completion">Completion</option><option value="Participation">Participation</option><option value="Achievement">Achievement</option><option value="Internship">Internship</option><option value="Excellence">Excellence</option><option value="Appreciation">Appreciation</option></select></div>
-            <div class="form-group"><label class="form-label" for="certProgramType">Program type *</label><select id="certProgramType" name="program_type" class="form-control" required><option value="Training Program">Training Program</option><option value="Internship">Internship</option><option value="Hackathon">Hackathon</option><option value="Workshop">Workshop</option><option value="Webinar">Webinar</option><option value="Competition">Competition</option></select><div style="font-size:.72rem;color:var(--text-dim);margin-top:3px;">Sets the ID prefix automatically (CRS, INT, HCK, WRK, EVT).</div></div>
-            <div class="form-group"><label class="form-label" for="certRecognition">Recognition (result / role) *</label><select id="certRecognition" name="recognition" class="form-control" required><option value="Completed">Completed</option><option value="Participant">Participant</option><option value="Winner">Winner</option><option value="Runner-up">Runner-up</option><option value="Intern">Intern</option><option value="Volunteer">Volunteer</option></select></div>
-            <div class="form-group"><label class="form-label" for="certRecipientName">Recipient name *</label><input type="text" id="certRecipientName" name="recipient_name" class="form-control" required autocomplete="name"></div>
-            <div class="form-group"><label class="form-label" for="certRecipientEmail">Recipient email</label><input type="email" id="certRecipientEmail" name="recipient_email" class="form-control" autocomplete="email"></div>
-            <div class="form-group"><label class="form-label" for="certCourseName">Program / event name *</label><input type="text" id="certCourseName" name="course_name" class="form-control" required></div>
-            <div class="form-group"><label class="form-label" for="certCourseDuration">Duration</label><input type="text" id="certCourseDuration" name="course_duration" class="form-control" placeholder="e.g. 3 Months, 24 Hours, 1 Day"></div>
-            <div class="form-group"><label class="form-label" for="certMentorName">Mentor / lead name</label><input type="text" id="certMentorName" name="trainer_name" class="form-control" placeholder="Shown on the certificate (left signature)"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-              <div class="form-group"><label class="form-label" for="certIssueDate">Date of issue *</label><input type="date" id="certIssueDate" name="issue_date" class="form-control" required></div>
-              <div class="form-group"><label class="form-label" for="certCompletionDate">Completion date</label><input type="date" id="certCompletionDate" name="completion_date" class="form-control"></div>
+
+            <!-- ROW 1: Classification (Matches Top of Certificate) -->
+            <div class="cert-field-row-3">
+              <div class="form-group">
+                <label class="form-label" for="certType">
+                  Certificate Type <span class="cert-template-tag">OF [TYPE]</span>
+                </label>
+                <select id="certType" name="certificate_type" class="form-control" style="background:#050713;" required>
+                  <option value="Completion" selected>Completion (Certificate of Completion)</option>
+                  <option value="Internship">Internship (Certificate of Internship)</option>
+                  <option value="Participation">Participation (Certificate of Participation)</option>
+                  <option value="Achievement">Achievement (Certificate of Achievement)</option>
+                  <option value="Excellence">Excellence (Certificate of Excellence)</option>
+                  <option value="Appreciation">Appreciation (Certificate of Appreciation)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="certProgramType">
+                  Program Category * <span class="cert-template-tag">[PROGRAM TYPE]</span>
+                </label>
+                <select id="certProgramType" name="program_type" class="form-control" style="background:#050713;" required>
+                  <option value="Training Program" selected>Training Program</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Workshop">Workshop</option>
+                  <option value="Hackathon">Hackathon</option>
+                  <option value="Webinar">Webinar</option>
+                  <option value="Competition">Competition</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="certRecognition">
+                  Recognition / Result * <span class="cert-template-tag">RECOGNITION: [RESULT / ROLE]</span>
+                </label>
+                <select id="certRecognition" name="recognition" class="form-control" style="background:#050713;" required>
+                  <option value="Completed" selected>Completed</option>
+                  <option value="Participant">Participant</option>
+                  <option value="Winner">Winner</option>
+                  <option value="Runner-up">Runner-up</option>
+                  <option value="Intern">Intern</option>
+                  <option value="Volunteer">Volunteer</option>
+                </select>
+              </div>
             </div>
-            <div class="form-group"><label class="form-label" for="certDescription">Internal notes (private, never public)</label><textarea id="certDescription" name="private_notes" class="form-control" rows="2" placeholder="Optional. Only admins can see this"></textarea></div>
-            <button type="button" class="btn btn-primary" id="btnSaveCertificate"><i class="fas fa-qrcode"></i> Create ID, token &amp; QR</button>
+
+            <!-- ROW 2: Candidate Name & Email (Matches Presentation Line) -->
+            <div class="cert-field-row-2">
+              <div class="form-group">
+                <label class="form-label" for="certRecipientName">
+                  Recipient Full Name * <span class="cert-template-tag">[RECIPIENT NAME]</span>
+                </label>
+                <input type="text" id="certRecipientName" name="recipient_name" class="form-control" placeholder="e.g. Sachin K or Jane Doe" required autocomplete="name">
+                <div style="font-size:0.72rem; color:var(--text-dim); margin-top:3px;">Printed under &ldquo;THIS CERTIFICATE IS PROUDLY PRESENTED TO&rdquo;</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="certRecipientEmail">
+                  Recipient Email (Optional / Records)
+                </label>
+                <input type="email" id="certRecipientEmail" name="recipient_email" class="form-control" placeholder="candidate@example.com" autocomplete="email">
+                <div style="font-size:0.72rem; color:var(--text-dim); margin-top:3px;">Used for verification lookup &amp; certificate delivery</div>
+              </div>
+            </div>
+
+            <!-- ROW 3: Course Title & Duration (Matches in recognition of ... & DURATION) -->
+            <div class="cert-field-row-2">
+              <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                  <label class="form-label" for="certCourseName" style="margin:0;">
+                    Program / Course Title * <span class="cert-template-tag">[PROGRAM / EVENT NAME]</span>
+                  </label>
+                  <button type="button" class="cert-chip-btn" id="btnFillCoursePython" title="Click to fill Python course title">
+                    <i class="fab fa-python" style="color:#00f0ff;"></i> Python with AI
+                  </button>
+                </div>
+                <input type="text" id="certCourseName" name="course_name" class="form-control" placeholder="e.g. Advanced Python &amp; Applied AI Engineering" required>
+                <div style="font-size:0.72rem; color:var(--text-dim); margin-top:3px;">Printed under &ldquo;in recognition of&rdquo;</div>
+              </div>
+
+              <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                  <label class="form-label" for="certCourseDuration" style="margin:0;">
+                    Duration * <span class="cert-template-tag">DURATION: [DURATION]</span>
+                  </label>
+                  <div style="display:flex; gap:4px;">
+                    <button type="button" class="cert-chip-btn active" data-duration-val="1 Month">1 Month</button>
+                    <button type="button" class="cert-chip-btn" data-duration-val="3 Months">3 Months</button>
+                    <button type="button" class="cert-chip-btn" data-duration-val="2 Weeks">2 Weeks</button>
+                  </div>
+                </div>
+                <input type="text" id="certCourseDuration" name="course_duration" class="form-control" value="1 Month" required>
+                <div style="font-size:0.72rem; color:var(--text-dim); margin-top:3px;">Default: 1 Month (matches 1month_python course.docx)</div>
+              </div>
+            </div>
+
+            <!-- ROW 4: Date of Issue & Signatories (Matches Date Box & Signature Blocks) -->
+            <div class="cert-field-row-3">
+              <div class="form-group">
+                <label class="form-label" for="certIssueDate">
+                  Date of Issue * <span class="cert-template-tag">DATE OF ISSUE: [DD MMM YYYY]</span>
+                </label>
+                <input type="date" id="certIssueDate" name="issue_date" class="form-control" style="background:#050713;" required>
+                <div style="font-size:0.72rem; color:var(--text-dim); margin-top:3px;">Prints formatted, e.g. 04 Oct 2026</div>
+              </div>
+
+              <!-- Left Signature: Program Lead -->
+              <div class="cert-signature-box">
+                <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:700; margin-bottom:0.4rem;">
+                  <i class="fas fa-signature" style="color:var(--cyan);"></i> Left Signatory <span class="cert-template-tag">[MENTOR / LEAD NAME]</span>
+                </div>
+                <div class="form-group" style="margin-bottom:0.4rem;">
+                  <input type="text" id="certMentorName" name="trainer_name" class="form-control" value="Santhosh S" placeholder="Mentor / Lead Name" style="font-size:0.85rem;">
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+                  <span>Title: <strong>PROGRAM LEAD</strong></span>
+                  <input type="hidden" id="certMentorTitle" name="trainer_designation" value="Program Lead">
+                  <span>VYOMANTRA</span>
+                </div>
+              </div>
+
+              <!-- Right Signature: Founder & CEO -->
+              <div class="cert-signature-box">
+                <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:700; margin-bottom:0.4rem;">
+                  <i class="fas fa-stamp" style="color:var(--purple);"></i> Right Signatory <span class="cert-template-tag">[FOUNDER NAME]</span>
+                </div>
+                <div class="form-group" style="margin-bottom:0.4rem;">
+                  <input type="text" id="certSignatoryName" name="signatory_name" class="form-control" value="S.B. Sachin" placeholder="Founder &amp; CEO Name" style="font-size:0.85rem;">
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+                  <span>Title: <strong>FOUNDER &amp; CEO</strong></span>
+                  <input type="hidden" id="certSignatoryTitle" name="signatory_designation" value="Founder & CEO">
+                  <span>VYOMANTRA</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ROW 5: Optional Completion Date & Notes -->
+            <div class="cert-field-row-2" style="margin-bottom:1.25rem;">
+              <div class="form-group">
+                <label class="form-label" for="certCompletionDate">
+                  Completion Date (Optional)
+                </label>
+                <input type="date" id="certCompletionDate" name="completion_date" class="form-control" style="background:#050713;">
+                <div style="font-size:0.72rem; color:var(--text-dim); margin-top:3px;">Leave blank to match Date of Issue</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="certDescription">
+                  Private Admin Notes (Internal only)
+                </label>
+                <input type="text" id="certDescription" name="private_notes" class="form-control" placeholder="Optional. Only admins can see this in registry.">
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding-top:0.5rem;">
+              <button type="button" class="btn btn-primary" id="btnSaveCertificate" style="padding:0.65rem 1.6rem; font-size:0.92rem;">
+                <i class="fas fa-qrcode"></i> Generate Certificate ID, Token &amp; QR
+              </button>
+              <div style="font-size:0.78rem; color:var(--text-dim);">
+                <i class="fas fa-shield-alt" style="color:var(--cyan);"></i> Generates collision-safe ID (VYOM-CRS-YYYY-NNNNN-XXXX) + secure 32-char token
+              </div>
+            </div>
           </form>
 
-          <div id="generatedCertificatePanel" class="admin-card" style="display:none;padding:1.25rem;">
-            <h2 style="margin:0 0 .35rem;color:#fff;font-size:1.05rem;">Verification details</h2>
-            <p style="margin:0 0 1rem;color:var(--text-muted);font-size:.82rem;">Use this QR on your manually edited certificate. Upload the finished DOCX below to prepare its optional verification PDF.</p>
-            <div id="generatedQrBox" style="display:flex;justify-content:center;background:#fff;border-radius:10px;padding:12px;width:max-content;margin:0 auto 1rem;"></div>
-            <div class="form-group"><label class="form-label">Certificate ID</label><div style="display:flex;gap:.5rem;"><input id="generatedCertId" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="id">Copy</button></div></div>
-            <div class="form-group"><label class="form-label">Verification token</label><div style="display:flex;gap:.5rem;"><input id="generatedCertToken" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="token">Copy</button></div></div>
-            <div class="form-group"><label class="form-label">Verification link</label><div style="display:flex;gap:.5rem;"><input id="generatedCertUrl" class="form-control" readonly><button type="button" class="btn btn-outline" data-copy-generated="url">Copy</button></div></div>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
-              <button type="button" class="btn btn-outline" id="btnDownloadGeneratedQr"><i class="fas fa-download"></i> Download QR PNG</button>
-              <button type="button" class="btn btn-outline" id="btnViewGeneratedFilledFields" style="color:var(--cyan);border-color:rgba(0,240,255,0.4);"><i class="fas fa-list-alt"></i> View Filled Details</button>
+          <!-- Generated Certificate Verification Panel -->
+          <div id="generatedCertificatePanel" class="admin-card" style="display:none; padding:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; border-bottom:1px solid var(--border-admin); padding-bottom:0.75rem;">
+              <h2 style="margin:0; color:#fff; font-size:1.05rem; display:flex; align-items:center; gap:0.4rem;">
+                <i class="fas fa-check-circle" style="color:var(--green);"></i> Verification Details Ready
+              </h2>
+              <button type="button" class="modal-close-btn" id="btnCloseGeneratedPanel" title="Dismiss Panel" style="font-size:1.2rem; background:none; border:none; color:var(--text-muted); cursor:pointer;">&times;</button>
             </div>
-            <hr style="border-color:var(--border-admin);margin:1.1rem 0;">
-            <label class="form-label" for="generatedFinalDocx">Final certificate DOCX (optional)</label>
-            <input type="file" id="generatedFinalDocx" class="form-control" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-            <button type="button" class="btn btn-outline" id="btnUploadFinalDocx" style="margin-top:.6rem;"><i class="fas fa-file-upload"></i> Upload DOCX &amp; prepare PDF</button>
-            <div id="generatedPdfStatus" style="margin-top:.65rem;font-size:.8rem;color:var(--text-muted);"></div>
+            <p style="margin:0 0 1rem; color:var(--text-muted); font-size:0.82rem;">
+              Download this high-res QR code and insert it into <strong style="color:var(--cyan);">1month_python course.docx</strong>.
+            </p>
+            <div id="generatedQrBox" style="display:flex; justify-content:center; background:#fff; border-radius:10px; padding:12px; width:max-content; margin:0 auto 1rem; box-shadow:0 4px 20px rgba(0,0,0,0.5);"></div>
+            <div class="form-group" style="margin-bottom:0.75rem;"><label class="form-label">Certificate ID</label><div style="display:flex;gap:.5rem;"><input id="generatedCertId" class="form-control" readonly style="font-family:var(--font-mono); color:var(--cyan); font-weight:700;"><button type="button" class="btn btn-outline btn-sm" data-copy-generated="id">Copy</button></div></div>
+            <div class="form-group" style="margin-bottom:0.75rem;"><label class="form-label">Verification Token</label><div style="display:flex;gap:.5rem;"><input id="generatedCertToken" class="form-control" readonly style="font-family:var(--font-mono); font-size:0.8rem;"><button type="button" class="btn btn-outline btn-sm" data-copy-generated="token">Copy</button></div></div>
+            <div class="form-group" style="margin-bottom:0.75rem;"><label class="form-label">Public Verification Link</label><div style="display:flex;gap:.5rem;"><input id="generatedCertUrl" class="form-control" readonly style="font-size:0.8rem;"><button type="button" class="btn btn-outline btn-sm" data-copy-generated="url">Copy</button></div></div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin:1rem 0;">
+              <button type="button" class="btn btn-primary btn-sm" id="btnDownloadGeneratedQr"><i class="fas fa-download"></i> Download QR PNG</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btnViewGeneratedFilledFields" style="color:var(--cyan); border-color:rgba(0,240,255,0.4);"><i class="fas fa-list-alt"></i> View Filled Details</button>
+            </div>
+            <hr style="border-color:var(--border-admin); margin:1.1rem 0;">
+            <label class="form-label" for="generatedFinalDocx">Attach Completed Certificate (.docx / .pdf)</label>
+            <input type="file" id="generatedFinalDocx" class="form-control" accept=".docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf">
+            <button type="button" class="btn btn-outline btn-sm" id="btnUploadFinalDocx" style="margin-top:0.6rem; width:100%;"><i class="fas fa-file-upload"></i> Upload &amp; Link to Verification Page</button>
+            <div id="generatedPdfStatus" style="margin-top:0.65rem; font-size:0.8rem; color:var(--text-muted);"></div>
           </div>
         </div>
 
