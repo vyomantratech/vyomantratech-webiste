@@ -353,6 +353,248 @@ if ($action === 'create') {
 }
 
 // =========================================================================
+// 2B. BATCH CREATE CERTIFICATES (BLAZING-FAST MULTI-RECIPIENT ISSUANCE)
+// =========================================================================
+if ($action === 'batch_create') {
+    $recipientsRaw = $_POST['recipients'] ?? $_POST['batch_names'] ?? '';
+    $recipients = [];
+
+    if (is_array($recipientsRaw)) {
+        $recipients = $recipientsRaw;
+    } elseif (is_string($recipientsRaw)) {
+        $decoded = json_decode($recipientsRaw, true);
+        if (is_array($decoded)) {
+            $recipients = $decoded;
+        } else {
+            // Split line-by-line format: "Student Name" or "Student Name, email@domain.com"
+            $lines = preg_split('/\r\n|\r|\n/', $recipientsRaw);
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '') continue;
+                if (strpos($line, ',') !== false) {
+                    $parts = explode(',', $line, 2);
+                    $rName = trim($parts[0]);
+                    $rEmail = trim($parts[1] ?? '');
+                } else {
+                    $rName = $line;
+                    $rEmail = '';
+                }
+                if ($rName !== '') {
+                    $recipients[] = ['name' => $rName, 'email' => $rEmail];
+                }
+            }
+        }
+    }
+
+    if (empty($recipients)) {
+        sendResponse(false, 'Please provide at least one recipient name for batch certificate issuance.', [], 400);
+    }
+
+    if (count($recipients) > 250) {
+        sendResponse(false, 'Batch generation is limited to 250 recipients at a time for optimal speed.', [], 400);
+    }
+
+    $certificateType      = trim($_POST['certificate_type'] ?? 'Completion');
+    $programType          = trim($_POST['program_type'] ?? 'Training Program');
+    $recognition          = trim($_POST['recognition'] ?? 'Completed');
+    $prefix               = trim($_POST['prefix'] ?? '') ?: certPrefixForProgramType($programType);
+    $courseName           = trim($_POST['course_name'] ?? '');
+    $courseDuration       = trim($_POST['course_duration'] ?? '1 Month');
+    $description          = trim($_POST['description'] ?? '');
+    $trainerName          = trim($_POST['trainer_name'] ?? 'Santhosh S');
+    $trainerDesignation   = trim($_POST['trainer_designation'] ?? 'Program Lead');
+    $signatoryName        = trim($_POST['signatory_name'] ?? 'S.B. Sachin');
+    $signatoryDesignation = trim($_POST['signatory_designation'] ?? 'Founder & CEO');
+    $issueDate            = trim($_POST['issue_date'] ?? date('Y-m-d'));
+    $completionDate       = trim($_POST['completion_date'] ?? $issueDate);
+    $expiryDate           = trim($_POST['expiry_date'] ?? '') ?: null;
+    $status               = 'valid';
+    $privateNotes         = trim($_POST['private_notes'] ?? '');
+
+    if (empty($courseName)) {
+        sendResponse(false, 'Program / Course Title is mandatory for batch generation.', [], 400);
+    }
+
+    $year = date('Y', strtotime($issueDate));
+    $createdRecords = [];
+
+    // Calculate initial max sequence once for high-speed linear sequencing
+    $prefixUpper = strtoupper(trim($prefix ?: 'VYOM-CRS'));
+    $searchPattern = $prefixUpper . '-' . $year . '-%';
+    $matcher = '/^' . preg_quote($prefixUpper . '-' . $year . '-', '/') . '(\d+)(?:-[A-Z0-9]{4})?$/';
+    $maxSeq = 0;
+
+    if ($pdo) {
+        try {
+            $stmtSeq = $pdo->prepare("SELECT certificate_id FROM certificates WHERE certificate_id LIKE :pat");
+            $stmtSeq->execute([':pat' => $searchPattern]);
+            while ($row = $stmtSeq->fetch(PDO::FETCH_ASSOC)) {
+                if (preg_match($matcher, $row['certificate_id'], $m)) {
+                    $maxSeq = max($maxSeq, (int)$m[1]);
+                }
+            }
+        } catch (\PDOException $e) {}
+    }
+
+    $localCerts = getLocalCerts();
+    foreach ($localCerts as $c) {
+        if (preg_match($matcher, $c['certificate_id'] ?? '', $m)) {
+            $maxSeq = max($maxSeq, (int)$m[1]);
+        }
+    }
+
+    if ($pdo) {
+        try {
+            $pdo->beginTransaction();
+            $insertStmt = $pdo->prepare("
+                INSERT INTO certificates (
+                    certificate_id, certificate_type, program_type, recognition, prefix, recipient_name, recipient_email,
+                    course_name, course_duration, description, trainer_name, trainer_designation,
+                    signatory_name, signatory_designation, issue_date, completion_date, expiry_date,
+                    status, verification_token, verification_url, template_id, issued_by, private_notes,
+                    created_at, updated_at
+                ) VALUES (
+                    :cid, :ctype, :ptype, :recog, :prefix, :rname, :remail,
+                    :cname, :cdur, :desc, :tname, :tdesig,
+                    :sname, :sdesig, :idate, :cdate, :edate,
+                    :status, :token, :vurl, :tempid, :issuedby, :pnotes,
+                    NOW(), NOW()
+                )
+            ");
+
+            foreach ($recipients as $rec) {
+                $rName = trim(is_array($rec) ? ($rec['name'] ?? '') : (string)$rec);
+                $rEmail = trim(is_array($rec) ? ($rec['email'] ?? '') : '');
+                if ($rName === '') continue;
+
+                $maxSeq++;
+                $certId = sprintf("%s-%04d-%04d", $prefixUpper, $year, $maxSeq);
+                $token  = bin2hex(random_bytes(16));
+                $vUrl   = SITE_URL . '/verify/?id=' . $token;
+
+                $insertStmt->execute([
+                    ':cid'      => $certId,
+                    ':ctype'    => $certificateType,
+                    ':ptype'    => $programType,
+                    ':recog'    => $recognition,
+                    ':prefix'   => $prefixUpper,
+                    ':rname'    => $rName,
+                    ':remail'   => $rEmail,
+                    ':cname'    => $courseName,
+                    ':cdur'     => $courseDuration,
+                    ':desc'     => $description,
+                    ':tname'    => $trainerName,
+                    ':tdesig'   => $trainerDesignation,
+                    ':sname'    => $signatoryName,
+                    ':sdesig'   => $signatoryDesignation,
+                    ':idate'    => $issueDate,
+                    ':cdate'    => $completionDate,
+                    ':edate'    => $expiryDate,
+                    ':status'   => $status,
+                    ':token'    => $token,
+                    ':vurl'     => $vUrl,
+                    ':tempid'   => '1month_python_course',
+                    ':issuedby' => 'VYOMANTRA TECHNOLOGIES',
+                    ':pnotes'   => $privateNotes
+                ]);
+
+                $newDbId = (int)$pdo->lastInsertId();
+                $createdRecords[] = [
+                    'id'                  => $newDbId,
+                    'certificate_id'      => $certId,
+                    'certificate_type'    => $certificateType,
+                    'program_type'        => $programType,
+                    'recognition'         => $recognition,
+                    'prefix'              => $prefixUpper,
+                    'recipient_name'      => $rName,
+                    'recipient_email'     => $rEmail,
+                    'course_name'         => $courseName,
+                    'course_duration'     => $courseDuration,
+                    'trainer_name'        => $trainerName,
+                    'trainer_designation' => $trainerDesignation,
+                    'signatory_name'      => $signatoryName,
+                    'signatory_designation'=> $signatoryDesignation,
+                    'issue_date'          => $issueDate,
+                    'completion_date'     => $completionDate,
+                    'status'              => $status,
+                    'verification_token'  => $token,
+                    'verification_url'    => $vUrl,
+                    'certificate_pdf_url' => null,
+                    'final_docx_url'      => null,
+                    'template_id'         => '1month_python_course',
+                    'issued_by'           => 'VYOMANTRA TECHNOLOGIES',
+                    'private_notes'       => $privateNotes,
+                    'created_at'          => date('Y-m-d H:i:s'),
+                    'updated_at'          => date('Y-m-d H:i:s')
+                ];
+            }
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log("Batch create DB transaction error: " . $e->getMessage());
+        }
+    }
+
+    if (empty($createdRecords)) {
+        // Fallback for environment without DB connection
+        foreach ($recipients as $idx => $rec) {
+            $rName = trim(is_array($rec) ? ($rec['name'] ?? '') : (string)$rec);
+            $rEmail = trim(is_array($rec) ? ($rec['email'] ?? '') : '');
+            if ($rName === '') continue;
+
+            $maxSeq++;
+            $certId = sprintf("%s-%04d-%04d", $prefixUpper, $year, $maxSeq);
+            $token  = bin2hex(random_bytes(16));
+            $vUrl   = SITE_URL . '/verify/?id=' . $token;
+
+            $createdRecords[] = [
+                'id'                  => count($localCerts) + $idx + 1,
+                'certificate_id'      => $certId,
+                'certificate_type'    => $certificateType,
+                'program_type'        => $programType,
+                'recognition'         => $recognition,
+                'prefix'              => $prefixUpper,
+                'recipient_name'      => $rName,
+                'recipient_email'     => $rEmail,
+                'course_name'         => $courseName,
+                'course_duration'     => $courseDuration,
+                'trainer_name'        => $trainerName,
+                'trainer_designation' => $trainerDesignation,
+                'signatory_name'      => $signatoryName,
+                'signatory_designation'=> $signatoryDesignation,
+                'issue_date'          => $issueDate,
+                'completion_date'     => $completionDate,
+                'status'              => $status,
+                'verification_token'  => $token,
+                'verification_url'    => $vUrl,
+                'certificate_pdf_url' => null,
+                'final_docx_url'      => null,
+                'template_id'         => '1month_python_course',
+                'issued_by'           => 'VYOMANTRA TECHNOLOGIES',
+                'private_notes'       => $privateNotes,
+                'created_at'          => date('Y-m-d H:i:s'),
+                'updated_at'          => date('Y-m-d H:i:s')
+            ];
+        }
+    }
+
+    // Prepend to local JSON in correct order
+    foreach (array_reverse($createdRecords) as $item) {
+        array_unshift($localCerts, $item);
+    }
+    saveLocalCerts($localCerts);
+
+    $count = count($createdRecords);
+    sendResponse(true, "Successfully generated $count certificates in batch.", [
+        'count'        => $count,
+        'certificates' => $createdRecords
+    ], 201);
+}
+
+// =========================================================================
 // REVOKE / REINSTATE (file is kept; public access is blocked while revoked)
 // =========================================================================
 if ($action === 'revoke' || $action === 'reinstate') {

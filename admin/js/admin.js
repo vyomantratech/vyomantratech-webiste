@@ -2050,6 +2050,40 @@ const CERTS_PAGE_SIZE = 25;
 let certCurrentPage = 0;
 let latestGeneratedCertificate = null;
 let currentCertificatesList = [];
+let certRecipientMode = 'single';
+let currentBatchGeneratedCertificates = [];
+
+function updateBatchRecipientCount() {
+  const textarea = document.getElementById('certBatchNames');
+  const badge = document.getElementById('batchCountBadge');
+  const btnText = document.getElementById('btnSaveCertText');
+  const btnIcon = document.getElementById('btnSaveCertIcon');
+  if (!textarea) return;
+
+  const raw = textarea.value.trim();
+  const count = raw ? raw.split(/\r?\n/).filter(line => line.trim().length > 0).length : 0;
+
+  if (badge) {
+    badge.textContent = `${count} Candidate${count === 1 ? '' : 's'}`;
+    badge.className = count > 0 ? 'badge-pill badge-green' : 'badge-pill badge-blue';
+  }
+
+  if (certRecipientMode === 'batch') {
+    if (btnText) {
+      btnText.textContent = count > 0 ? `Generate ${count} Certificates in Batch (Instant)` : 'Generate Batch Certificates';
+    }
+    if (btnIcon) {
+      btnIcon.className = 'fas fa-users';
+    }
+  } else {
+    if (btnText) {
+      btnText.textContent = 'Generate Certificate ID, Token & QR';
+    }
+    if (btnIcon) {
+      btnIcon.className = 'fas fa-qrcode';
+    }
+  }
+}
 
 function initCertificatesManager() {
   const form = document.getElementById('certificateEditorForm');
@@ -2149,6 +2183,66 @@ function initCertificatesManager() {
       await uploadFinalCertificateDocx(certId, file);
     }
     replaceSuccessInput.value = '';
+  });
+
+  // Wire Recipient Mode Switcher (Single vs Batch)
+  const tabSingle = document.getElementById('tabModeSingle');
+  const tabBatch = document.getElementById('tabModeBatch');
+  const singleFields = document.getElementById('singleRecipientFields');
+  const batchFields = document.getElementById('batchRecipientsFields');
+  const singleNameInput = document.getElementById('certRecipientName');
+  const batchTextarea = document.getElementById('certBatchNames');
+  const btnSampleBatch = document.getElementById('btnFillSampleBatch');
+  const btnClearBatch = document.getElementById('btnClearBatch');
+
+  tabSingle?.addEventListener('click', () => {
+    certRecipientMode = 'single';
+    tabSingle.classList.add('active');
+    tabSingle.style.background = 'var(--cyan)';
+    tabSingle.style.color = '#000';
+    tabBatch?.classList.remove('active');
+    if (tabBatch) {
+      tabBatch.style.background = 'transparent';
+      tabBatch.style.color = 'var(--text-muted)';
+    }
+    if (singleFields) singleFields.style.display = 'grid';
+    if (batchFields) batchFields.style.display = 'none';
+    if (singleNameInput) singleNameInput.setAttribute('required', '');
+    updateBatchRecipientCount();
+  });
+
+  tabBatch?.addEventListener('click', () => {
+    certRecipientMode = 'batch';
+    tabBatch.classList.add('active');
+    tabBatch.style.background = 'var(--cyan)';
+    tabBatch.style.color = '#000';
+    tabSingle?.classList.remove('active');
+    if (tabSingle) {
+      tabSingle.style.background = 'transparent';
+      tabSingle.style.color = 'var(--text-muted)';
+    }
+    if (singleFields) singleFields.style.display = 'none';
+    if (batchFields) batchFields.style.display = 'block';
+    if (singleNameInput) singleNameInput.removeAttribute('required');
+    updateBatchRecipientCount();
+    batchTextarea?.focus();
+  });
+
+  batchTextarea?.addEventListener('input', updateBatchRecipientCount);
+
+  btnSampleBatch?.addEventListener('click', () => {
+    if (batchTextarea) {
+      batchTextarea.value = "Arun Kumar\nPriya Sharma, priya.sharma@example.com\nKarthik R\nSneha Patel";
+      updateBatchRecipientCount();
+      showToast('Inserted 4 sample candidates for batch issuance.');
+    }
+  });
+
+  btnClearBatch?.addEventListener('click', () => {
+    if (batchTextarea) {
+      batchTextarea.value = '';
+      updateBatchRecipientCount();
+    }
   });
 }
 
@@ -2351,6 +2445,121 @@ async function saveCertificate() {
   const button = document.getElementById('btnSaveCertificate');
   button.disabled = true;
   const formData = new FormData(form);
+
+  // =========================================================================
+  // BATCH MODE: Issue multiple certificates with same details, different names
+  // =========================================================================
+  if (certRecipientMode === 'batch') {
+    const rawBatch = document.getElementById('certBatchNames')?.value || '';
+    const lines = rawBatch.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) {
+      showToast('Please enter at least one recipient name in the batch list.', true);
+      document.getElementById('certBatchNames')?.focus();
+      button.disabled = false;
+      return;
+    }
+
+    const recipients = lines.map(line => {
+      if (line.includes(',')) {
+        const parts = line.split(',');
+        return { name: parts[0].trim(), email: (parts[1] || '').trim() };
+      }
+      return { name: line, email: '' };
+    }).filter(r => r.name.length > 0);
+
+    const btnTextEl = document.getElementById('btnSaveCertText');
+    if (btnTextEl) btnTextEl.textContent = `Generating ${recipients.length} Certificates...`;
+
+    try {
+      let createdCertificates = [];
+      const courseTitle = String(formData.get('course_name') || 'Training Program').trim();
+
+      if (isDevStaticMode) {
+        const all = getLocalData('certificates') || [];
+        const prefixByType = { 'Training Program': 'VYOM-CRS', 'Internship': 'VYOM-INT', 'Hackathon': 'VYOM-HCK', 'Workshop': 'VYOM-WRK', 'Webinar': 'VYOM-EVT', 'Competition': 'VYOM-EVT' };
+        const prefix = prefixByType[String(formData.get('program_type') || 'Training Program')] || 'VYOM-CRS';
+        const issueDate = String(formData.get('issue_date') || new Date().toISOString().slice(0, 10));
+        const year = new Date(`${issueDate}T00:00:00`).getFullYear() || new Date().getFullYear();
+        const matcher = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-${year}-(\\d+)(?:-[A-Z0-9]{4})?$`);
+        let sequence = all.reduce((max, item) => Math.max(max, Number((item.certificate_id || '').match(matcher)?.[1] || 0)), 0);
+
+        for (const rec of recipients) {
+          sequence++;
+          const certificateId = `${prefix}-${year}-${String(sequence).padStart(4, '0')}`;
+          const random = new Uint8Array(16);
+          crypto.getRandomValues(random);
+          const token = [...random].map(value => value.toString(16).padStart(2, '0')).join('');
+
+          const cert = {
+            id: Date.now() + Math.random(),
+            certificate_id: certificateId,
+            verification_token: token,
+            verification_url: `${window.location.origin}/verify/?id=${token}`,
+            certificate_type: String(formData.get('certificate_type') || 'Completion'),
+            program_type: String(formData.get('program_type') || 'Training Program'),
+            recognition: String(formData.get('recognition') || 'Completed'),
+            prefix,
+            trainer_name: String(formData.get('trainer_name') || 'Santhosh S').trim(),
+            trainer_designation: String(formData.get('trainer_designation') || 'Program Lead').trim(),
+            signatory_name: String(formData.get('signatory_name') || 'S.B. Sachin').trim(),
+            signatory_designation: String(formData.get('signatory_designation') || 'Founder & CEO').trim(),
+            recipient_name: rec.name,
+            recipient_email: rec.email,
+            course_name: courseTitle,
+            course_duration: String(formData.get('course_duration') || '1 Month').trim(),
+            issue_date: issueDate,
+            completion_date: String(formData.get('completion_date') || issueDate),
+            private_notes: String(formData.get('private_notes') || '').trim(),
+            status: 'valid',
+            template_id: '1month_python_course',
+            issued_by: 'VYOMANTRA TECHNOLOGIES',
+            created_at: new Date().toISOString()
+          };
+          createdCertificates.push(cert);
+          all.unshift(cert);
+          currentCertificatesList.unshift(cert);
+        }
+        saveLocalData('certificates', all);
+      } else {
+        formData.set('action', 'batch_create');
+        formData.set('recipients', JSON.stringify(recipients));
+
+        const response = await apiFetch('../api/admin/certificates.php', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${authToken || ''}` },
+          body: formData
+        });
+        const result = await response.json();
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.message || 'Could not generate the batch certificates.');
+        }
+        createdCertificates = result.data?.certificates || [];
+        createdCertificates.forEach(c => currentCertificatesList.unshift(c));
+      }
+
+      showBatchResultModal(createdCertificates, courseTitle);
+      showToast(`Batch generated: ${createdCertificates.length} certificates created!`);
+
+      // Clear batch text
+      const batchInput = document.getElementById('certBatchNames');
+      if (batchInput) batchInput.value = '';
+      updateBatchRecipientCount();
+
+      await fetchCertificates();
+      fetchDashboardStats();
+    } catch (err) {
+      console.error('Batch certificate generation error:', err);
+      showToast(err.message || 'Batch certificate generation failed.', true);
+    } finally {
+      button.disabled = false;
+      updateBatchRecipientCount();
+    }
+    return;
+  }
+
+  // =========================================================================
+  // SINGLE RECIPIENT MODE
+  // =========================================================================
   formData.set('action', 'create');
   try {
     let certificate;
@@ -2426,6 +2635,185 @@ async function saveCertificate() {
   } finally {
     button.disabled = false;
   }
+}
+
+// =========================================================================
+// BATCH CERTIFICATES RESULT MODAL & FAST QR EXPORT
+// =========================================================================
+function showBatchResultModal(certificates, courseName) {
+  currentBatchGeneratedCertificates = certificates || [];
+  const courseEl = document.getElementById('batchResultCourseName');
+  const tbody = document.getElementById('batchResultTableBody');
+  const footerCount = document.getElementById('batchResultFooterCount');
+  const titleEl = document.getElementById('batchResultHeaderTitle');
+
+  if (titleEl) titleEl.textContent = `Batch Generated: ${certificates.length} Certificates Ready!`;
+  if (courseEl) courseEl.textContent = courseName || 'Program / Course';
+  if (footerCount) footerCount.textContent = `Total: ${certificates.length} certificates generated`;
+
+  if (tbody) {
+    tbody.innerHTML = certificates.map((cert, index) => {
+      const id = cert.certificate_id;
+      const safeName = cert.recipient_name || 'Certificate';
+      const url = cert.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(cert.verification_token || id)}`;
+
+      return `
+        <tr>
+          <td style="padding: 0.6rem 0.85rem; font-weight: 700; color: var(--text-dim);">${index + 1}</td>
+          <td style="padding: 0.6rem 0.85rem;">
+            <div style="font-weight: 700; color: #fff;">${escapeHtml(cert.recipient_name)}</div>
+            ${cert.recipient_email ? `<div style="font-size: 0.72rem; color: var(--text-dim);">${escapeHtml(cert.recipient_email)}</div>` : ''}
+          </td>
+          <td style="padding: 0.6rem 0.85rem;">
+            <strong style="font-family: var(--font-mono); color: var(--cyan); font-size: 0.85rem;">${escapeHtml(id)}</strong>
+          </td>
+          <td style="padding: 0.6rem 0.85rem;">
+            <button type="button" class="btn btn-outline btn-sm btn-batch-download-qr" data-batch-qr-name="${escapeHtml(safeName)}" data-batch-qr-id="${escapeHtml(id)}" data-batch-qr-url="${escapeHtml(url)}" style="padding: 3px 8px; font-size: 0.75rem;">
+              <i class="fas fa-qrcode"></i> QR PNG
+            </button>
+          </td>
+          <td style="padding: 0.6rem 0.85rem;">
+            <button type="button" class="btn btn-outline btn-sm btn-batch-view-details" data-batch-cert-id="${escapeHtml(id)}" style="padding: 3px 8px; font-size: 0.75rem; color: var(--cyan); border-color: rgba(0,240,255,0.4); background: rgba(0,240,255,0.06);">
+              <i class="fas fa-list-alt"></i> Fill Details
+            </button>
+          </td>
+          <td style="padding: 0.6rem 0.85rem;">
+            <label class="btn btn-outline btn-sm" style="cursor: pointer; padding: 3px 8px; font-size: 0.75rem; margin: 0; display: inline-flex; align-items: center; gap: 4px;" title="Upload PDF or DOCX file">
+              <i class="fas fa-upload"></i> Attach File
+              <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="batch-row-file-input" data-cert-id="${escapeHtml(id)}" style="display: none;">
+            </label>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Bind individual QR download buttons
+    tbody.querySelectorAll('.btn-batch-download-qr').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await downloadCertificateQr(btn.dataset.batchQrName, btn.dataset.batchQrId, btn.dataset.batchQrUrl);
+          showToast(`QR for ${btn.dataset.batchQrName} downloaded.`);
+        } catch (e) {
+          showToast(e.message, true);
+        }
+      });
+    });
+
+    // Bind fill details buttons
+    tbody.querySelectorAll('.btn-batch-view-details').forEach(btn => {
+      btn.addEventListener('click', () => {
+        closeAdminModal('certBatchResultModal');
+        openCertFillDetailsModal(btn.dataset.batchCertId);
+      });
+    });
+
+    // Bind attach file inputs
+    tbody.querySelectorAll('.batch-row-file-input').forEach(input => {
+      input.addEventListener('change', async () => {
+        const certId = input.dataset.certId;
+        const file = input.files?.[0];
+        if (certId && file) {
+          closeAdminModal('certBatchResultModal');
+          await uploadFinalCertificateDocx(certId, file);
+        }
+        input.value = '';
+      });
+    });
+  }
+
+  // Bind "Copy All Student Links" button
+  const copyBtn = document.getElementById('btnBatchCopyAllLinks');
+  if (copyBtn) {
+    copyBtn.onclick = async () => {
+      const summaryText = certificates.map((c, i) => {
+        const id = c.certificate_id;
+        const url = c.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(c.verification_token || id)}`;
+        return `${i + 1}. ${c.recipient_name} | ID: ${id} | Verification Link: ${url}`;
+      }).join('\n');
+
+      await copyCertificateText(summaryText, `All ${certificates.length} verification links copied to clipboard!`);
+    };
+  }
+
+  // Bind "Download All QR Codes" button
+  const downloadAllBtn = document.getElementById('btnBatchDownloadAllQrs');
+  if (downloadAllBtn) {
+    downloadAllBtn.onclick = async () => {
+      await downloadBatchAllQrs(certificates);
+    };
+  }
+
+  openAdminModal('certBatchResultModal');
+}
+
+async function downloadBatchAllQrs(certificates) {
+  if (!certificates || !certificates.length) {
+    showToast('No certificates to download.', true);
+    return;
+  }
+
+  showToast(`Preparing ${certificates.length} QR codes...`);
+
+  // If JSZip is available, bundle all QR codes into one ZIP archive
+  if (typeof JSZip !== 'undefined') {
+    try {
+      const zip = new JSZip();
+      const qrHolder = document.createElement('div');
+      qrHolder.style.cssText = 'position:fixed;left:-10000px;top:0;background:#fff;padding:8px;';
+      document.body.appendChild(qrHolder);
+
+      for (const cert of certificates) {
+        const id = cert.certificate_id;
+        const name = cert.recipient_name || 'Certificate';
+        const url = cert.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(cert.verification_token || id)}`;
+
+        qrHolder.replaceChildren();
+        new QRCode(qrHolder, {
+          text: url,
+          width: 600,
+          height: 600,
+          colorDark: '#07111d',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        await new Promise(r => setTimeout(r, 45));
+        const canvas = qrHolder.querySelector('canvas');
+        if (canvas) {
+          const dataUrl = canvas.toDataURL('image/png');
+          const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+          zip.file(safeQrName(name, id), base64Data, { base64: true });
+        }
+      }
+
+      qrHolder.remove();
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const downloadLink = document.createElement('a');
+      downloadLink.href = URL.createObjectURL(zipBlob);
+      downloadLink.download = `Vyomantra_Certificates_Batch_QRs_${new Date().toISOString().slice(0, 10)}.zip`;
+      downloadLink.click();
+      URL.revokeObjectURL(downloadLink.href);
+
+      showToast(`Downloaded ZIP with ${certificates.length} QR codes!`);
+      return;
+    } catch (err) {
+      console.warn('JSZip batch failed, falling back to individual download:', err);
+    }
+  }
+
+  // Fallback: sequential download
+  let count = 0;
+  for (const cert of certificates) {
+    const id = cert.certificate_id;
+    const name = cert.recipient_name || 'Certificate';
+    const url = cert.verification_url || `${window.location.origin}/verify/?id=${encodeURIComponent(cert.verification_token || id)}`;
+    try {
+      await downloadCertificateQr(name, id, url);
+      count++;
+      await new Promise(r => setTimeout(r, 220));
+    } catch (_) {}
+  }
+  showToast(`Downloaded ${count} QR codes.`);
 }
 
 function updateGeneratedPanelAttachedState(cert) {
