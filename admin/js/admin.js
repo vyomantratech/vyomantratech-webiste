@@ -2051,7 +2051,76 @@ let certCurrentPage = 0;
 let latestGeneratedCertificate = null;
 let currentCertificatesList = [];
 let certRecipientMode = 'single';
+window.certRecipientMode = window.certRecipientMode || 'single';
 let currentBatchGeneratedCertificates = [];
+
+function setCertRecipientMode(mode) {
+  certRecipientMode = mode;
+  window.certRecipientMode = mode;
+  const tabSingle = document.getElementById('tabModeSingle');
+  const tabBatch = document.getElementById('tabModeBatch');
+  const singleFields = document.getElementById('singleRecipientFields');
+  const batchFields = document.getElementById('batchRecipientsFields');
+  const singleNameInput = document.getElementById('certRecipientName');
+  const batchTextarea = document.getElementById('certBatchNames');
+
+  if (mode === 'batch') {
+    if (tabBatch) {
+      tabBatch.classList.add('active');
+      tabBatch.style.background = '#00f0ff';
+      tabBatch.style.color = '#050713';
+      tabBatch.style.fontWeight = '700';
+    }
+    if (tabSingle) {
+      tabSingle.classList.remove('active');
+      tabSingle.style.background = 'transparent';
+      tabSingle.style.color = 'var(--text-muted, #94a3b8)';
+      tabSingle.style.fontWeight = '600';
+    }
+    if (singleFields) singleFields.style.setProperty('display', 'none', 'important');
+    if (batchFields) batchFields.style.setProperty('display', 'block', 'important');
+    if (singleNameInput) singleNameInput.removeAttribute('required');
+    if (batchTextarea) {
+      batchTextarea.setAttribute('required', '');
+      setTimeout(() => batchTextarea.focus(), 40);
+    }
+  } else {
+    if (tabSingle) {
+      tabSingle.classList.add('active');
+      tabSingle.style.background = '#00f0ff';
+      tabSingle.style.color = '#050713';
+      tabSingle.style.fontWeight = '700';
+    }
+    if (tabBatch) {
+      tabBatch.classList.remove('active');
+      tabBatch.style.background = 'transparent';
+      tabBatch.style.color = 'var(--text-muted, #94a3b8)';
+      tabBatch.style.fontWeight = '600';
+    }
+    if (singleFields) singleFields.style.setProperty('display', 'grid', 'important');
+    if (batchFields) batchFields.style.setProperty('display', 'none', 'important');
+    if (singleNameInput) singleNameInput.setAttribute('required', '');
+    if (batchTextarea) batchTextarea.removeAttribute('required');
+  }
+  updateBatchRecipientCount();
+}
+
+function fillSampleBatchNames() {
+  const textarea = document.getElementById('certBatchNames');
+  if (textarea) {
+    textarea.value = "Arun Kumar\nPriya Sharma, priya.sharma@example.com\nKarthik R\nSneha Patel";
+    updateBatchRecipientCount();
+    showToast('Inserted 4 sample candidates for batch issuance.');
+  }
+}
+
+function clearBatchNames() {
+  const textarea = document.getElementById('certBatchNames');
+  if (textarea) {
+    textarea.value = '';
+    updateBatchRecipientCount();
+  }
+}
 
 function updateBatchRecipientCount() {
   const textarea = document.getElementById('certBatchNames');
@@ -2068,7 +2137,8 @@ function updateBatchRecipientCount() {
     badge.className = count > 0 ? 'badge-pill badge-green' : 'badge-pill badge-blue';
   }
 
-  if (certRecipientMode === 'batch') {
+  const activeMode = window.certRecipientMode || certRecipientMode;
+  if (activeMode === 'batch') {
     if (btnText) {
       btnText.textContent = count > 0 ? `Generate ${count} Certificates in Batch (Instant)` : 'Generate Batch Certificates';
     }
@@ -2195,55 +2265,19 @@ function initCertificatesManager() {
   const btnSampleBatch = document.getElementById('btnFillSampleBatch');
   const btnClearBatch = document.getElementById('btnClearBatch');
 
-  tabSingle?.addEventListener('click', () => {
-    certRecipientMode = 'single';
-    tabSingle.classList.add('active');
-    tabSingle.style.background = 'var(--cyan)';
-    tabSingle.style.color = '#000';
-    tabBatch?.classList.remove('active');
-    if (tabBatch) {
-      tabBatch.style.background = 'transparent';
-      tabBatch.style.color = 'var(--text-muted)';
-    }
-    if (singleFields) singleFields.style.display = 'grid';
-    if (batchFields) batchFields.style.display = 'none';
-    if (singleNameInput) singleNameInput.setAttribute('required', '');
-    updateBatchRecipientCount();
+  tabSingle?.addEventListener('click', (e) => {
+    e.preventDefault();
+    setCertRecipientMode('single');
   });
 
-  tabBatch?.addEventListener('click', () => {
-    certRecipientMode = 'batch';
-    tabBatch.classList.add('active');
-    tabBatch.style.background = 'var(--cyan)';
-    tabBatch.style.color = '#000';
-    tabSingle?.classList.remove('active');
-    if (tabSingle) {
-      tabSingle.style.background = 'transparent';
-      tabSingle.style.color = 'var(--text-muted)';
-    }
-    if (singleFields) singleFields.style.display = 'none';
-    if (batchFields) batchFields.style.display = 'block';
-    if (singleNameInput) singleNameInput.removeAttribute('required');
-    updateBatchRecipientCount();
-    batchTextarea?.focus();
+  tabBatch?.addEventListener('click', (e) => {
+    e.preventDefault();
+    setCertRecipientMode('batch');
   });
 
   batchTextarea?.addEventListener('input', updateBatchRecipientCount);
-
-  btnSampleBatch?.addEventListener('click', () => {
-    if (batchTextarea) {
-      batchTextarea.value = "Arun Kumar\nPriya Sharma, priya.sharma@example.com\nKarthik R\nSneha Patel";
-      updateBatchRecipientCount();
-      showToast('Inserted 4 sample candidates for batch issuance.');
-    }
-  });
-
-  btnClearBatch?.addEventListener('click', () => {
-    if (batchTextarea) {
-      batchTextarea.value = '';
-      updateBatchRecipientCount();
-    }
-  });
+  btnSampleBatch?.addEventListener('click', fillSampleBatchNames);
+  btnClearBatch?.addEventListener('click', clearBatchNames);
 }
 
 async function handleCertificateAction(event) {
@@ -2449,7 +2483,8 @@ async function saveCertificate() {
   // =========================================================================
   // BATCH MODE: Issue multiple certificates with same details, different names
   // =========================================================================
-  if (certRecipientMode === 'batch') {
+  const isBatchMode = (window.certRecipientMode === 'batch' || certRecipientMode === 'batch');
+  if (isBatchMode) {
     const rawBatch = document.getElementById('certBatchNames')?.value || '';
     const lines = rawBatch.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     if (!lines.length) {
@@ -3573,6 +3608,28 @@ window.openAdminModal = openAdminModal;
 window.closeAdminModal = closeAdminModal;
 window.deleteCertificate = deleteCertificate;
 window.openCertFillDetailsModal = openCertFillDetailsModal;
+window.setCertRecipientMode = setCertRecipientMode;
+window.updateBatchRecipientCount = updateBatchRecipientCount;
+window.fillSampleBatchNames = fillSampleBatchNames;
+window.clearBatchNames = clearBatchNames;
+window.showBatchResultModal = showBatchResultModal;
+window.downloadBatchAllQrs = downloadBatchAllQrs;
+
+// Global tab switcher fallback delegation
+document.addEventListener('click', (event) => {
+  const batchBtn = event.target.closest('#tabModeBatch');
+  if (batchBtn) {
+    event.preventDefault();
+    setCertRecipientMode('batch');
+    return;
+  }
+  const singleBtn = event.target.closest('#tabModeSingle');
+  if (singleBtn) {
+    event.preventDefault();
+    setCertRecipientMode('single');
+    return;
+  }
+});
 
 // Install the click router as soon as this body-end script loads. It must not
 // depend on the async authentication/setup path finishing first.
