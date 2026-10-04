@@ -1932,38 +1932,17 @@ async function deleteJob(id, slug) {
 // 9. LOCAL DATA STORAGE ENGINE (FOR STATIC LIVE SERVER PORT 5500)
 // =========================================================================
 function initLocalSeedData() {
-  // Clear any existing demo contacts, quotes, course registrations, applicants, and demo jobs
-  // while strictly keeping authentic certificates data.
+  // Clear all demo/sample data on each load to start with a clean admin panel.
+  // Real data is managed via the MySQL database (API) or explicitly created by admin.
   localStorage.setItem('vyomantra_admin_contacts', JSON.stringify([]));
   localStorage.setItem('vyomantra_admin_quotes', JSON.stringify([]));
   localStorage.setItem('vyomantra_admin_courses', JSON.stringify([]));
   localStorage.setItem('vyomantra_admin_applicants', JSON.stringify([]));
   localStorage.setItem('vyomantra_admin_jobs', JSON.stringify([]));
   localStorage.setItem('vyomantra_admin_courses_catalog', JSON.stringify([]));
-
-  // Pre-load certificates from ../data/certificates.json if not present
-  if (!localStorage.getItem('vyomantra_admin_certificates')) {
-    fetch('../data/certificates.json')
-      .then(res => res.json())
-      .then(certs => {
-        if (Array.isArray(certs) && certs.length > 0) {
-          saveLocalData('certificates', certs);
-        }
-      })
-      .catch(() => {});
-  }
-
-  // Pre-load certificate logs from ../data/certificate_logs.json if not present
-  if (!localStorage.getItem('vyomantra_admin_certificate_logs')) {
-    fetch('../data/certificate_logs.json')
-      .then(res => res.json())
-      .then(logs => {
-        if (Array.isArray(logs) && logs.length > 0) {
-          saveLocalData('certificate_logs', logs);
-        }
-      })
-      .catch(() => {});
-  }
+  // Always reset certificates and logs localStorage so stale sample records never persist.
+  localStorage.setItem('vyomantra_admin_certificates', JSON.stringify([]));
+  localStorage.setItem('vyomantra_admin_certificate_logs', JSON.stringify([]));
 }
 
 function getLocalData(key) {
