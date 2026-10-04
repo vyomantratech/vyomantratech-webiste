@@ -52,13 +52,13 @@ function certPrefixForProgramType($programType) {
     return $map[$programType] ?? 'VYOM-CRS';
 }
 
-// Helper to generate next clean, short Certificate ID
-// Format: PREFIX-NNNN (e.g. VYOM-CRS-0001, VYOM-INT-0001) - 13 characters
+// Helper to generate next Certificate ID in exact format: PREFIX-YYYY-NNNN (e.g. VYOM-CRS-2026-0001)
 function generateNextCertificateId($pdo, $prefix, $year = null) {
     $prefix = strtoupper(trim($prefix ?: 'VYOM-CRS'));
-    $searchPattern = $prefix . '-%';
-    // Matcher matches short format PREFIX-NNNN as well as legacy formats with year/suffix
-    $matcher = '/^' . preg_quote($prefix, '/') . '-(?:(?:\d{4}|\d{2})-)?(\d+)(?:-[A-Z0-9]{4})?$/';
+    $year = (int)($year ?: date('Y'));
+    $searchPattern = $prefix . '-' . $year . '-%';
+    // Matcher matches PREFIX-YYYY-NNNN or legacy formats with random suffixes
+    $matcher = '/^' . preg_quote($prefix . '-' . $year . '-', '/') . '(\d+)(?:-[A-Z0-9]{4})?$/';
 
     $maxSeq = 0;
 
@@ -87,7 +87,7 @@ function generateNextCertificateId($pdo, $prefix, $year = null) {
 
     do {
         $maxSeq++;
-        $newId = sprintf("%s-%04d", $prefix, $maxSeq);
+        $newId = sprintf("%s-%04d-%04d", $prefix, $year, $maxSeq);
         $existsInDb = false;
         if ($pdo) {
             try {
