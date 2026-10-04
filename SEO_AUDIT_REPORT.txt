@@ -1,0 +1,494 @@
+================================================================================
+VYOMANTRA TECHNOLOGIES — CURRENT SEO AUDIT & TECHNICAL ASSESSMENT REPORT
+================================================================================
+Date: October 4, 2026
+Production Domain: https://vyomantratech.com/
+Repository: vyomantratech/vyomantratech-webiste
+Hosting Environment: Hostinger Shared Hosting (Apache / LiteSpeed, PHP, FastCGI)
+Audit Type: Read-Only Repository & Live Production Endpoint Inspection
+================================================================================
+
+
+1. OVERALL STATUS
+--------------------------------------------------------------------------------
+The Vyomantra Technologies website possesses a modern visual design, responsive
+viewport layout, clean typography, and baseline meta tags across its pages.
+
+However, a SEVERE TECHNICAL CONFLICT exists between the production .htaccess
+configuration and the HTML source files:
+
+1. Canonical vs. Redirect Contradiction:
+   The live Hostinger .htaccess forces a 301 Moved Permanently redirect to strip
+   .html extensions (e.g., /about.html -> /about). Conversely, every single HTML
+   document and the production sitemap.xml explicitly set their canonical URL
+   with .html. Crawlers requesting /about are redirected, read a canonical
+   pointing back to /about.html, and enter a canonical-redirect conflict loop.
+
+2. Directory vs. Extensionless URL Collision:
+   Requests for /services, /solutions, /products, and /portfolio trigger a
+   multi-hop redirect chain (.html -> extensionless -> trailing slash directory
+   /services/ -> services/index.html -> canonical pointing back to services.html).
+
+3. Split Domain Indexing (WWW vs. Non-WWW):
+   https://www.vyomantratech.com/ returns 200 OK directly and does NOT redirect
+   to https://vyomantratech.com/, splitting domain link equity and causing
+   duplicate content indexing.
+
+4. Dead 404 URLs in Sitemap:
+   The production sitemap.xml contains 6 career detail URLs that do not exist on
+   disk or server, returning 404 Not Found to Googlebot.
+
+5. Brand Disambiguation Gaps:
+   Entity signals for "Vyomantra Technologies" lack key authority anchors
+   (no LinkedIn company page, no MSME/Udyam identifier in Schema, all-caps brand
+   styling, and a generic homepage H1), leaving the entity vulnerable to Google
+   search confusion with "Vyomastra".
+
+
+2. ALREADY CORRECT
+--------------------------------------------------------------------------------
+- Document Structure: UTF-8 character encoding enforced in .htaccess and HTML <head>.
+- Mobile Responsiveness: Standard viewport meta tag (width=device-width, initial-scale=1.0)
+  present on all public pages.
+- Single H1 Structure: All public pages have exactly one <h1> heading.
+- Utility Noindex Protection:
+  * admin/index.html and admin/dashboard.html contain:
+    <meta name="robots" content="noindex, nofollow, noarchive">
+  * verify/index.html contains:
+    <meta name="robots" content="noindex, nofollow, noarchive">
+- API Header Protection: 20 out of 22 PHP endpoints in api/ send:
+  X-Robots-Tag: noindex, nofollow
+- Directory Isolation: Dedicated .htaccess files exist in data/, logs/, scratch/,
+  scripts/, templates/, and uploads/certificates/ denying direct public execution.
+- Security Headers: Root .htaccess applies:
+  * X-Content-Type-Options: nosniff
+  * X-Frame-Options: SAMEORIGIN
+  * Referrer-Policy: strict-origin-when-cross-origin
+- Core Structured Data:
+  * index.html has valid Organization and WebSite JSON-LD schemas.
+  * contact.html has detailed LocalBusiness JSON-LD with exact GPS coordinates.
+  * 12 service pages in services/ include valid Service JSON-LD linked to Organization.
+- Image Alt Coverage: All 329 <img> tags across public pages have alt attributes
+  populated (only 1 empty placeholder tag in gallery.html).
+- Root HTTP to HTTPS: Plain HTTP requests to http://vyomantratech.com/ redirect with
+  301 to https://vyomantratech.com/.
+
+
+3. CRITICAL ISSUES
+--------------------------------------------------------------------------------
+1. SEVERE 301 REDIRECT VS. CANONICAL CONFLICT (Verified Live on Hostinger)
+   - Root .htaccess rules 5 & 6 force-strip .html:
+     RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+(.*?)\.html[\s?] [NC]
+     RewriteRule ^ /%1 [R=301,L]
+   - Conflict: about.html, contact.html, courses.html, and all sitemap.xml entries
+     use .html as their canonical.
+   - Live Server Curl Verification:
+     curl -ILs https://vyomantratech.com/about.html
+     -> HTTP/1.1 301 Moved Permanently
+     -> Location: https://vyomantratech.com/about
+     -> HTTP/1.1 200 OK
+     HTML served at /about contains:
+     <link rel="canonical" href="https://vyomantratech.com/about.html">
+   - Impact: Googlebot is instructed by .htaccess that /about.html permanently moved
+     to /about, but /about tells Googlebot the canonical master is /about.html.
+     Google Search Console classifies this as "Page with redirect" and excludes
+     the pages from indexing.
+
+2. MULTI-HOP REDIRECT LOOPS ON SECTION HUBS
+   - The server has both section HTML files (services.html, solutions.html,
+     products.html, portfolio.html) and matching physical folders (services/,
+     solutions/, products/, portfolio/).
+   - Live Server Curl Verification:
+     curl -ILs https://vyomantratech.com/services.html
+     -> Step 1: 301 Moved Permanently to /services (from .htaccess rule 5)
+     -> Step 2: 301 Moved Permanently to /services/ (Apache mod_dir folder slash)
+     -> Step 3: 200 OK (serves services/index.html whose canonical says services.html!)
+   - Impact: Two sequential redirects pointing right back to the starting URL.
+     Affects /services, /solutions, /products, and /portfolio.
+
+3. DUPLICATE WWW AND NON-WWW PRODUCTION ENDPOINTS
+   - Live Server Curl Verification:
+     curl -ILs https://www.vyomantratech.com/ returns HTTP/1.1 200 OK directly
+     without redirecting to https://vyomantratech.com/.
+   - Impact: Hostinger serves identical content on both hostnames, diluting domain
+     authority and splitting organic backlinks across two separate domains.
+
+4. SIX DEAD 404 URLS IN SITEMAP.XML
+   - sitemap.xml contains 6 subpages under /careers/:
+     * https://vyomantratech.com/careers/ai-ml-engineer.html
+     * https://vyomantratech.com/careers/digital-marketing-specialist.html
+     * https://vyomantratech.com/careers/full-stack-engineer.html
+     * https://vyomantratech.com/careers/python-backend-intern.html
+     * https://vyomantratech.com/careers/ui-ux-designer.html
+     * https://vyomantratech.com/careers/web-development-intern.html
+   - None of these static HTML files exist on disk or server.
+   - Live Server Curl Verification: Returns 301 -> 404 Not Found.
+   - Impact: Submitting broken URLs in sitemaps degrades domain crawl quality score.
+
+5. CAREERS ROUTE CONTRADICTION
+   - careers/index.html has canonical https://vyomantratech.com/careers (clean URL)
+     and <meta http-equiv="refresh" content="0;url=/careers">.
+   - careers.html has canonical https://vyomantratech.com/careers.html.
+   - sitemap.xml lists careers.html.
+   - These three declarations directly conflict.
+
+
+4. HIGH PRIORITY ISSUES
+--------------------------------------------------------------------------------
+1. Missing Structured Data on 33 Public Pages:
+   - about.html: No schema (missing AboutPage and Organization reference).
+   - solutions/*.html (7 pages): No schema (missing Service / Solution schema).
+   - products/stockmitra.html: No schema (missing SoftwareApplication / Product).
+   - courses.html: No schema (missing Course schema for Python, Web Dev, AI).
+   - portfolio/*.html: No schema (missing CreativeWork / Article schema).
+   - Legal & Utility pages: No schema.
+2. Missing BreadcrumbList Schema:
+   No subpages in services/, solutions/, portfolio/, or products/ have breadcrumbs
+   JSON-LD, losing Google SERP breadcrumb snippet visibility.
+3. Conflicting Entity @id Schema Definition:
+   - index.html declares @id: "https://vyomantratech.com/#organization" as Organization.
+   - contact.html declares the same @id as LocalBusiness.
+   In Schema.org entity graphs, declaring conflicting top-level types on the same @id
+   creates entity confusion.
+4. Missing Google Integrations:
+   - No google-site-verification meta tag in HTML head.
+   - No Google Analytics 4 (GA4 G-XXXXXXXXXX) tracking tag.
+   - No Google Tag Manager (GTM) container script.
+5. Large Media Assets Degrading Core Web Vitals (LCP):
+   - assets/ai/vyomantra_ai_core.jpg is 2.51 MB (referenced on homepage hero canvas).
+   - assets/Team/sachin.png (2.01 MB), assets/Team/sachin.webp (1.32 MB), and other
+     team photos range between 1.2 MB and 1.9 MB each.
+6. External Image Dependencies (Unsplash):
+   - 16 unique image URLs (18 instances) load from images.unsplash.com for
+     testimonials on index.html and course cards on courses.html, adding external
+     latency and DNS dependencies.
+
+
+5. MEDIUM PRIORITY ISSUES
+--------------------------------------------------------------------------------
+1. Brand Entity Naming:
+   - Organization name is formatted in ALL CAPS ("VYOMANTRA TECHNOLOGIES") in schema
+     and <title> tags. It should use natural corporate Title Case: "Vyomantra Technologies".
+   - Schema lacks legalName, foundingDate, knowsAbout, and taxID (MSME Udyam number).
+2. Homepage H1 Lacks Brand Identity:
+   - Current H1: "Empowering Innovation Through Technology & AI Training"
+   - Contains zero mention of "Vyomantra Technologies" and omits primary keywords
+     ("Web Development & AI Solutions Company").
+3. Heading Hierarchy Flaws:
+   - index.html lines 251-259: <h4>50+</h4>, <h4>99%</h4>, <h4>500+</h4> appear
+     inside hero stats before any <h2> tag exists on the page.
+   - Testimonial author names jump to <h5> without intermediary <h3>/<h4> hierarchy.
+4. Missing LinkedIn Corporate Profile:
+   - No LinkedIn Company URL in schema sameAs or website footer. For B2B tech and
+     IT companies, LinkedIn is Google's primary corporate entity verification signal.
+   - Facebook link uses raw profile query: profile.php?id=61593276075676.
+   - Twitter link points to twitter.com instead of x.com.
+5. Open Graph Image Geometry:
+   - og:image is set to vyomantra_logo.png (1024x1024 square). Social platforms
+     (LinkedIn, WhatsApp, Facebook, X) require 1200x630 (1.91:1) landscape banners.
+6. MSME SVG Dimension Mismatches:
+   - assets/icons/msme_logo.svg has viewBox 394.26x394.26, but is hardcoded as
+     width="44" height="44" across 11 pages, causing layout dimension warnings.
+7. Empty Placeholder Image:
+   - gallery.html contains an invalid empty tag: <img alt="" src="">.
+
+
+6. LOW PRIORITY ISSUES
+--------------------------------------------------------------------------------
+1. Duplicate Alias Files in Root:
+   - privacy-policy.html is a duplicate of privacy.html.
+   - terms-and-conditions.html is a duplicate of terms.html.
+   - projects.html is a duplicate of portfolio.html.
+2. Missing Twitter Handle:
+   - Missing <meta name="twitter:site" content="@vyomantratech"> across pages.
+3. Missing Noindex Headers on Backend Utility Scripts:
+   - api/admin/docx-generator.php and api/cert-lib.php lack noindex headers.
+4. Favicon Asset Size:
+   - assets/icons/favicon.png is 44.6 KB (can be optimized to < 5 KB).
+
+
+7. GOOGLE INDEXING RISKS
+--------------------------------------------------------------------------------
+Crawling Path Diagram:
+Googlebot -> Discovers https://vyomantratech.com/about.html (via sitemap.xml)
+          -> Server 301 redirects to https://vyomantratech.com/about
+          -> Googlebot inspects HTML at /about
+          -> HTML specifies canonical as https://vyomantratech.com/about.html
+          -> CONFLICT: Redirect loop / Canonical contradiction detected
+          -> Result: Google Search Console flags "Page with redirect" and excludes page!
+
+Furthermore:
+- Googlebot fetching sitemap.xml hits 6 hard 404 errors under /careers/, reducing
+  overall domain crawl frequency.
+- Failure to redirect www.vyomantratech.com to vyomantratech.com causes index
+  fragmentation and duplicate content penalties.
+
+
+8. VYOMANTRA VS VYOMASTRA BRAND PROBLEM
+--------------------------------------------------------------------------------
+Problem Analysis:
+When searchers type "Vyomantra" or "Vyomantra Technologies", Google often responds:
+"Did you mean: Vyomastra?" or displays search results for "Vyomastra".
+
+Why this happens:
+- "Vyomastra" has substantial search volume tied to Indian aerospace, defense drone
+  initiatives, space robotics context, and defense technology ventures.
+- "Vyomantra" is an emerging tech brand entity. Without explicit, high-authority
+  signals, Google's phonetic spell-correction algorithm assumes the query is a typo.
+
+Current Signals in Code:
+- Brand Name Consistency: "Vyomantra Technologies" is used; 0 occurrences of
+  "Vyomastra" exist in the codebase (Clean).
+- Schema Entity Definition: All caps "VYOMANTRA TECHNOLOGIES" without legalName.
+- LinkedIn Company Page: Completely missing (Critical weakness).
+- Government Registration: MSME logo is shown visually, but Udyam Registration
+  number (UDYAM-TN-XX-XXXXXXX) is missing from Schema and visible text.
+- Google Business Profile: Map coordinates exist, but no direct CID/Google Maps link.
+- Homepage H1: Missing company name completely.
+
+Action Plan to Fortify Brand Entity:
+1. Revise Homepage H1:
+   "Vyomantra Technologies — Web Development, Custom Software & Enterprise AI Solutions"
+2. Enhance Organization Schema on index.html:
+   {
+     "@context": "https://schema.org",
+     "@type": "Organization",
+     "@id": "https://vyomantratech.com/#organization",
+     "name": "Vyomantra Technologies",
+     "legalName": "Vyomantra Technologies",
+     "alternateName": ["Vyomantra", "Vyomantra Tech"],
+     "identifier": "UDYAM-TN-XX-XXXXXXX",
+     "url": "https://vyomantratech.com/",
+     "logo": "https://vyomantratech.com/assets/icons/vyomantra_logo.png",
+     "sameAs": [
+       "https://www.linkedin.com/company/vyomantratech",
+       "https://www.instagram.com/vyomantratech",
+       "https://x.com/vyomantratech",
+       "https://www.facebook.com/vyomantratech",
+       "https://github.com/vyomantratech"
+     ]
+   }
+3. Establish official LinkedIn Company Page ("vyomantratech") and link it site-wide.
+
+
+9. CANONICAL / WWW / HTTPS
+--------------------------------------------------------------------------------
+Current Live Behavior:
+  http://vyomantratech.com        -> 301 -> https://vyomantratech.com/      (OK)
+  http://www.vyomantratech.com    -> 301 -> https://www.vyomantratech.com/  (STOPS AT WWW)
+  https://www.vyomantratech.com/  -> 200 OK                                 (DUPLICATE)
+  https://vyomantratech.com/about.html -> 301 -> /about                     (CONFLICT)
+  https://vyomantratech.com/services.html -> 301 -> /services -> 301 -> /services/ (LOOP)
+
+Required .htaccess Normalization Rules:
+  # 1. Force HTTPS and Non-WWW in a single permanent 301 redirect
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\.vyomantratech\.com$ [NC]
+  RewriteRule ^(.*)$ https://vyomantratech.com/$1 [R=301,L]
+
+  # 2. Harmonize extensionless URLs and prevent directory slash collision
+  # Ensure /services, /solutions, /products, /portfolio map cleanly to their
+  # respective overview files without triggering mod_dir trailing-slash loops.
+
+
+10. ROBOTS.TXT
+--------------------------------------------------------------------------------
+Current File:
+  User-agent: *
+  Allow: /
+  Disallow: /api/
+  Sitemap: https://vyomantratech.com/sitemap.xml
+
+Required Adjustments:
+  User-agent: *
+  Allow: /
+  Disallow: /api/
+  Disallow: /admin/
+  Disallow: /data/
+  Disallow: /logs/
+  Disallow: /scratch/
+  Disallow: /scripts/
+  Disallow: /templates/
+  Sitemap: https://vyomantratech.com/sitemap.xml
+
+
+11. SITEMAP.XML
+--------------------------------------------------------------------------------
+- Total URLs currently listed: 42
+- Broken 404 URLs to PURGE immediately:
+  1. https://vyomantratech.com/careers/ai-ml-engineer.html
+  2. https://vyomantratech.com/careers/digital-marketing-specialist.html
+  3. https://vyomantratech.com/careers/full-stack-engineer.html
+  4. https://vyomantratech.com/careers/python-backend-intern.html
+  5. https://vyomantratech.com/careers/ui-ux-designer.html
+  6. https://vyomantratech.com/careers/web-development-intern.html
+- Canonical Alignment:
+  Update all remaining URLs to match the decided canonical standard (either clean
+  extensionless URLs /about, /services, or adjust .htaccess to preserve .html).
+
+
+12. STRUCTURED DATA
+--------------------------------------------------------------------------------
+Currently Implemented:
+  - Organization (index.html)
+  - WebSite (index.html)
+  - LocalBusiness (contact.html)
+  - Service (12 subpages in services/)
+
+Missing Structured Data:
+  - AboutPage (about.html)
+  - Course (courses.html) - for Python, Full Stack Web Dev, and AI Mentorship
+  - SoftwareApplication / Product (products/stockmitra.html)
+  - Service (all 7 subpages in solutions/)
+  - CreativeWork / CaseStudy (portfolio/ai-crm.html, portfolio/home-bakers.html)
+  - BreadcrumbList (all subpages across services, solutions, products, portfolio)
+
+
+13. PAGE-BY-PAGE SEO AUDIT TABLE
+--------------------------------------------------------------------------------
+Page                       | Canonical URL                         | H1 Tag                                                     | Schema                | Status
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+index.html                 | https://vyomantratech.com/            | Empowering Innovation Through Technology & AI Training      | Organization, WebSite | OK
+about.html                 | https://vyomantratech.com/about.html  | Crafting the Future of Tech with Purpose, Precision & Code | None                  | Redirect Conflict
+services.html              | https://vyomantratech.com/services.html | Scalable Digital Services Engineered for Growth          | None                  | Multi-Hop Loop
+services/index.html        | https://vyomantratech.com/services.html | Scalable Digital Services Engineered for Growth          | None                  | Directory Alias
+services/ai-machine-learning.html | .../services/ai-machine-learning.html | Autonomous AI & Machine Learning Systems           | Service               | Redirect Conflict
+services/automation.html   | .../services/automation.html          | Business Process Automation & Zero-Touch Workflows         | Service               | Redirect Conflict
+services/branding.html     | .../services/branding.html            | Corporate Branding & Creative Digital Identity             | Service               | Redirect Conflict
+services/cloud-devops.html | .../services/cloud-devops.html        | Cloud Infrastructure, DevOps & 99.99% Availability         | Service               | Redirect Conflict
+services/digital-marketing.html | .../services/digital-marketing.html | Performance Digital Marketing & Customer Funnels       | Service               | Redirect Conflict
+services/erp-crm.html      | .../services/erp-crm.html             | Custom ERP & CRM Platforms Unified Enterprise Operations   | Service               | Redirect Conflict
+services/it-consulting.html| .../services/it-consulting.html       | Strategic IT Consulting & Enterprise Architecture Advisory | Service               | Redirect Conflict
+services/mobile-app-development.html | .../services/mobile-app-development.html | Custom Mobile App Development Built for Scale | Service               | Redirect Conflict
+services/seo.html          | .../services/seo.html                 | Technical SEO Engineering & Sustainable Organic Rankings   | Service               | Redirect Conflict
+services/software-development.html | .../services/software-development.html | Custom Software Development Engineered for Operations | Service      | Redirect Conflict
+services/ui-ux-design.html | .../services/ui-ux-design.html        | UI/UX Design & Interactive Product Prototyping             | Service               | Redirect Conflict
+services/web-development.html | .../services/web-development.html | Custom Web Development & Progressive Web Apps               | Service               | Redirect Conflict
+solutions.html             | https://vyomantratech.com/solutions.html | Enterprise Business Solutions Engineered for ROI        | None                  | Multi-Hop Loop
+solutions/index.html       | https://vyomantratech.com/solutions.html | Enterprise Business Solutions Engineered for ROI        | None                  | Directory Alias
+solutions/ai-solutions.html| .../solutions/ai-solutions.html       | Enterprise AI Solutions Practical Intelligence             | None                  | Redirect Conflict
+solutions/automation.html  | .../solutions/automation.html         | Workflow Automation Solutions Eliminate Repetitive Work    | None                  | Redirect Conflict
+solutions/business-websites.html | .../solutions/business-websites.html | Business Websites Solution Engineered to Command Authority | None           | Redirect Conflict
+solutions/custom-software.html | .../solutions/custom-software.html | Custom Software Solutions Engineered for Operations       | None                  | Redirect Conflict
+solutions/ecommerce.html   | .../solutions/ecommerce.html          | E-commerce Solutions Engineered for Frictionless Purchases  | None                  | Redirect Conflict
+solutions/erp-crm.html     | .../solutions/erp-crm.html            | Custom ERP & CRM Solutions Complete Visibility             | None                  | Redirect Conflict
+solutions/saas.html        | .../solutions/saas.html               | SaaS Product Solutions Engineered for Multi-Tenant Scale   | None                  | Redirect Conflict
+products.html              | https://vyomantratech.com/products.html | Engineered Digital Products Built to Power Commerce      | None                  | Multi-Hop Loop
+products/index.html        | https://vyomantratech.com/products.html | Engineered Digital Products Built to Power Commerce      | None                  | Directory Alias
+products/stockmitra.html   | .../products/stockmitra.html          | StockMitra Smart Inventory & POS Billing Platform          | None                  | Redirect Conflict
+portfolio.html             | https://vyomantratech.com/portfolio.html | Client Portfolio & Featured Case Studies                | None                  | Multi-Hop Loop
+portfolio/index.html       | https://vyomantratech.com/portfolio.html | Client Portfolio & Featured Case Studies                | None                  | Directory Alias
+projects.html              | https://vyomantratech.com/portfolio.html | Client Portfolio & Featured Case Studies                | None                  | Duplicate Alias
+portfolio/ai-crm.html      | .../portfolio/ai-crm.html             | AI-CRM Enterprise System Sales Pipelines & Operations Hub  | None                  | Redirect Conflict
+portfolio/home-bakers.html | .../portfolio/home-bakers.html        | Home Bakers Online Store Artisanal Bakery Architecture      | None                  | Redirect Conflict
+courses.html               | https://vyomantratech.com/courses.html | Elite Tech Courses & Hands-On AI Mentorship                | None                  | Redirect Conflict
+careers.html               | https://vyomantratech.com/careers.html | Build Real Software Systems That Power Real Businesses      | None                  | Redirect Conflict
+careers/index.html         | https://vyomantratech.com/careers     | (Missing) Redirecting to Careers                            | None                  | Meta Refresh Conflict
+contact.html               | https://vyomantratech.com/contact.html | Get in Touch with Vyomantra Technologies                    | LocalBusiness         | Redirect Conflict
+gallery.html               | https://vyomantratech.com/gallery.html | Our Journey in Pictures                                     | None                  | Redirect Conflict
+request-a-quote.html       | https://vyomantratech.com/request-a-quote.html | Request a Project Quote & Engineering Blueprint    | None                  | Redirect Conflict
+refund-policy.html         | https://vyomantratech.com/refund-policy.html | Cancellation & Refund Policy                         | None                  | Redirect Conflict
+privacy.html               | https://vyomantratech.com/privacy.html | Privacy Policy                                             | None                  | Redirect Conflict
+privacy-policy.html        | https://vyomantratech.com/privacy.html | Privacy Policy                                             | None                  | Duplicate Alias
+terms.html                 | https://vyomantratech.com/terms.html   | Terms & Conditions                                          | None                  | Redirect Conflict
+terms-and-conditions.html  | https://vyomantratech.com/terms.html   | Terms & Conditions                                          | None                  | Duplicate Alias
+verify/index.html          | (None)                                 | Certificate Verification                                    | None                  | Noindex (Utility)
+admin/index.html           | (None)                                 | (None - Login Form)                                         | None                  | Noindex (Utility)
+admin/dashboard.html       | (None)                                 | Executive Dashboard                                         | None                  | Noindex (Utility)
+
+
+14. EXACT FILES THAT NEED CHANGES
+--------------------------------------------------------------------------------
+Configuration & Infrastructure:
+1. .htaccess
+2. robots.txt
+3. sitemap.xml
+
+Core Landing & Entity Pages:
+4. index.html
+5. about.html
+6. contact.html
+7. courses.html
+8. gallery.html
+9. careers.html
+10. careers/index.html
+
+Subpages & Products:
+11. products/stockmitra.html
+12. 12 Service Pages in services/:
+    - ai-machine-learning.html
+    - automation.html
+    - branding.html
+    - cloud-devops.html
+    - digital-marketing.html
+    - erp-crm.html
+    - it-consulting.html
+    - mobile-app-development.html
+    - seo.html
+    - software-development.html
+    - ui-ux-design.html
+    - web-development.html
+13. 7 Solution Pages in solutions/:
+    - ai-solutions.html
+    - automation.html
+    - business-websites.html
+    - custom-software.html
+    - ecommerce.html
+    - erp-crm.html
+    - saas.html
+14. 2 Case Study Pages in portfolio/:
+    - ai-crm.html
+    - home-bakers.html
+
+Backend Scripts:
+15. api/admin/docx-generator.php
+16. api/cert-lib.php
+
+
+15. RECOMMENDED FIX ORDER
+--------------------------------------------------------------------------------
+Phase 1: Server & Domain Normalization (.htaccess & robots.txt)
+  - Add www -> non-www HTTPS 301 redirect.
+  - Resolve folder trailing slash collisions for services, solutions, products, portfolio.
+  - Disallow private directories in robots.txt.
+
+Phase 2: Sitemap & Crawl Hygiene (sitemap.xml)
+  - Purge the 6 non-existent careers/*.html 404 URLs.
+  - Ensure all sitemap URLs point to direct 200 OK final canonical destinations.
+
+Phase 3: URL Standard & Canonical Harmonization
+  - Unify canonical URLs across all 47 HTML files with the server URL structure.
+  - Harmonize internal links to use canonical destinations.
+
+Phase 4: Brand Entity & Knowledge Graph Fortification
+  - Update homepage H1 with "Vyomantra Technologies" and primary keywords.
+  - Enrich Organization schema on index.html with legalName, MSME taxID, and LinkedIn sameAs.
+  - Connect contact.html LocalBusiness cleanly to Organization schema.
+  - Add Google Search Console verification meta tag.
+
+Phase 5: Structured Data Expansion
+  - Add BreadcrumbList schema to service, solution, and portfolio subpages.
+  - Add Course schema to courses.html.
+  - Add SoftwareApplication schema to products/stockmitra.html.
+  - Add Service schema to solutions subpages.
+  - Add AboutPage schema to about.html.
+
+Phase 6: Image Optimization & QA
+  - Compress vyomantra_ai_core.jpg (2.5 MB down to < 200 KB WebP).
+  - Compress team portrait images.
+  - Fix msme_logo.svg dimension mismatches.
+  - Remove empty placeholder tag in gallery.html.
+
+
+16. READY FOR IMPLEMENTATION
+--------------------------------------------------------------------------------
+The top 5 immediate fixes to execute first upon approval:
+1. Fix WWW to Non-WWW redirection in .htaccess.
+2. Resolve the .htaccess 301 redirect vs. canonical loop conflict.
+3. Purge the 6 dead 404 URLs from sitemap.xml.
+4. Fortify the brand entity in index.html (H1, Schema, Google Search Console tag).
+5. Update robots.txt with disallows for admin and internal directories.
+
+================================================================================
+END OF REPORT — VYOMANTRA TECHNOLOGIES
+================================================================================

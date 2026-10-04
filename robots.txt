@@ -1,8 +1,14 @@
 User-agent: *
 Allow: /
 
-# API endpoints are machine interfaces, not search landing pages.
+# Private machine interfaces, admin and data directories
 Disallow: /api/
+Disallow: /admin/
+Disallow: /data/
+Disallow: /logs/
+Disallow: /scratch/
+Disallow: /scripts/
+Disallow: /templates/
 
 # Keep CSS, JavaScript and image assets crawlable for page rendering.
 Sitemap: https://vyomantratech.com/sitemap.xml
