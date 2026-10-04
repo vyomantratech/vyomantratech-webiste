@@ -2331,13 +2331,9 @@ async function saveCertificate() {
       const prefixByType = { 'Training Program': 'VYOM-CRS', 'Internship': 'VYOM-INT', 'Hackathon': 'VYOM-HCK', 'Workshop': 'VYOM-WRK', 'Webinar': 'VYOM-EVT', 'Competition': 'VYOM-EVT' };
       const prefix = prefixByType[String(formData.get('program_type') || 'Training Program')] || 'VYOM-CRS';
       const issueDate = String(formData.get('issue_date') || new Date().toISOString().slice(0, 10));
-      const year = new Date(`${issueDate}T00:00:00`).getFullYear();
-      const matcher = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-${year}-(\\d+)(?:-[A-Z0-9]{4})?$`);
+      const matcher = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(?:(?:\\d{4}|\\d{2})-)?(\\d+)(?:-[A-Z0-9]{4})?$`);
       const sequence = all.reduce((max, item) => Math.max(max, Number((item.certificate_id || '').match(matcher)?.[1] || 0)), 0) + 1;
-      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      const suffixBytes = new Uint8Array(4); crypto.getRandomValues(suffixBytes);
-      const suffix = [...suffixBytes].map(v => alphabet[v % alphabet.length]).join('');
-      const certificateId = `${prefix}-${year}-${String(sequence).padStart(5, '0')}-${suffix}`;
+      const certificateId = `${prefix}-${String(sequence).padStart(4, '0')}`;
       const random = new Uint8Array(16);
       crypto.getRandomValues(random);
       const token = [...random].map(value => value.toString(16).padStart(2, '0')).join('');

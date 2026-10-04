@@ -52,13 +52,13 @@ function certPrefixForProgramType($programType) {
     return $map[$programType] ?? 'VYOM-CRS';
 }
 
-// Helper to generate next unique collision-safe, hard-to-guess Certificate ID
-// Format: PREFIX-YYYY-NNNNN-XXXX  (XXXX = random suffix so IDs cannot be enumerated)
-function generateNextCertificateId($pdo, $prefix, $year) {
+// Helper to generate next clean, short Certificate ID
+// Format: PREFIX-NNNN (e.g. VYOM-CRS-0001, VYOM-INT-0001) - 13 characters
+function generateNextCertificateId($pdo, $prefix, $year = null) {
     $prefix = strtoupper(trim($prefix ?: 'VYOM-CRS'));
-    $year = (int)($year ?: date('Y'));
-    $searchPattern = $prefix . '-' . $year . '-%';
-    $matcher = '/^' . preg_quote($prefix . '-' . $year . '-', '/') . '(\d+)(?:-[A-Z0-9]{4})?$/';
+    $searchPattern = $prefix . '-%';
+    // Matcher matches short format PREFIX-NNNN as well as legacy formats with year/suffix
+    $matcher = '/^' . preg_quote($prefix, '/') . '-(?:(?:\d{4}|\d{2})-)?(\d+)(?:-[A-Z0-9]{4})?$/';
 
     $maxSeq = 0;
 
@@ -85,14 +85,9 @@ function generateNextCertificateId($pdo, $prefix, $year) {
         }
     }
 
-    $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     do {
         $maxSeq++;
-        $suffix = '';
-        for ($i = 0; $i < 4; $i++) {
-            $suffix .= $alphabet[random_int(0, strlen($alphabet) - 1)];
-        }
-        $newId = sprintf("%s-%04d-%05d-%s", $prefix, $year, $maxSeq, $suffix);
+        $newId = sprintf("%s-%04d", $prefix, $maxSeq);
         $existsInDb = false;
         if ($pdo) {
             try {

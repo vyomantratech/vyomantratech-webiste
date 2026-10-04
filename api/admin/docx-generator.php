@@ -242,6 +242,7 @@ class VyomantraDocxEngine {
             '[DD MMM YYYY]'           => htmlspecialchars($issueDate, ENT_XML1, 'UTF-8'),
             '[MENTOR / LEAD NAME]'    => htmlspecialchars($trainerSign, ENT_XML1, 'UTF-8'),
             '[FOUNDER NAME]'          => htmlspecialchars($founderSign, ENT_XML1, 'UTF-8'),
+            '[CERTIFICATE ID]'        => htmlspecialchars($certId, ENT_XML1, 'UTF-8'),
             'VYOM-CRS-2026-0001'      => htmlspecialchars($certId, ENT_XML1, 'UTF-8'),
 
             // Standard Curly Braces placeholders

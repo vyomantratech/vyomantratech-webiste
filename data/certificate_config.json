@@ -17,6 +17,7 @@
     "[DD MMM YYYY]": "issue_date",
     "[MENTOR / LEAD NAME]": "trainer_name",
     "[FOUNDER NAME]": "signatory_name",
+    "[CERTIFICATE ID]": "certificate_id",
     "VYOM-CRS-2026-0001": "certificate_id"
   }
 }
