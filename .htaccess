@@ -35,8 +35,10 @@ DirectoryIndex index.html index.php
   # 4. Clean QR Certificate Verification: /verify/VYM-... -> /verify/index.html?id=VYM-...
   RewriteRule ^verify/([A-Za-z0-9_-]+)/?$ verify/index.html?id=$1 [L,QSA]
 
-  # 4b. Careers directory fix: map /careers and /careers/ to careers.html
-  RewriteRule ^careers/?$ careers.html [L]
+  # 4b. Careers fix: redirect /careers/ → /careers (so relative CSS paths resolve from /)
+  RewriteRule ^careers/$ /careers [R=301,L]
+  # 4c. Internal rewrite /careers → careers.html
+  RewriteRule ^careers$ careers.html [L]
 
   # 5. External 301 Redirect: Strip .html extension from browser address bar
   # E.g. https://vyomantratech.com/about.html -> https://vyomantratech.com/about
