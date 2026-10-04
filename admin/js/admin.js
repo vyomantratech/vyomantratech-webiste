@@ -2139,6 +2139,17 @@ function initCertificatesManager() {
       uploadInput.value = '';
     }
   });
+
+  const replaceSuccessInput = document.getElementById('uploadSuccessReplaceInput');
+  replaceSuccessInput?.addEventListener('change', async () => {
+    const certId = replaceSuccessInput.dataset.certUpload;
+    const file = replaceSuccessInput.files?.[0];
+    if (certId && file) {
+      closeAdminModal('certUploadSuccessModal');
+      await uploadFinalCertificateDocx(certId, file);
+    }
+    replaceSuccessInput.value = '';
+  });
 }
 
 async function handleCertificateAction(event) {
@@ -2297,7 +2308,24 @@ function renderCertificatesTable(certificates, total) {
       <td><span style="font-weight:700;font-size:.78rem;color:${stColor};text-transform:uppercase;">${escapeHtml(st)}</span></td>
       <td>${escapeHtml(formatDate(cert.issue_date))}</td>
       <td><button type="button" class="btn btn-outline btn-sm" data-cert-action="download-qr" data-cert-name="${safeName}" data-cert-id="${id}" data-cert-url="${url}"><i class="fas fa-qrcode"></i> Download QR</button><button type="button" class="btn-action-icon" data-cert-action="copy-token" data-cert-token="${token}" title="Copy token"><i class="fas fa-key"></i></button><button type="button" class="btn-action-icon" data-cert-action="copy-url" data-cert-url="${url}" title="Copy verification link"><i class="fas fa-link"></i></button></td>
-      <td>${pdfUrl ? `<a class="btn btn-outline btn-sm" href="${pdfUrl}" download><i class="fas fa-file-pdf"></i> Download File</a>` : `<label class="btn btn-outline btn-sm" style="cursor:pointer;"><i class="fas fa-upload"></i> Upload DOCX / PDF<input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;"></label><div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;">Not uploaded yet</div>`}</td>
+      <td>${pdfUrl ? `
+        <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+          <a class="btn btn-outline btn-sm" href="${pdfUrl}" download style="color:#10b981; border-color:rgba(16,185,129,0.45); padding:3px 9px; font-size:0.75rem; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+            <i class="fas fa-file-download"></i> Download File
+          </a>
+          <label class="btn btn-outline btn-sm" style="cursor:pointer; padding:2px 8px; font-size:0.72rem; color:var(--cyan); border-color:rgba(0,240,255,0.4); background:rgba(0,240,255,0.06); margin:0; display:inline-flex; align-items:center; gap:4px;" title="Replace or re-upload certificate file">
+            <i class="fas fa-sync-alt"></i> Change / Re-upload
+            <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;">
+          </label>
+        </div>` : `
+        <div>
+          <label class="btn btn-outline btn-sm" style="cursor:pointer; padding:3px 10px; font-size:0.75rem; margin:0; display:inline-flex; align-items:center; gap:4px;" title="Upload PDF or Word certificate file">
+            <i class="fas fa-upload"></i> Upload DOCX / PDF
+            <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-cert-upload="${id}" style="display:none;">
+          </label>
+          <div style="font-size:.7rem; color:var(--text-dim); margin-top:3px;">Not uploaded yet</div>
+        </div>`}
+      </td>
       <td><div style="display:inline-flex;gap:.35rem;align-items:center;">${actionBtn}${deleteBtn}</div></td>
     </tr>`;
   }).join('');
@@ -2400,6 +2428,38 @@ async function saveCertificate() {
   }
 }
 
+function updateGeneratedPanelAttachedState(cert) {
+  const attachedBox = document.getElementById('generatedAttachedBox');
+  const attachedFileName = document.getElementById('generatedAttachedFileName');
+  const downloadLink = document.getElementById('btnGeneratedDownloadFile');
+  const uploadLabel = document.getElementById('generatedUploadLabel');
+  const uploadButton = document.getElementById('btnUploadFinalDocx');
+
+  const fileUrl = cert?.certificate_pdf_url || cert?.final_docx_url;
+  if (fileUrl) {
+    if (attachedBox) attachedBox.style.display = 'block';
+    if (attachedFileName) {
+      const parts = String(fileUrl).split('/');
+      attachedFileName.textContent = decodeURIComponent(parts[parts.length - 1] || 'Certificate File');
+    }
+    if (downloadLink) downloadLink.href = fileUrl;
+    if (uploadLabel) {
+      uploadLabel.innerHTML = `<span>Change / Replace Certificate (.pdf / .docx)</span><span style="font-size:0.72rem; color:var(--text-dim);">Replaces previous file</span>`;
+    }
+    if (uploadButton) {
+      uploadButton.innerHTML = `<i class="fas fa-sync-alt"></i> Change / Re-upload Certificate File`;
+    }
+  } else {
+    if (attachedBox) attachedBox.style.display = 'none';
+    if (uploadLabel) {
+      uploadLabel.innerHTML = `<span>Attach Completed Certificate (.pdf / .docx)</span><span style="font-size:0.72rem; color:var(--text-dim);">Can be replaced anytime</span>`;
+    }
+    if (uploadButton) {
+      uploadButton.innerHTML = `<i class="fas fa-file-upload"></i> Upload &amp; Link to Verification Page`;
+    }
+  }
+}
+
 function showGeneratedCertificate(certificate) {
   latestGeneratedCertificate = certificate;
   const panel = document.getElementById('generatedCertificatePanel');
@@ -2415,8 +2475,86 @@ function showGeneratedCertificate(certificate) {
   if (typeof QRCode !== 'undefined') new QRCode(qrBox, { text: url, width: 190, height: 190, colorDark: '#07111d', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
   if (panel) panel.style.display = 'block';
   if (grid) grid.classList.add('has-generated');
-  document.getElementById('generatedFinalDocx').value = '';
+
+  updateGeneratedPanelAttachedState(certificate);
+
+  const fileInput = document.getElementById('generatedFinalDocx');
+  if (fileInput) fileInput.value = '';
   panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function formatFileSize(bytes) {
+  if (!bytes || bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function showUploadProgress(certId, fileName) {
+  const certIdEl = document.getElementById('certUploadProgressCertId');
+  const fileNameEl = document.getElementById('certUploadProgressFilename');
+  const bar = document.getElementById('certUploadProgressBarFill');
+  const percentText = document.getElementById('certUploadProgressPercentText');
+  const statusText = document.getElementById('certUploadProgressStatusText');
+
+  if (certIdEl) certIdEl.textContent = certId;
+  if (fileNameEl) fileNameEl.textContent = fileName;
+  if (bar) bar.style.width = '0%';
+  if (percentText) percentText.textContent = '0%';
+  if (statusText) statusText.textContent = 'Preparing file upload...';
+
+  openAdminModal('certUploadProgressModal');
+}
+
+function updateUploadProgress(percent, statusMsg) {
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
+  const bar = document.getElementById('certUploadProgressBarFill');
+  const percentText = document.getElementById('certUploadProgressPercentText');
+  const statusText = document.getElementById('certUploadProgressStatusText');
+
+  if (bar) bar.style.width = `${clamped}%`;
+  if (percentText) percentText.textContent = `${clamped}%`;
+  if (statusText && statusMsg) statusText.textContent = statusMsg;
+}
+
+function hideUploadProgress() {
+  closeAdminModal('certUploadProgressModal');
+}
+
+function showUploadSuccessModal(data, originalFile) {
+  hideUploadProgress();
+
+  const recipientEl = document.getElementById('uploadSuccessRecipient');
+  const certIdEl = document.getElementById('uploadSuccessCertId');
+  const fileNameEl = document.getElementById('uploadSuccessFileName');
+  const fileSizeEl = document.getElementById('uploadSuccessFileSize');
+  const btnDownload = document.getElementById('btnUploadSuccessDownload');
+  const btnVerify = document.getElementById('btnUploadSuccessVerify');
+  const replaceInput = document.getElementById('uploadSuccessReplaceInput');
+
+  const certId = data?.certificate_id || '';
+  const recipientName = data?.recipient_name || 'Certificate Recipient';
+  const fileName = data?.file_name || originalFile?.name || `${certId}_final.pdf`;
+  const fileSize = data?.file_size ? formatFileSize(data.file_size) : (originalFile?.size ? formatFileSize(originalFile.size) : 'Ready');
+  const downloadUrl = data?.download_url || data?.certificate_pdf_url || `../api/download.php?id=${encodeURIComponent(certId)}`;
+  const verifyUrl = data?.verification_url || `../verify/?id=${encodeURIComponent(certId)}`;
+
+  if (recipientEl) recipientEl.textContent = recipientName;
+  if (certIdEl) certIdEl.textContent = certId;
+  if (fileNameEl) fileNameEl.textContent = fileName;
+  if (fileSizeEl) fileSizeEl.textContent = fileSize;
+  if (btnDownload) {
+    btnDownload.href = downloadUrl;
+    btnDownload.download = fileName;
+  }
+  if (btnVerify) {
+    btnVerify.href = verifyUrl;
+  }
+  if (replaceInput) {
+    replaceInput.dataset.certUpload = certId;
+  }
+
+  openAdminModal('certUploadSuccessModal');
 }
 
 async function copyCertificateText(value, successMessage) {
@@ -2469,30 +2607,137 @@ function downloadGeneratedQr() {
 }
 
 async function uploadFinalCertificateDocx(certificateId, file) {
+  if (!certificateId || !file) return;
   const isPdf  = /\.pdf$/i.test(file.name);
   const isDocx = /\.docx$/i.test(file.name);
-  if (!isPdf && !isDocx) { showToast('Please choose a .pdf or .docx certificate file.', true); return; }
-  if (isDevStaticMode && isDocx) { showToast('DOCX upload requires the PHP server. Upload a PDF, or use the live site.', true); return; }
-  const status = document.getElementById('generatedPdfStatus');
-  if (status) status.textContent = isPdf ? 'Uploading PDF...' : 'Uploading DOCX...';
-  const action = isPdf ? 'upload_final_pdf' : 'upload_final_docx';
-  const fieldName = isPdf ? 'final_pdf' : 'final_docx';
-  const body = new FormData(); body.append('action', action); body.append('id', certificateId); body.append(fieldName, file);
-  try {
-    const response = await apiFetch('../api/admin/certificates.php', { method: 'POST', headers: { 'Authorization': `Bearer ${authToken || ''}` }, body });
-    const result = await response.json();
-    if (!response.ok || !result?.success) throw new Error(result?.message || 'Could not upload the certificate file.');
-    if (latestGeneratedCertificate?.certificate_id === certificateId) {
-      latestGeneratedCertificate.certificate_pdf_url = result.data?.certificate_pdf_url;
-      if (status) status.textContent = 'Certificate file ready. It will appear on the public verification page.';
-    }
-    showToast(isPdf ? 'PDF uploaded and attached.' : 'DOCX uploaded and attached.');
-    await fetchCertificates();
-  } catch (error) {
-    console.error('Certificate file upload failed:', error);
-    if (status) status.textContent = error.message || 'Upload failed.';
-    showToast(error.message || 'Upload failed.', true);
+  if (!isPdf && !isDocx) {
+    showToast('Please choose a .pdf or .docx certificate file.', true);
+    return;
   }
+
+  showUploadProgress(certificateId, file.name);
+
+  if (isDevStaticMode) {
+    let currentPct = 0;
+    const progressInterval = setInterval(() => {
+      currentPct += Math.floor(Math.random() * 22) + 16;
+      if (currentPct >= 100) {
+        currentPct = 100;
+        clearInterval(progressInterval);
+        updateUploadProgress(100, 'Processing & attaching file to registry...');
+
+        setTimeout(async () => {
+          const all = getLocalData('certificates') || [];
+          const cert = all.find(c => c.certificate_id === certificateId || String(c.id) === String(certificateId));
+          const mockFileUrl = URL.createObjectURL(file);
+          if (cert) {
+            cert.certificate_pdf_url = mockFileUrl;
+            cert.final_docx_url = isDocx ? mockFileUrl : null;
+            cert.updated_at = new Date().toISOString();
+            setLocalData('certificates', all);
+          }
+
+          if (latestGeneratedCertificate && (latestGeneratedCertificate.certificate_id === certificateId || String(latestGeneratedCertificate.id) === String(certificateId))) {
+            latestGeneratedCertificate.certificate_pdf_url = mockFileUrl;
+            updateGeneratedPanelAttachedState(latestGeneratedCertificate);
+          }
+
+          const fillModal = document.getElementById('certFillDetailsModal');
+          if (fillModal && fillModal.classList.contains('active') && cert) {
+            renderCertFillDetailsModal(cert);
+          }
+
+          const mockResult = {
+            certificate_id: certificateId,
+            recipient_name: cert?.recipient_name || 'Recipient',
+            course_name: cert?.course_name || 'Certificate Course',
+            certificate_pdf_url: mockFileUrl,
+            download_url: mockFileUrl,
+            verification_url: `${window.location.origin}/verify/?id=${encodeURIComponent(cert?.verification_token || certificateId)}`,
+            file_name: file.name,
+            file_size: file.size
+          };
+
+          showUploadSuccessModal(mockResult, file);
+          showToast(`Certificate file attached to ${certificateId}.`);
+          await fetchCertificates();
+        }, 300);
+      } else {
+        updateUploadProgress(currentPct, `Uploading: ${currentPct}%`);
+      }
+    }, 110);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('action', 'upload_final_pdf');
+  formData.append('id', certificateId);
+  formData.append('final_pdf', file);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '../api/admin/certificates.php', true);
+  if (authToken) {
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+  }
+
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable && e.total > 0) {
+      const pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
+      updateUploadProgress(pct, pct === 100 ? 'Finalizing file on server...' : `Uploading: ${pct}%`);
+    } else {
+      updateUploadProgress(50, 'Uploading file...');
+    }
+  };
+
+  xhr.onload = async () => {
+    let result;
+    try {
+      result = JSON.parse(xhr.responseText);
+    } catch (_) {
+      result = null;
+    }
+
+    if (xhr.status >= 200 && xhr.status < 300 && result?.success) {
+      updateUploadProgress(100, 'Upload complete!');
+
+      setTimeout(async () => {
+        const data = result.data || {};
+        if (latestGeneratedCertificate && (latestGeneratedCertificate.certificate_id === certificateId || String(latestGeneratedCertificate.id) === String(certificateId))) {
+          latestGeneratedCertificate.certificate_pdf_url = data.certificate_pdf_url;
+          updateGeneratedPanelAttachedState(latestGeneratedCertificate);
+        }
+
+        const fillModal = document.getElementById('certFillDetailsModal');
+        if (fillModal && fillModal.classList.contains('active')) {
+          const cert = currentCertificatesList.find(c => c.certificate_id === certificateId || String(c.id) === String(certificateId));
+          if (cert) {
+            cert.certificate_pdf_url = data.certificate_pdf_url;
+            renderCertFillDetailsModal(cert);
+          }
+        }
+
+        showUploadSuccessModal(data, file);
+        showToast(result.message || 'Certificate file uploaded and attached.');
+        await fetchCertificates();
+      }, 250);
+    } else {
+      hideUploadProgress();
+      const errMsg = result?.message || `Upload failed (Status ${xhr.status}).`;
+      showToast(errMsg, true);
+    }
+  };
+
+  xhr.onerror = () => {
+    hideUploadProgress();
+    showToast('Network error during file upload. Please try again.', true);
+  };
+
+  xhr.onabort = () => {
+    hideUploadProgress();
+    showToast('Upload was cancelled.', true);
+  };
+
+  xhr.send(formData);
 }
 
 // =========================================================================
@@ -2562,6 +2807,9 @@ function renderCertFillDetailsModal(cert) {
   const notes = cert.private_notes || '';
   const status = String(cert.status || 'valid').toUpperCase();
   const statusColor = status === 'VALID' ? '#22c55e' : (status === 'REVOKED' ? '#ef4444' : '#f59e0b');
+  const certAttachedUrl = cert.certificate_pdf_url || cert.final_docx_url || '';
+  const isAttached = Boolean(certAttachedUrl);
+  const attachedFileName = isAttached ? (certAttachedUrl.split('/').pop() || 'Certificate File') : '';
 
   // Text summary ready to paste into Word template / Canva
   const allFormattedText = [
@@ -2622,6 +2870,51 @@ function renderCertFillDetailsModal(cert) {
         </div>
       </div>
     </div>
+
+    <!-- Attached Certificate File & Re-upload Card -->
+    ${isAttached ? `
+      <div style="background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.25); border-radius: 10px; padding: 0.9rem 1.15rem; margin-bottom: 1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+          <div>
+            <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#22c55e; font-weight:700; display:flex; align-items:center; gap:0.35rem;">
+              <i class="fas fa-check-circle"></i> Completed Certificate File Attached &amp; Live
+            </div>
+            <div style="font-size:0.95rem; font-weight:700; color:#fff; margin-top:2px; word-break:break-all;">
+              ${escapeHtml(decodeURIComponent(attachedFileName))}
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
+              Directly downloadable by candidate on the public verification page.
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+            <a href="${escapeHtml(certAttachedUrl)}" download class="btn btn-outline btn-sm" style="color:#22c55e; border-color:rgba(34,197,94,0.4); padding:4px 10px; font-size:0.75rem; text-decoration:none;">
+              <i class="fas fa-file-download"></i> Download File
+            </a>
+            <label class="btn btn-outline btn-sm" style="cursor:pointer; padding:4px 10px; font-size:0.75rem; color:var(--cyan); border-color:rgba(0,240,255,0.4); background:rgba(0,240,255,0.06); margin:0; display:inline-flex; align-items:center; gap:4px;" title="Re-upload or change certificate file">
+              <i class="fas fa-sync-alt"></i> Change / Re-upload
+              <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="modal-cert-reupload-input" data-cert-id="${escapeHtml(id)}" style="display:none;">
+            </label>
+          </div>
+        </div>
+      </div>
+    ` : `
+      <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-admin); border-radius: 10px; padding: 0.9rem 1.15rem; margin-bottom: 1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+          <div>
+            <div style="font-size:0.72rem; color:var(--text-dim); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">
+              <i class="fas fa-file-upload" style="color:var(--cyan);"></i> Certificate File Attachment
+            </div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">
+              No completed certificate file (.pdf / .docx) attached to this record yet.
+            </div>
+          </div>
+          <label class="btn btn-primary btn-sm" style="cursor:pointer; padding:4px 12px; font-size:0.78rem; margin:0; display:inline-flex; align-items:center; gap:4px;" title="Upload completed certificate">
+            <i class="fas fa-upload"></i> Upload Completed Certificate
+            <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="modal-cert-reupload-input" data-cert-id="${escapeHtml(id)}" style="display:none;">
+          </label>
+        </div>
+      </div>
+    `}
 
     <!-- Section 1: Exact Text Needed on Certificate Template -->
     <div style="margin-bottom:1.5rem;">
@@ -2869,6 +3162,18 @@ function renderCertFillDetailsModal(cert) {
 
   document.getElementById('btnModalDownloadCertQr')?.addEventListener('click', triggerQrDownload);
   document.getElementById('btnModalDownloadQrInWidget')?.addEventListener('click', triggerQrDownload);
+
+  // Bind modal certificate re-upload / replace inputs
+  container.querySelectorAll('.modal-cert-reupload-input').forEach(input => {
+    input.addEventListener('change', async () => {
+      const targetId = input.dataset.certId;
+      const file = input.files?.[0];
+      if (targetId && file) {
+        await uploadFinalCertificateDocx(targetId, file);
+      }
+      input.value = '';
+    });
+  });
 }
 
 // Explicit Window Method Bindings for Inline HTML Event Compatibility

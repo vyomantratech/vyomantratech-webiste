@@ -633,21 +633,30 @@ if ($action === 'upload_final_pdf') {
     $targetDir = dirname(__DIR__, 2) . '/uploads/certificates';
     if (!is_dir($targetDir) && !@mkdir($targetDir, 0755, true)) sendResponse(false, 'Could not prepare certificate storage.', [], 500);
 
+    // If replacing an existing file with a different extension (.pdf vs .docx), remove the old file
+    $altExt = ($ext === 'pdf') ? 'docx' : 'pdf';
+    $altPath = $targetDir . '/' . $safeId . '_final.' . $altExt;
+    if (file_exists($altPath)) {
+        @unlink($altPath);
+    }
+
     $fileName = $safeId . '_final.' . $ext;
     $destPath = $targetDir . '/' . $fileName;
     if (!move_uploaded_file($upload['tmp_name'], $destPath)) sendResponse(false, 'Could not save the uploaded file.', [], 500);
 
     $fileUrl = rtrim(SITE_URL, '/') . '/uploads/certificates/' . rawurlencode($fileName);
+    $finalDocxUrl = ($ext === 'docx') ? $fileUrl : null;
     if ($pdo) {
         try {
-            $update = $pdo->prepare('UPDATE certificates SET certificate_pdf_url = :url, updated_at = NOW() WHERE certificate_id = :cid');
-            $update->execute([':url' => $fileUrl, ':cid' => $certificateId]);
+            $update = $pdo->prepare('UPDATE certificates SET certificate_pdf_url = :url, final_docx_url = :durl, updated_at = NOW() WHERE certificate_id = :cid');
+            $update->execute([':url' => $fileUrl, ':durl' => $finalDocxUrl, ':cid' => $certificateId]);
         } catch (\PDOException $e) {}
     }
     $records = getLocalCerts();
     foreach ($records as &$record) {
         if (($record['certificate_id'] ?? '') === $certificateId) {
             $record['certificate_pdf_url'] = $fileUrl;
+            $record['final_docx_url'] = $finalDocxUrl;
             $record['updated_at'] = date('Y-m-d H:i:s');
         }
     }
@@ -655,7 +664,14 @@ if ($action === 'upload_final_pdf') {
     saveLocalCerts($records);
     sendResponse(true, strtoupper($ext) . ' file uploaded and attached to the certificate.', [
         'certificate_id'      => $certificateId,
+        'recipient_name'      => $certificate['recipient_name'] ?? '',
+        'course_name'         => $certificate['course_name'] ?? '',
         'certificate_pdf_url' => $fileUrl,
+        'download_url'        => rtrim(SITE_URL, '/') . '/api/download.php?id=' . rawurlencode($certificateId),
+        'verification_url'    => $certificate['verification_url'] ?? (rtrim(SITE_URL, '/') . '/verify/?id=' . rawurlencode($certificateId)),
+        'file_name'           => $fileName,
+        'file_ext'            => $ext,
+        'file_size'           => (int)(@filesize($destPath) ?: ($upload['size'] ?? 0))
     ]);
 }
 

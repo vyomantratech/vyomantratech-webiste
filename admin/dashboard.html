@@ -783,8 +783,27 @@
               <button type="button" class="btn btn-outline btn-sm" id="btnViewGeneratedFilledFields" style="color:var(--cyan); border-color:rgba(0,240,255,0.4);"><i class="fas fa-list-alt"></i> View Filled Details</button>
             </div>
             <hr style="border-color:var(--border-admin); margin:1.1rem 0;">
-            <label class="form-label" for="generatedFinalDocx">Attach Completed Certificate (.docx / .pdf)</label>
-            <input type="file" id="generatedFinalDocx" class="form-control" accept=".docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf">
+            <div id="generatedAttachedBox" style="display:none; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.3); border-radius:8px; padding:0.75rem 1rem; margin-bottom:0.85rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                  <div style="font-size:0.72rem; color:#22c55e; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">
+                    <i class="fas fa-check-circle"></i> File Attached &amp; Live
+                  </div>
+                  <div id="generatedAttachedFileName" style="font-size:0.85rem; font-weight:700; color:#fff; word-break:break-all;">Certificate File</div>
+                </div>
+                <div style="display:flex; gap:0.4rem;">
+                  <a id="btnGeneratedDownloadFile" href="#" download class="btn btn-outline btn-sm" style="padding:2px 8px; font-size:0.75rem; color:#22c55e; border-color:rgba(34,197,94,0.4);">
+                    <i class="fas fa-download"></i> Download
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <label class="form-label" for="generatedFinalDocx" id="generatedUploadLabel" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>Attach Completed Certificate (.pdf / .docx)</span>
+              <span style="font-size:0.72rem; color:var(--text-dim);">Can be replaced anytime</span>
+            </label>
+            <input type="file" id="generatedFinalDocx" class="form-control" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
             <button type="button" class="btn btn-outline btn-sm" id="btnUploadFinalDocx" style="margin-top:0.6rem; width:100%;"><i class="fas fa-file-upload"></i> Upload &amp; Link to Verification Page</button>
             <div id="generatedPdfStatus" style="margin-top:0.65rem; font-size:0.8rem; color:var(--text-muted);"></div>
           </div>
@@ -1108,6 +1127,95 @@
           <i class="fas fa-info-circle" style="color: var(--cyan);"></i> Tip: Use <strong>Copy All for Canva/Word</strong> to paste all certificate lines at once.
         </div>
         <button type="button" class="btn btn-outline btn-sm" onclick="closeAdminModal('certFillDetailsModal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Certificate File Upload Progress Modal -->
+  <div class="admin-modal-backdrop" id="certUploadProgressModal" style="z-index: 10005;">
+    <div class="admin-modal-card" style="max-width: 460px; text-align: center; padding: 2rem;">
+      <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(0, 240, 255, 0.1); border: 2px solid var(--cyan); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
+        <i class="fas fa-cloud-upload-alt" style="font-size: 1.8rem; color: var(--cyan);"></i>
+      </div>
+      <h3 style="margin: 0 0 0.5rem; color: #fff; font-size: 1.2rem;">Uploading Certificate File</h3>
+      <p id="certUploadProgressSubtitle" style="margin: 0 0 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+        Attaching file to <strong id="certUploadProgressCertId" style="color: var(--cyan); font-family: var(--font-mono);">-</strong>...
+      </p>
+
+      <!-- Progress Percentage Display -->
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+        <span id="certUploadProgressFilename" style="font-size: 0.8rem; color: var(--text-dim); max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Uploading...</span>
+        <span id="certUploadProgressPercentText" style="font-size: 1.35rem; font-weight: 800; color: var(--cyan); font-family: var(--font-mono);">0%</span>
+      </div>
+
+      <!-- Animated Progress Bar -->
+      <div style="background: rgba(255, 255, 255, 0.06); border-radius: 10px; height: 10px; overflow: hidden; border: 1px solid var(--border-admin); margin-bottom: 1rem; position: relative;">
+        <div id="certUploadProgressBarFill" style="background: linear-gradient(90deg, #00f0ff 0%, #8b5cf6 100%); height: 100%; width: 0%; border-radius: 10px; transition: width 0.12s ease-out; box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);"></div>
+      </div>
+
+      <div id="certUploadProgressStatusText" style="font-size: 0.78rem; color: var(--text-dim);">
+        Please keep this window open while the file uploads...
+      </div>
+    </div>
+  </div>
+
+  <!-- Certificate File Upload Success Modal -->
+  <div class="admin-modal-backdrop" id="certUploadSuccessModal" style="z-index: 10006;">
+    <div class="admin-modal-card" style="max-width: 520px;">
+      <div class="admin-modal-header" style="background: rgba(34, 197, 94, 0.08); border-bottom-color: rgba(34, 197, 94, 0.25);">
+        <h3 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 0.6rem; color: #fff;">
+          <i class="fas fa-check-circle" style="color: #22c55e; font-size: 1.35rem;"></i> Certificate Uploaded Successfully!
+        </h3>
+        <button type="button" class="modal-close-btn" onclick="closeAdminModal('certUploadSuccessModal')">&times;</button>
+      </div>
+
+      <div class="admin-modal-body" style="padding: 1.5rem;">
+        <div style="text-align: center; margin-bottom: 1.25rem;">
+          <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 0.25rem;">Credential Verified &amp; Attached</div>
+          <div id="uploadSuccessRecipient" style="font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 0.35rem;">-</div>
+          <div style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--cyan); font-weight: 700;" id="uploadSuccessCertId">-</div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-admin); border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+            <span style="font-size: 0.78rem; color: var(--text-dim);">Attached File:</span>
+            <span id="uploadSuccessFileName" style="font-size: 0.85rem; font-weight: 700; color: #fff; word-break: break-all;">-</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+            <span style="font-size: 0.78rem; color: var(--text-dim);">File Size:</span>
+            <span id="uploadSuccessFileSize" style="font-size: 0.82rem; color: var(--text-muted);">-</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.78rem; color: var(--text-dim);">Public Verification Status:</span>
+            <span class="badge-pill badge-green" style="font-size: 0.75rem; padding: 2px 8px;">
+              <i class="fas fa-check"></i> Live for Download
+            </span>
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: 8px; padding: 0.75rem 0.9rem; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+          <i class="fas fa-info-circle" style="color: var(--cyan); margin-top: 2px;"></i>
+          <span>Uploaded the wrong file by mistake? You can replace it anytime by clicking <strong>Change / Re-upload File</strong> below.</span>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <a id="btnUploadSuccessDownload" href="#" download class="btn btn-primary btn-sm" style="flex: 1; min-width: 140px; justify-content: center;">
+            <i class="fas fa-download"></i> Download File
+          </a>
+          <a id="btnUploadSuccessVerify" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="flex: 1; min-width: 140px; justify-content: center;">
+            <i class="fas fa-external-link-alt"></i> Verification Page
+          </a>
+        </div>
+      </div>
+
+      <div class="admin-modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <label class="btn btn-outline btn-sm" style="cursor: pointer; color: var(--cyan); border-color: rgba(0, 240, 255, 0.4); margin: 0;">
+          <i class="fas fa-sync-alt"></i> Change / Re-upload File
+          <input type="file" id="uploadSuccessReplaceInput" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display: none;">
+        </label>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeAdminModal('certUploadSuccessModal')">
+          <i class="fas fa-check"></i> Done
+        </button>
       </div>
     </div>
   </div>
