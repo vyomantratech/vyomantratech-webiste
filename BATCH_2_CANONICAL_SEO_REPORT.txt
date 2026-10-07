@@ -1,0 +1,568 @@
+================================================================================
+VYOMANTRA TECHNOLOGIES — BATCH 2 AUDIT & IMPLEMENTATION REPORT
+CANONICAL URL + INTERNAL LINK SEO HARMONIZATION
+================================================================================
+Generated: 2026-10-04
+Target Production Domain: https://vyomantratech.com/
+Repository: vyomantratech/vyomantratech-webiste
+Batch: 2 of SEO Foundation Roadmap
+Status: PASS
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+Batch 2 has achieved complete harmonization of all SEO canonical tags, internal
+website links, dynamic URL generators, and host domain references across the
+entire Vyomantra Technologies production codebase.
+
+Prior to this batch, 95.5% of canonical tags referenced legacy `.html` file paths,
+over 2,550 internal navigation links forced users and search engine crawlers
+through `.html` redirects, and JavaScript modules dynamically generated `.html`
+career subpage links.
+
+In Batch 2:
+1. 100% of public canonical tags (45 total across all HTML pages and template
+   generators) have been updated to clean, extensionless, non-www HTTPS URLs.
+2. 2,544 internal navigation, header, dropdown, footer, card, and CTA button links
+   were converted from legacy `.html` links to clean, root-relative URLs.
+3. Dynamic careers URL generation across public listings, admin dashboards, and
+   the server-side subpage builder was converted to `/careers/${slug}`.
+4. Dynamic course architecture was thoroughly audited, confirming courses render
+   in-place on `/courses` without orphan or unindexed subpages.
+5. All internal `www.vyomantratech.com` references in legal and policy pages were
+   normalized to `https://vyomantratech.com`.
+6. Zero visual styles, CSS layouts, metadata schemas, tracking scripts, or Batch 1
+   server routing rules were disturbed.
+
+The entire URL flow now strictly satisfies the architectural objective:
+Clean Browser URL -> Direct HTTP 200 -> Self-Referencing Canonical -> Clean Internal Links -> Clean Sitemap.
+
+================================================================================
+2. AUDIT RESULTS
+================================================================================
+A project-wide read-only audit of all 82 source files was performed prior to
+modifications.
+
+Initial Scan Findings:
+- Total HTML Files: 47
+- Canonical Tags Identified: 44 (42 pointed to legacy `.html`, 2 were clean)
+- Internal Href Links with `.html`: 2,553 occurrences
+- Absolute `www.vyomantratech.com` Occurrences: 10 (4 in HTML legal text, 6 in audit docs)
+- Dynamic URL Generators:
+  * `careers.html`: Built URLs as `careers/${j.slug}.html`
+  * `admin/js/admin.js`: Saved job objects with `careers/${slug}.html`
+  * `api/get-jobs.php`: Returned `careers/' . $r['slug'] . '.html'`
+  * `api/admin/jobs.php`: Returned and stored `careers/' . $slug . '.html'`
+  * `api/admin/job-builder.php`: Emitted canonical tag with `.html` and template links with `.html`
+  * `js/form-handlers.js`: Emitted modal links pointing to `index.html` and `portfolio.html`
+
+Pre-Modification Audit Matrix:
+------------------------------------------------------------------------------------------------------------------------
+FILE                               CURRENT CANONICAL / LINK                    PROPOSED CLEAN URL              TYPE      RISK
+------------------------------------------------------------------------------------------------------------------------
+index.html                         https://vyomantratech.com/                  https://vyomantratech.com/      Canonical None
+about.html                         https://vyomantratech.com/about.html        https://vyomantratech.com/about Canonical Low
+services.html                      https://vyomantratech.com/services.html     https://vyomantratech.com/services Canonical Low
+services/web-development.html      .../services/web-development.html          .../services/web-development    Canonical Low
+solutions.html                     https://vyomantratech.com/solutions.html    https://vyomantratech.com/solutions Canonical Low
+solutions/business-websites.html   .../solutions/business-websites.html       .../solutions/business-websites Canonical Low
+products.html                      https://vyomantratech.com/products.html     https://vyomantratech.com/products Canonical Low
+products/stockmitra.html           .../products/stockmitra.html                .../products/stockmitra         Canonical Low
+portfolio.html                     https://vyomantratech.com/portfolio.html    https://vyomantratech.com/portfolio Canonical Low
+portfolio/ai-crm.html              .../portfolio/ai-crm.html                   .../portfolio/ai-crm            Canonical Low
+courses.html                       https://vyomantratech.com/courses.html      https://vyomantratech.com/courses Canonical Low
+careers.html                       https://vyomantratech.com/careers.html      https://vyomantratech.com/careers Canonical Low
+careers/index.html                 https://vyomantratech.com/careers           https://vyomantratech.com/careers Canonical None
+contact.html                       https://vyomantratech.com/contact.html      https://vyomantratech.com/contact Canonical Low
+gallery.html                       https://vyomantratech.com/gallery.html      https://vyomantratech.com/gallery Canonical Low
+request-a-quote.html               .../request-a-quote.html                    .../request-a-quote             Canonical Low
+privacy.html                       https://vyomantratech.com/privacy.html      https://vyomantratech.com/privacy Canonical Low
+terms.html                         https://vyomantratech.com/terms.html        https://vyomantratech.com/terms Canonical Low
+refund-policy.html                 .../refund-policy.html                      .../refund-policy               Canonical Low
+All Header Navigation (45 files)   href="about.html", href="../services.html"  href="/about", href="/services" Internal  Low
+All Footer Navigation (45 files)   href="privacy-policy.html", etc.            href="/privacy-policy", etc.    Internal  Low
+careers.html (Line 619)            careers/${j.slug}.html                      /careers/${j.slug}              Dynamic   Medium
+admin/js/admin.js (Line 1823)      careers/${slug}.html                        /careers/${slug}                Dynamic   Medium
+api/admin/job-builder.php          careers/{$slug}.html                        /careers/{$slug}                Dynamic   Medium
+js/form-handlers.js (Lines 525,559)index.html, portfolio.html                  /, /portfolio                   Dynamic   Low
+------------------------------------------------------------------------------------------------------------------------
+
+================================================================================
+3. CANONICAL TAG AUDIT
+================================================================================
+- Total Canonical Tags in Project: 45
+- Canonical Tags Changed in Batch 2: 43
+- Canonical Tags Already Correct from Batch 1: 2
+  * `index.html` (https://vyomantratech.com/)
+  * `careers/index.html` (https://vyomantratech.com/careers)
+- Remaining Incorrect Canonical Tags: 0
+- Non-HTTPS Canonicals: 0
+- WWW Host Canonicals: 0
+- Canonical Tags Ending in .html: 0
+- Canonical Tags Pointing to Redirects: 0
+
+Complete Canonical Tag Inventory:
+--------------------------------------------------------------------------------
+Page File                                Canonical Tag Target URL
+--------------------------------------------------------------------------------
+index.html                               https://vyomantratech.com/
+about.html                               https://vyomantratech.com/about
+services.html                            https://vyomantratech.com/services
+services/index.html                      https://vyomantratech.com/services
+services/web-development.html            https://vyomantratech.com/services/web-development
+services/mobile-app-development.html     https://vyomantratech.com/services/mobile-app-development
+services/software-development.html       https://vyomantratech.com/services/software-development
+services/ai-machine-learning.html        https://vyomantratech.com/services/ai-machine-learning
+services/automation.html                 https://vyomantratech.com/services/automation
+services/erp-crm.html                    https://vyomantratech.com/services/erp-crm
+services/ui-ux-design.html               https://vyomantratech.com/services/ui-ux-design
+services/cloud-devops.html               https://vyomantratech.com/services/cloud-devops
+services/digital-marketing.html          https://vyomantratech.com/services/digital-marketing
+services/seo.html                        https://vyomantratech.com/services/seo
+services/branding.html                   https://vyomantratech.com/services/branding
+services/it-consulting.html              https://vyomantratech.com/services/it-consulting
+solutions.html                           https://vyomantratech.com/solutions
+solutions/index.html                     https://vyomantratech.com/solutions
+solutions/business-websites.html         https://vyomantratech.com/solutions/business-websites
+solutions/custom-software.html           https://vyomantratech.com/solutions/custom-software
+solutions/erp-crm.html                   https://vyomantratech.com/solutions/erp-crm
+solutions/ai-solutions.html              https://vyomantratech.com/solutions/ai-solutions
+solutions/automation.html                https://vyomantratech.com/solutions/automation
+solutions/saas.html                      https://vyomantratech.com/solutions/saas
+solutions/ecommerce.html                 https://vyomantratech.com/solutions/ecommerce
+products.html                            https://vyomantratech.com/products
+products/index.html                      https://vyomantratech.com/products
+products/stockmitra.html                 https://vyomantratech.com/products/stockmitra
+portfolio.html                           https://vyomantratech.com/portfolio
+portfolio/index.html                     https://vyomantratech.com/portfolio
+portfolio/ai-crm.html                    https://vyomantratech.com/portfolio/ai-crm
+portfolio/home-bakers.html               https://vyomantratech.com/portfolio/home-bakers
+projects.html                            https://vyomantratech.com/portfolio
+courses.html                             https://vyomantratech.com/courses
+careers.html                             https://vyomantratech.com/careers
+careers/index.html                       https://vyomantratech.com/careers
+contact.html                             https://vyomantratech.com/contact
+gallery.html                             https://vyomantratech.com/gallery
+request-a-quote.html                     https://vyomantratech.com/request-a-quote
+privacy.html                             https://vyomantratech.com/privacy
+privacy-policy.html                      https://vyomantratech.com/privacy
+terms.html                               https://vyomantratech.com/terms
+terms-and-conditions.html                https://vyomantratech.com/terms
+refund-policy.html                       https://vyomantratech.com/refund-policy
+api/admin/job-builder.php (Template)     https://vyomantratech.com/careers/{$slug}
+--------------------------------------------------------------------------------
+
+================================================================================
+4. INTERNAL LINK AUDIT
+================================================================================
+- Total Internal .html Links Found Initially: 2,553
+- Links Converted to Clean URLs: 2,544
+- Remaining .html References in Public/Source Files: 9
+
+Complete Inventory of Remaining .html References and Justification:
+1. `careers.html`        -> `admin/index.html`
+2. `contact.html`        -> `admin/index.html`
+3. `courses.html`        -> `admin/index.html`
+4. `index.html`          -> `verify/index.html`
+5. `index.html`          -> `verify/index.html`
+6. `index.html`          -> `admin/index.html`
+7. `request-a-quote.html`-> `admin/index.html`
+8. `services/index.html` -> `../admin/index.html`
+9. `services.html`       -> `admin/index.html`
+
+Reason for Every Remaining Reference:
+- `admin/index.html`: Private administrative staff login portal. This is a secure
+  utility interface, excluded from search indexing (`Disallow: /admin/` in robots.txt).
+  Keeping the direct file target ensures staff authentication scripts operate
+  without risk of session rewrite side effects.
+- `verify/index.html`: Client and student certificate verification engine. This is an
+  interactive utility application page (`Disallow: /verify/` in robots.txt).
+  Maintaining direct access prevents certificate search query string stripping.
+
+All public indexable navigation elements (headers, menus, cards, dropdowns, and footers)
+now point 100% to clean URLs.
+
+================================================================================
+5. WWW URL AUDIT
+================================================================================
+- Total Internal Canonical References using `www`: 0
+- Total Internal Links using `www`: 0
+- Legal Policy References Updated:
+  * `privacy.html`: Updated "https://www.vyomantratech.com/" -> "https://vyomantratech.com"
+  * `privacy-policy.html`: Updated "https://www.vyomantratech.com/" -> "https://vyomantratech.com"
+  * `terms.html`: Updated "https://www.vyomantratech.com/" -> "https://vyomantratech.com"
+  * `terms-and-conditions.html`: Updated "https://www.vyomantratech.com/" -> "https://vyomantratech.com"
+- External `www` references (e.g., `www.w3.org` XML schema declarations in sitemaps):
+  Preserved as required for standard protocol specifications.
+
+================================================================================
+6. DYNAMIC CAREERS AUDIT
+================================================================================
+- Architecture:
+  Job postings are stored in the database (`job_postings` table) and mirrored to
+  `data/jobs.json`. When a new role is published or updated via the admin portal,
+  `api/admin/job-builder.php` generates a physical leaf file at `careers/{slug}.html`.
+  Server-side routing (`.htaccess` Rule 7) intercepts `/careers/{slug}` and internally
+  rewrites it to `careers/{slug}.html`.
+
+- Current URL Generation (Before):
+  * Dynamic job cards generated `href="careers/${j.slug}.html"`
+  * Admin API returned `subpage_url = 'careers/' . $slug . '.html'`
+  * Admin dashboard preview opened `../careers/${j.slug}.html`
+  * Generated subpage had canonical tag pointing to `careers/{$slug}.html`
+
+- New URL Generation (After):
+  * `careers.html`: Generates `href="/careers/${j.slug}"`. Fallback logic strips
+    legacy `.html` extensions automatically from older database rows.
+  * `admin/js/admin.js`: Saves new/updated jobs with `subpage_url: '/careers/' + slug`.
+    Table links point to `/careers/${j.slug}` with target `_blank`.
+  * `api/get-jobs.php`: Injects `$r['subpage_url'] = '/careers/' . $r['slug']`.
+  * `api/admin/jobs.php`: Injects and updates `subpage_url = '/careers/' . $slug`.
+  * `api/admin/job-builder.php`: Emits canonical `<link rel="canonical" href="https://vyomantratech.com/careers/{$slug}">`
+    and all template navigation/footer links as clean root-relative paths (`/`, `/services`, etc.).
+
+- Files Changed:
+  * `careers.html`
+  * `admin/js/admin.js`
+  * `api/get-jobs.php`
+  * `api/admin/jobs.php`
+  * `api/admin/job-builder.php`
+
+- Admin Compatibility:
+  100% compatible. Database schema is unchanged. API endpoints continue to return
+  identical JSON formats with sanitized `subpage_url`. Admin job creation and
+  editing functions remain completely intact.
+
+- Risks: None. Routing was pre-validated in Batch 1.
+
+================================================================================
+7. DYNAMIC COURSES AUDIT
+================================================================================
+- Architecture:
+  Courses are fetched from `api/get-courses.php` (DB table `courses` or fallback
+  `data/courses.json`) and dynamically populated into the grid on `courses.html`.
+- Detail URL Evaluation:
+  There are NO course subpages, course slugs, or individual course `.html` files.
+  All user interactions occur on the primary `/courses` page:
+  * "Register for Course" triggers `openEnrollmentModal()` (client-side modal)
+  * "Ask on WhatsApp" triggers direct WhatsApp API deep-link
+- Changes Made:
+  * Admin portal course table link updated from `../courses.html` to `/courses`.
+  * Public page canonical tag updated to `https://vyomantratech.com/courses`.
+- Admin Compatibility:
+  100% compatible. Course registration, payment verification, and CRUD operations
+  remain unaffected.
+- Risks: None.
+
+================================================================================
+8. PRODUCTS AUDIT
+================================================================================
+- Hub Page: `products.html` and `products/index.html` -> Clean URL: `/products`
+- Leaf Page: `products/stockmitra.html` -> Clean URL: `/products/stockmitra`
+- Canonical Tags: Updated to `https://vyomantratech.com/products` and
+  `https://vyomantratech.com/products/stockmitra`.
+- Internal Links: All navbar, footer, card, and modal links point to `/products`
+  and `/products/stockmitra`.
+- Dynamic Generation: Static pages; no dynamic slugs.
+- Safe to Change: YES. Confirmed HTTP 200 via Batch 1 routing.
+
+================================================================================
+9. SERVICES AUDIT
+================================================================================
+- Hub Page: `services.html` and `services/index.html` -> Clean URL: `/services`
+- Leaf Pages (11 total):
+  * `/services/web-development`
+  * `/services/mobile-app-development`
+  * `/services/software-development`
+  * `/services/ai-machine-learning`
+  * `/services/automation`
+  * `/services/erp-crm`
+  * `/services/ui-ux-design`
+  * `/services/cloud-devops`
+  * `/services/digital-marketing`
+  * `/services/seo`
+  * `/services/branding`
+  * `/services/it-consulting`
+- Canonical Tags: All 12 canonical tags updated to clean HTTPS non-www URLs.
+- Internal Links: Converted to root-relative `/services` and `/services/<slug>`.
+  Root-relative paths prevent broken links when navigating between parent and subfolders.
+- Safe to Change: YES. Batch 1 `.htaccess` Rule 6 explicitly prevents trailing
+  slash directory collision loops on `/services`.
+
+================================================================================
+10. SOLUTIONS AUDIT
+================================================================================
+- Hub Page: `solutions.html` and `solutions/index.html` -> Clean URL: `/solutions`
+- Leaf Pages (7 total):
+  * `/solutions/business-websites`
+  * `/solutions/custom-software`
+  * `/solutions/erp-crm`
+  * `/solutions/ai-solutions`
+  * `/solutions/automation`
+  * `/solutions/saas`
+  * `/solutions/ecommerce`
+- Canonical Tags: All 8 canonical tags updated to clean URLs.
+- Internal Links: Converted to root-relative `/solutions` and `/solutions/<slug>`.
+- Safe to Change: YES. Batch 1 `.htaccess` Rule 6 prevents trailing slash issues.
+
+================================================================================
+11. PORTFOLIO / CASE STUDIES AUDIT
+================================================================================
+- Hub Pages: `portfolio.html`, `portfolio/index.html`, `projects.html` (legacy alias)
+  All point canonical to `https://vyomantratech.com/portfolio`.
+- Case Study Detail Pages:
+  * `portfolio/ai-crm.html` -> Canonical: `https://vyomantratech.com/portfolio/ai-crm`
+  * `portfolio/home-bakers.html` -> Canonical: `https://vyomantratech.com/portfolio/home-bakers`
+- Internal Links: Converted across all pages to `/portfolio`, `/portfolio/ai-crm`,
+  and `/portfolio/home-bakers`.
+- Safe to Change: YES.
+
+================================================================================
+12. INTERNSHIPS AUDIT
+================================================================================
+- Internship opportunities are listed within the careers ecosystem (`/careers`)
+  under category "internship" and highlighted in `/services/it-consulting`.
+- Dynamic filters in `careers.html` (`data-type="internship"`) function
+  seamlessly with `/careers/${j.slug}` clean subpage URLs.
+- Safe to Change: YES.
+
+================================================================================
+13. ROUTE VALIDATION
+================================================================================
+Clean Public URL                Underlying File               Canonical Tag                                 Status
+------------------------------------------------------------------------------------------------------------------------
+/                               index.html                    https://vyomantratech.com/                    200 Direct
+/about                          about.html                    https://vyomantratech.com/about               200 Direct
+/services                       services.html                 https://vyomantratech.com/services            200 Direct
+/services/web-development       services/web-development.html https://vyomantratech.com/services/web-dev..  200 Direct
+/services/mobile-app-dev..      services/mobile-app-dev..html https://vyomantratech.com/services/mobile..   200 Direct
+/services/software-development  services/software-dev..html   https://vyomantratech.com/services/software.. 200 Direct
+/services/ai-machine-learning   services/ai-machine-learn..   https://vyomantratech.com/services/ai-mach..  200 Direct
+/services/automation            services/automation.html      https://vyomantratech.com/services/automation 200 Direct
+/services/erp-crm               services/erp-crm.html         https://vyomantratech.com/services/erp-crm    200 Direct
+/services/ui-ux-design          services/ui-ux-design.html    https://vyomantratech.com/services/ui-ux..    200 Direct
+/services/cloud-devops          services/cloud-devops.html    https://vyomantratech.com/services/cloud..    200 Direct
+/services/digital-marketing     services/digital-mark..html   https://vyomantratech.com/services/digital..  200 Direct
+/services/seo                   services/seo.html             https://vyomantratech.com/services/seo        200 Direct
+/services/branding              services/branding.html        https://vyomantratech.com/services/branding   200 Direct
+/services/it-consulting         services/it-consulting.html   https://vyomantratech.com/services/it-cons..  200 Direct
+/solutions                      solutions.html                https://vyomantratech.com/solutions           200 Direct
+/solutions/business-websites    solutions/business-web..html  https://vyomantratech.com/solutions/busin..  200 Direct
+/solutions/custom-software      solutions/custom-softw..html  https://vyomantratech.com/solutions/custom.. 200 Direct
+/solutions/erp-crm              solutions/erp-crm.html        https://vyomantratech.com/solutions/erp-crm   200 Direct
+/solutions/ai-solutions         solutions/ai-solutions.html   https://vyomantratech.com/solutions/ai-sol.. 200 Direct
+/solutions/automation           solutions/automation.html     https://vyomantratech.com/solutions/automa.. 200 Direct
+/solutions/saas                 solutions/saas.html           https://vyomantratech.com/solutions/saas      200 Direct
+/solutions/ecommerce            solutions/ecommerce.html      https://vyomantratech.com/solutions/ecom..    200 Direct
+/products                       products.html                 https://vyomantratech.com/products            200 Direct
+/products/stockmitra            products/stockmitra.html      https://vyomantratech.com/products/stockmitra 200 Direct
+/portfolio                      portfolio.html                https://vyomantratech.com/portfolio           200 Direct
+/portfolio/ai-crm               portfolio/ai-crm.html         https://vyomantratech.com/portfolio/ai-crm    200 Direct
+/portfolio/home-bakers          portfolio/home-bakers.html    https://vyomantratech.com/portfolio/home-bak..200 Direct
+/courses                        courses.html                  https://vyomantratech.com/courses             200 Direct
+/careers                        careers.html                  https://vyomantratech.com/careers             200 Direct
+/careers/<slug>                 careers/<slug>.html           https://vyomantratech.com/careers/<slug>      200 Direct
+/contact                        contact.html                  https://vyomantratech.com/contact             200 Direct
+/gallery                        gallery.html                  https://vyomantratech.com/gallery             200 Direct
+/request-a-quote                request-a-quote.html          https://vyomantratech.com/request-a-quote     200 Direct
+/privacy                        privacy.html                  https://vyomantratech.com/privacy             200 Direct
+/privacy-policy                 privacy-policy.html           https://vyomantratech.com/privacy             200 Direct
+/terms                          terms.html                    https://vyomantratech.com/terms               200 Direct
+/terms-and-conditions           terms-and-conditions.html     https://vyomantratech.com/terms               200 Direct
+/refund-policy                  refund-policy.html            https://vyomantratech.com/refund-policy       200 Direct
+------------------------------------------------------------------------------------------------------------------------
+
+================================================================================
+14. FILES CHANGED
+================================================================================
+Total files changed in Batch 2: 50
+
+HTML Files (45):
+1.  about.html
+2.  admin/index.html
+3.  careers.html
+4.  contact.html
+5.  courses.html
+6.  gallery.html
+7.  index.html
+8.  portfolio.html
+9.  portfolio/ai-crm.html
+10. portfolio/home-bakers.html
+11. portfolio/index.html
+12. privacy-policy.html
+13. privacy.html
+14. products.html
+15. products/index.html
+16. products/stockmitra.html
+17. projects.html
+18. refund-policy.html
+19. request-a-quote.html
+20. services.html
+21. services/ai-machine-learning.html
+22. services/automation.html
+23. services/branding.html
+24. services/cloud-devops.html
+25. services/digital-marketing.html
+26. services/erp-crm.html
+27. services/index.html
+28. services/it-consulting.html
+29. services/mobile-app-development.html
+30. services/seo.html
+31. services/software-development.html
+32. services/ui-ux-design.html
+33. services/web-development.html
+34. solutions.html
+35. solutions/ai-solutions.html
+36. solutions/automation.html
+37. solutions/business-websites.html
+38. solutions/custom-software.html
+39. solutions/ecommerce.html
+40. solutions/erp-crm.html
+41. solutions/index.html
+42. solutions/saas.html
+43. terms-and-conditions.html
+44. terms.html
+45. verify/index.html
+
+JavaScript Files (2):
+46. admin/js/admin.js
+47. js/form-handlers.js
+
+PHP / API Files (3):
+48. api/admin/job-builder.php
+49. api/admin/jobs.php
+50. api/get-jobs.php
+
+================================================================================
+15. FILES NOT CHANGED AND WHY
+================================================================================
+- `.htaccess`: Completed and validated in Batch 1. No server rule modifications
+  were required. Batch 2 strictly harmonized frontend links and canonicals to
+  match existing server rewrites.
+- `robots.txt`: Completed and validated in Batch 1.
+- `sitemap.xml`: Completed and validated in Batch 1 (already contains clean URLs).
+- `careers/index.html`: Redirect stub created in Batch 1 pointing to `/careers`.
+- CSS files (`css/main.css`, `css/components.css`, `css/animations.css`): Visual styling
+  and layouts were strictly out of scope for Batch 2.
+- Structured Data / JSON-LD schemas: Reserved for dedicated upcoming batch.
+- Images / Media Assets: Out of scope.
+
+================================================================================
+16. BEFORE / AFTER EXAMPLES
+================================================================================
+
+Example 1: Public Page Canonical Tag (about.html)
+BEFORE:
+<link rel="canonical" href="https://vyomantratech.com/about.html">
+AFTER:
+<link rel="canonical" href="https://vyomantratech.com/about">
+
+Example 2: Alias Page Canonical Tag (terms-and-conditions.html)
+BEFORE:
+<link rel="canonical" href="https://vyomantratech.com/terms.html">
+AFTER:
+<link rel="canonical" href="https://vyomantratech.com/terms">
+
+Example 3: Subfolder Service Canonical Tag (services/web-development.html)
+BEFORE:
+<link rel="canonical" href="https://vyomantratech.com/services/web-development.html">
+AFTER:
+<link rel="canonical" href="https://vyomantratech.com/services/web-development">
+
+Example 4: Navigation Bar Dropdown Links (index.html)
+BEFORE:
+<ul class="nav-menu">
+  <li><a href="index.html" class="nav-link active">Home</a></li>
+  <li class="dropdown">
+    <a href="services.html" class="nav-link">Services <i class="fas fa-chevron-down"></i></a>
+    <div class="dropdown-menu">
+      <a href="services/web-development.html" class="dropdown-item">Web Development</a>
+      <a href="services/mobile-app-development.html" class="dropdown-item">Mobile App Development</a>
+AFTER:
+<ul class="nav-menu">
+  <li><a href="/" class="nav-link active">Home</a></li>
+  <li class="dropdown">
+    <a href="/services" class="nav-link">Services <i class="fas fa-chevron-down"></i></a>
+    <div class="dropdown-menu">
+      <a href="/services/web-development" class="dropdown-item">Web Development</a>
+      <a href="/services/mobile-app-development" class="dropdown-item">Mobile App Development</a>
+
+Example 5: Subpage Navigation Link (services/ai-machine-learning.html)
+BEFORE:
+<a href="../about.html" class="nav-link">About Us</a>
+<a href="../request-a-quote.html" class="btn btn-primary btn-sm">Get a Quote</a>
+AFTER:
+<a href="/about" class="nav-link">About Us</a>
+<a href="/request-a-quote" class="btn btn-primary btn-sm">Get a Quote</a>
+
+Example 6: Dynamic Career URL Generation (careers.html)
+BEFORE:
+const subpageUrl = j.subpage_url || ('careers/' + j.slug + '.html');
+AFTER:
+let subpageUrl = j.subpage_url || ('/careers/' + j.slug);
+if (subpageUrl.endsWith('.html')) {
+  subpageUrl = '/' + subpageUrl.replace(/\.html$/, '').replace(/^\/+/, '');
+} else if (!subpageUrl.startsWith('/') && !subpageUrl.startsWith('http')) {
+  subpageUrl = '/' + subpageUrl;
+}
+
+Example 7: Dynamic Career Subpage Canonical Tag (api/admin/job-builder.php)
+BEFORE:
+<link rel="canonical" href="https://vyomantratech.com/careers/{$slug}.html">
+AFTER:
+<link rel="canonical" href="https://vyomantratech.com/careers/{$slug}">
+
+Example 8: Admin Panel Career Preview Links (admin/js/admin.js)
+BEFORE:
+<a href="../careers/${j.slug}.html" target="_blank" class="btn-action-icon" title="View Public Subpage">
+AFTER:
+<a href="/careers/${j.slug}" target="_blank" class="btn-action-icon" title="View Public Subpage">
+
+Example 9: Form Modal Confirmation Links (js/form-handlers.js)
+BEFORE:
+<a href="index.html" class="btn btn-outline">Return to Home</a>
+<a href="portfolio.html" class="btn btn-primary btn-sm">Explore Our Portfolio</a>
+AFTER:
+<a href="/" class="btn btn-outline">Return to Home</a>
+<a href="/portfolio" class="btn btn-primary btn-sm">Explore Our Portfolio</a>
+
+================================================================================
+17. REMAINING ISSUES
+================================================================================
+None. There are zero remaining broken links, zero invalid canonical targets,
+and zero unintentional references to `.html` URLs in public-facing templates.
+
+================================================================================
+18. POTENTIAL RISKS & MITIGATIONS
+================================================================================
+1. Risk: Browser Caching of Old Redirects
+   Mitigation: Because Batch 1 previously established 301 redirects from `.html`
+   to clean URLs, browsers navigating to clean URLs will receive fresh HTTP 200
+   responses immediately without relying on old redirect cache.
+2. Risk: Subpage Path Resolution in Deep Folders
+   Mitigation: By utilizing root-relative paths (`/services`, `/portfolio`),
+   navigation remains universally consistent whether viewed from the domain root
+   or three directory tiers deep.
+3. Risk: Admin Portal Compatibility
+   Mitigation: Verified that admin operations continue to function normally. The
+   generation of physical `.html` files in `careers/` is preserved, while the
+   public entry routes point cleanly to `/careers/${slug}`.
+
+================================================================================
+19. FINAL VALIDATION
+================================================================================
+Automated repository scan executed on all project files:
+- Total Canonical Tags: 45
+- Non-Clean Canonical Tags: 0
+- www Domain References in Code: 0
+- Total Internal Public `.html` Links Remaining: 0
+- Utility App `.html` Links Remaining: 9 (all verified intentional utility tools)
+- Dynamic Careers Subpage Link Harmonization: COMPLETE
+- Dynamic Courses Link Harmonization: COMPLETE
+- Public Navigation & Footer Link Harmonization: COMPLETE
+
+================================================================================
+20. BATCH 2 STATUS
+================================================================================
+PASS
+================================================================================

@@ -55,7 +55,7 @@ if ($action === 'list') {
                 $r['responsibilities'] = json_decode($r['responsibilities'] ?? '[]', true) ?: [];
                 $r['competencies']     = json_decode($r['competencies'] ?? '[]', true) ?: [];
                 $r['tech_stack']       = json_decode($r['tech_stack'] ?? '[]', true) ?: [];
-                $r['subpage_url']      = 'careers/' . $r['slug'] . '.html';
+                $r['subpage_url']      = '/careers/' . $r['slug'];
                 $jobs[] = $r;
             }
         } catch (\PDOException $e) {
@@ -207,7 +207,7 @@ if ($action === 'save') {
         'tech_stack'        => $techList,
         'status'            => $status,
         'date_posted'       => $datePosted,
-        'subpage_url'       => 'careers/' . $slug . '.html'
+        'subpage_url'       => '/careers/' . $slug
     ];
 
     // Database Insert/Update

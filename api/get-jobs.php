@@ -46,7 +46,7 @@ if ($pdo) {
             $r['responsibilities'] = json_decode($r['responsibilities'] ?? '[]', true) ?: [];
             $r['competencies']     = json_decode($r['competencies'] ?? '[]', true) ?: [];
             $r['tech_stack']       = json_decode($r['tech_stack'] ?? '[]', true) ?: [];
-            $r['subpage_url']      = 'careers/' . $r['slug'] . '.html';
+            $r['subpage_url']      = '/careers/' . $r['slug'];
             $jobs[] = $r;
         }
     } catch (\PDOException $e) {

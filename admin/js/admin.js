@@ -1430,7 +1430,7 @@ async function fetchCoursesCMS() {
         </select>
       </td>
       <td style="text-align:right; white-space:nowrap;">
-        <a href="../courses.html" target="_blank" class="btn-action-icon" title="View Public Courses Page">
+        <a href="/courses" target="_blank" class="btn-action-icon" title="View Public Courses Page">
           <i class="fas fa-eye"></i>
         </a>
         <button type="button" class="btn-action-icon" title="Edit Course Details" onclick='openCourseModal(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
@@ -1698,10 +1698,10 @@ async function fetchJobs() {
         ${j.date_posted || 'Recently'}
       </td>
       <td>
-        <a href="../careers/${j.slug}.html" target="_blank" style="color:#fff; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:6px;">
+        <a href="/careers/${j.slug}" target="_blank" style="color:#fff; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:6px;">
           ${escapeHtml(j.title)} <i class="fas fa-external-link-alt" style="font-size:0.75rem; color:var(--cyan);"></i>
         </a>
-        <span style="font-family:var(--font-mono); color:var(--text-dim); font-size:0.78rem;">careers/${escapeHtml(j.slug)}.html</span>
+        <span style="font-family:var(--font-mono); color:var(--text-dim); font-size:0.78rem;">/careers/${escapeHtml(j.slug)}</span>
       </td>
       <td>
         <span class="badge-pill badge-purple" style="font-size:0.75rem;">${escapeHtml(j.department_label || j.category)}</span>
@@ -1725,7 +1725,7 @@ async function fetchJobs() {
         </select>
       </td>
       <td style="text-align:right; white-space:nowrap;">
-        <a href="../careers/${j.slug}.html" target="_blank" class="btn-action-icon" title="View Public Subpage">
+        <a href="/careers/${j.slug}" target="_blank" class="btn-action-icon" title="View Public Subpage">
           <i class="fas fa-eye"></i>
         </a>
         <button type="button" class="btn-action-icon" title="Edit Role Details" onclick="openJobModal(${JSON.stringify(j).replace(/"/g, '&quot;')})">
@@ -1820,7 +1820,7 @@ async function handleSaveJob() {
       competencies: document.getElementById('jobCompetencies').value.split('\n').filter(Boolean),
       tech_stack: document.getElementById('jobTechStack').value.split(',').map(s => s.trim()).filter(Boolean),
       status: document.getElementById('jobStatus').value || 'active',
-      subpage_url: `careers/${slug}.html`,
+      subpage_url: `/careers/${slug}`,
       applicant_count: 0
     };
 

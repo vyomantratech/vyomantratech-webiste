@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button type="button" class="btn btn-primary" onclick="document.getElementById('quoteSuccessModal').remove();" style="padding: 0.85rem 2rem;">
             <i class="fas fa-check-circle"></i> Got It, Thank You
           </button>
-          <a href="index.html" class="btn btn-outline" style="padding: 0.85rem 1.5rem;">
+          <a href="/" class="btn btn-outline" style="padding: 0.85rem 1.5rem;">
             Return to Home
           </a>
         </div>
@@ -556,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button type="button" class="btn btn-outline btn-sm" onclick="location.reload();">
             <i class="fas fa-redo"></i> Submit Another Project Scope
           </button>
-          <a href="portfolio.html" class="btn btn-primary btn-sm">
+          <a href="/portfolio" class="btn btn-primary btn-sm">
             Explore Our Portfolio <i class="fas fa-arrow-right"></i>
           </a>
         </div>
