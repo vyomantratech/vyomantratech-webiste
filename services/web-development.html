@@ -33,22 +33,50 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
-    <script type="application/ld+json">
+      <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "@id": "https://vyomantratech.com/services/web-development.html#service",
-  "name": "Web Development",
-  "serviceType": "Web Development",
-  "url": "https://vyomantratech.com/services/web-development.html",
-  "description": "Custom web development in Dharmapuri, Tamil Nadu, including React and Next.js apps, PWAs and API backends by VYOMANTRA TECHNOLOGIES.",
-  "provider": {
-    "@id": "https://vyomantratech.com/#organization"
-  },
-  "areaServed": [
-    "Dharmapuri",
-    "Tamil Nadu",
-    "India"
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://vyomantratech.com/services/web-development#service",
+      "name": "Web Development",
+      "serviceType": "Web Development",
+      "url": "https://vyomantratech.com/services/web-development",
+      "description": "Custom web development in Dharmapuri, Tamil Nadu, including React and Next.js apps, PWAs and API backends by Vyomantra Technologies.",
+      "provider": {
+        "@id": "https://vyomantratech.com/#organization"
+      },
+      "areaServed": [
+        "Dharmapuri",
+        "Tamil Nadu",
+        "India"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/services/web-development#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Services",
+          "item": "https://vyomantratech.com/services"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Web Development",
+          "item": "https://vyomantratech.com/services/web-development"
+        }
+      ]
+    }
   ]
 }
   </script>

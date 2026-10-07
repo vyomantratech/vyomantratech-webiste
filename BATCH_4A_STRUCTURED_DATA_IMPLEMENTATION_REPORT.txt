@@ -1,0 +1,423 @@
+================================================================================
+VYOMANTRA TECHNOLOGIES
+BATCH 4A IMPLEMENTATION REPORT
+STRUCTURED DATA REMEDIATION + CORE BREADCRUMBS
+================================================================================
+Generated: 2026-10-07
+Target Production Domain: https://vyomantratech.com/
+Repository: vyomantratech/vyomantratech-webiste
+Batch: 4A (High-Confidence Schema Remediation & Expansion)
+Status: PASS
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+Batch 4A has successfully remediated all existing structured-data defects
+identified in the Batch 4 audit and established high-confidence, compliant
+Schema.org JSON-LD architectures across 15 core pages of the Vyomantra
+Technologies production website.
+
+Key Accomplishments in Batch 4A:
+1. Remediated all 12 individual Service pages:
+   - Completely eliminated legacy `.html` extensions from all Service `@id` and
+     `url` properties, bringing schemas into 100% harmonization with Batch 1/2
+     clean URLs (e.g., /services/web-development).
+   - Normalized all brand name occurrences in service descriptions from all-caps
+     "VYOMANTRA TECHNOLOGIES" to the natural entity "Vyomantra Technologies".
+   - Verified that every Service schema connects directly to the central
+     authoritative entity: "provider": { "@id": "https://vyomantratech.com/#organization" }.
+   - Implemented a 3-tier BreadcrumbList schema (Home > Services > [Service])
+     with clean canonical URLs on every service page.
+2. Remediated the Contact page (contact.html):
+   - Resolved the critical entity ID collision where LocalBusiness was sharing
+     the same `@id` ("https://vyomantratech.com/#organization") as the homepage
+     Organization entity.
+   - Assigned `@id: "https://vyomantratech.com/#localbusiness"` to LocalBusiness
+     and linked it to the parent organization via "parentOrganization": { "@id": "https://vyomantratech.com/#organization" }.
+   - Corrected the entity URL from the homepage to "https://vyomantratech.com/contact".
+   - Normalized the brand name to "Vyomantra Technologies".
+   - Introduced a dedicated ContactPage entity and a 2-tier BreadcrumbList.
+3. Expanded the About page (about.html):
+   - Injected AboutPage structured data linking to the WebSite and Organization
+     entities without duplicating entity declarations.
+   - Implemented a 2-tier BreadcrumbList schema (Home > About Us).
+4. Expanded the Services Hub (services.html):
+   - Injected CollectionPage and ItemList structured data indexing all 12
+     individual engineering service offerings with clean extensionless URLs.
+   - Implemented a 2-tier BreadcrumbList schema (Home > Services).
+5. Preserved 100% of visual design, CSS styling, responsive layout, JavaScript
+   functionality, server routing, and previous batch achievements.
+
+Total Website Files Modified: EXACTLY 15.
+
+================================================================================
+2. FILES CHANGED
+================================================================================
+The following 15 files were modified to implement Batch 4A:
+
+1.  services/ai-machine-learning.html
+2.  services/automation.html
+3.  services/branding.html
+4.  services/cloud-devops.html
+5.  services/digital-marketing.html
+6.  services/erp-crm.html
+7.  services/it-consulting.html
+8.  services/mobile-app-development.html
+9.  services/seo.html
+10. services/software-development.html
+11. services/ui-ux-design.html
+12. services/web-development.html
+13. contact.html
+14. about.html
+15. services.html
+
+================================================================================
+3. SERVICE SCHEMA FIXES
+================================================================================
+For all 12 individual service pages, existing schemas were remediated and
+enriched with BreadcrumbList schemas inside a unified @graph block.
+
+Detailed Record for Each of the 12 Services:
+
+1. services/ai-machine-learning.html
+   - Old @id: https://vyomantratech.com/services/ai-machine-learning.html#service
+   - New @id: https://vyomantratech.com/services/ai-machine-learning#service
+   - Old URL: https://vyomantratech.com/services/ai-machine-learning.html
+   - New URL: https://vyomantratech.com/services/ai-machine-learning
+   - Service Name: AI & Machine Learning
+   - Service Type: AI & Machine Learning
+   - Brand Normalization: Standardized to "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > AI & Machine Learning (/services/ai-machine-learning)
+   - Validation: PASS
+
+2. services/automation.html
+   - Old @id: https://vyomantratech.com/services/automation.html#service
+   - New @id: https://vyomantratech.com/services/automation#service
+   - Old URL: https://vyomantratech.com/services/automation.html
+   - New URL: https://vyomantratech.com/services/automation
+   - Service Name: Automation
+   - Service Type: Automation
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Automation (/services/automation)
+   - Validation: PASS
+
+3. services/branding.html
+   - Old @id: https://vyomantratech.com/services/branding.html#service
+   - New @id: https://vyomantratech.com/services/branding#service
+   - Old URL: https://vyomantratech.com/services/branding.html
+   - New URL: https://vyomantratech.com/services/branding
+   - Service Name: Branding & Creative
+   - Service Type: Branding & Creative
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Branding & Creative (/services/branding)
+   - Validation: PASS
+
+4. services/cloud-devops.html
+   - Old @id: https://vyomantratech.com/services/cloud-devops.html#service
+   - New @id: https://vyomantratech.com/services/cloud-devops#service
+   - Old URL: https://vyomantratech.com/services/cloud-devops.html
+   - New URL: https://vyomantratech.com/services/cloud-devops
+   - Service Name: Cloud & DevOps
+   - Service Type: Cloud & DevOps
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Cloud & DevOps (/services/cloud-devops)
+   - Validation: PASS
+
+5. services/digital-marketing.html
+   - Old @id: https://vyomantratech.com/services/digital-marketing.html#service
+   - New @id: https://vyomantratech.com/services/digital-marketing#service
+   - Old URL: https://vyomantratech.com/services/digital-marketing.html
+   - New URL: https://vyomantratech.com/services/digital-marketing
+   - Service Name: Digital Marketing
+   - Service Type: Digital Marketing
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Digital Marketing (/services/digital-marketing)
+   - Validation: PASS
+
+6. services/erp-crm.html
+   - Old @id: https://vyomantratech.com/services/erp-crm.html#service
+   - New @id: https://vyomantratech.com/services/erp-crm#service
+   - Old URL: https://vyomantratech.com/services/erp-crm.html
+   - New URL: https://vyomantratech.com/services/erp-crm
+   - Service Name: ERP & CRM
+   - Service Type: ERP & CRM
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > ERP & CRM (/services/erp-crm)
+   - Validation: PASS
+
+7. services/it-consulting.html
+   - Old @id: https://vyomantratech.com/services/it-consulting.html#service
+   - New @id: https://vyomantratech.com/services/it-consulting#service
+   - Old URL: https://vyomantratech.com/services/it-consulting.html
+   - New URL: https://vyomantratech.com/services/it-consulting
+   - Service Name: IT Consulting
+   - Service Type: IT Consulting
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > IT Consulting (/services/it-consulting)
+   - Validation: PASS
+
+8. services/mobile-app-development.html
+   - Old @id: https://vyomantratech.com/services/mobile-app-development.html#service
+   - New @id: https://vyomantratech.com/services/mobile-app-development#service
+   - Old URL: https://vyomantratech.com/services/mobile-app-development.html
+   - New URL: https://vyomantratech.com/services/mobile-app-development
+   - Service Name: Mobile App Development
+   - Service Type: Mobile App Development
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Mobile App Development (/services/mobile-app-development)
+   - Validation: PASS
+
+9. services/seo.html
+   - Old @id: https://vyomantratech.com/services/seo.html#service
+   - New @id: https://vyomantratech.com/services/seo#service
+   - Old URL: https://vyomantratech.com/services/seo.html
+   - New URL: https://vyomantratech.com/services/seo
+   - Service Name: Technical SEO
+   - Service Type: Technical SEO
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Technical SEO (/services/seo)
+   - Validation: PASS
+
+10. services/software-development.html
+   - Old @id: https://vyomantratech.com/services/software-development.html#service
+   - New @id: https://vyomantratech.com/services/software-development#service
+   - Old URL: https://vyomantratech.com/services/software-development.html
+   - New URL: https://vyomantratech.com/services/software-development
+   - Service Name: Software Development
+   - Service Type: Software Development
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Software Development (/services/software-development)
+   - Validation: PASS
+
+11. services/ui-ux-design.html
+   - Old @id: https://vyomantratech.com/services/ui-ux-design.html#service
+   - New @id: https://vyomantratech.com/services/ui-ux-design#service
+   - Old URL: https://vyomantratech.com/services/ui-ux-design.html
+   - New URL: https://vyomantratech.com/services/ui-ux-design
+   - Service Name: UI/UX Design
+   - Service Type: UI/UX Design
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > UI/UX Design (/services/ui-ux-design)
+   - Validation: PASS
+
+12. services/web-development.html
+   - Old @id: https://vyomantratech.com/services/web-development.html#service
+   - New @id: https://vyomantratech.com/services/web-development#service
+   - Old URL: https://vyomantratech.com/services/web-development.html
+   - New URL: https://vyomantratech.com/services/web-development
+   - Service Name: Web Development
+   - Service Type: Web Development
+   - Brand Normalization: Replaced "VYOMANTRA TECHNOLOGIES" with "Vyomantra Technologies"
+   - Provider Linkage: "provider": { "@id": "https://vyomantratech.com/#organization" }
+   - Breadcrumb Added: Home (/) > Services (/services) > Web Development (/services/web-development)
+   - Validation: PASS
+
+==================================================
+4. CONTACT PAGE FIX
+==================================================
+File: contact.html
+
+Old Configuration (Defective):
+- @id: https://vyomantratech.com/#organization (CONFLICT with Organization)
+- URL: https://vyomantratech.com/ (Incorrect page URL)
+- Name: VYOMANTRA TECHNOLOGIES (All-caps)
+- Schemas: Single LocalBusiness block without ContactPage or Breadcrumbs.
+
+New Configuration (Remediated):
+- ContactPage @id: https://vyomantratech.com/contact#contactpage
+- LocalBusiness @id: https://vyomantratech.com/#localbusiness
+- URL: https://vyomantratech.com/contact
+- Name: Vyomantra Technologies
+- Parent Organization Relationship:
+  "parentOrganization": { "@id": "https://vyomantratech.com/#organization" }
+- ContactPage Relationships:
+  "isPartOf": { "@id": "https://vyomantratech.com/#website" },
+  "about": { "@id": "https://vyomantratech.com/#organization" },
+  "mainEntity": { "@id": "https://vyomantratech.com/#localbusiness" }
+- Contact Breadcrumb:
+  Level 1: Home (https://vyomantratech.com/)
+  Level 2: Contact (https://vyomantratech.com/contact)
+- Verification: 0 collisions, 0 .html URLs, clean entity separation.
+
+==================================================
+5. ABOUT PAGE
+==================================================
+File: about.html
+
+Schema Added: AboutPage + BreadcrumbList within @graph:
+- AboutPage @id: https://vyomantratech.com/about#aboutpage
+- URL: https://vyomantratech.com/about
+- Name: About Us | Vyomantra Technologies
+- Description: "Learn about Vyomantra Technologies, our engineering philosophy, enterprise AI solutions, custom software architecture, and the team driving digital innovation."
+- WebSite Relationship:
+  "isPartOf": { "@id": "https://vyomantratech.com/#website" }
+- Organization Relationship:
+  "about": { "@id": "https://vyomantratech.com/#organization" }
+- About Breadcrumb:
+  Level 1: Home (https://vyomantratech.com/)
+  Level 2: About Us (https://vyomantratech.com/about)
+- Verification: No duplicate Organization created; pure @id reference.
+
+==================================================
+6. SERVICES HUB
+==================================================
+File: services.html
+
+Schema Added: CollectionPage + ItemList + BreadcrumbList within @graph:
+- CollectionPage @id: https://vyomantratech.com/services#collectionpage
+- URL: https://vyomantratech.com/services
+- Name: Technology Services | Vyomantra Technologies
+- Description: "Explore web development, software, AI, cloud, design and digital marketing services from Vyomantra Technologies in Dharmapuri, Tamil Nadu."
+- WebSite Relationship:
+  "isPartOf": { "@id": "https://vyomantratech.com/#website" }
+- Publisher Relationship:
+  "publisher": { "@id": "https://vyomantratech.com/#organization" }
+- MainEntity Relationship:
+  "mainEntity": { "@id": "https://vyomantratech.com/services#itemlist" }
+- ItemList @id: https://vyomantratech.com/services#itemlist
+- ItemList Contents: 12 ListItem entries indexing each clean service URL:
+  1.  Web Development (https://vyomantratech.com/services/web-development)
+  2.  Mobile App Development (https://vyomantratech.com/services/mobile-app-development)
+  3.  Software Development (https://vyomantratech.com/services/software-development)
+  4.  AI & Machine Learning (https://vyomantratech.com/services/ai-machine-learning)
+  5.  Automation (https://vyomantratech.com/services/automation)
+  6.  ERP & CRM Solutions (https://vyomantratech.com/services/erp-crm)
+  7.  UI/UX Design (https://vyomantratech.com/services/ui-ux-design)
+  8.  Cloud & DevOps (https://vyomantratech.com/services/cloud-devops)
+  9.  Digital Marketing (https://vyomantratech.com/services/digital-marketing)
+  10. Technical SEO (https://vyomantratech.com/services/seo)
+  11. Branding & Creative (https://vyomantratech.com/services/branding)
+  12. IT Consulting (https://vyomantratech.com/services/it-consulting)
+- Services Breadcrumb:
+  Level 1: Home (https://vyomantratech.com/)
+  Level 2: Services (https://vyomantratech.com/services)
+
+==================================================
+7. DUPLICATION AUDIT
+==================================================
+1. Duplicate JSON-LD blocks per page:
+   - All 15 modified files contain EXACTLY ONE <script type="application/ld+json"> block.
+   - Result: 0 duplicates. PASS.
+2. Duplicate Organization entities:
+   - Central Organization remains exclusively declared on index.html.
+   - Subpages reference it solely via { "@id": "https://vyomantratech.com/#organization" }.
+   - Result: 0 duplicate declarations. PASS.
+3. Duplicate WebSite entities:
+   - Central WebSite remains exclusively declared on index.html.
+   - Subpages reference it solely via { "@id": "https://vyomantratech.com/#website" }.
+   - Result: 0 duplicate declarations. PASS.
+4. Duplicate Service entities on same page:
+   - Each service page contains exactly one Service entity.
+   - Result: PASS.
+5. Duplicate BreadcrumbList entities on same page:
+   - Each page contains exactly one BreadcrumbList entity.
+   - Result: PASS.
+
+==================================================
+8. .HTML AUDIT
+==================================================
+Automated regex scan of all JSON-LD strings across all 15 modified files:
+- Pattern: /\.html/i
+- Occurrences Found: EXACTLY 0 (Zero).
+- Result: 100% clean extensionless URLs in all schema @id, url, and item properties. PASS.
+
+==================================================
+9. WWW AUDIT
+==================================================
+Automated regex scan of all JSON-LD strings across all 15 modified files:
+- Pattern: /www\.vyomantratech\.com/i
+- Occurrences Found: EXACTLY 0 (Zero).
+- Result: 100% non-www canonical origin adherence. PASS.
+
+==================================================
+10. BRAND NAME AUDIT
+==================================================
+- All schemas use the natural entity name "Vyomantra Technologies".
+- All-caps "VYOMANTRA TECHNOLOGIES" in descriptions and schema names was completely eliminated.
+- Result: PASS.
+
+==================================================
+11. VYOMASTRA AUDIT
+==================================================
+Automated scan of all modified code for accidental misspelling "Vyomastra":
+- Occurrences Found: EXACTLY 0 (Zero).
+- Result: PASS.
+
+==================================================
+12. JSON-LD VALIDATION
+==================================================
+All 15 JSON-LD payloads were extracted and parsed via Node.js JSON engine:
+- Syntax Errors: 0
+- Type Verification:
+  * 12 service files: [Service, BreadcrumbList] — Verified.
+  * contact.html: [ContactPage, LocalBusiness, BreadcrumbList] — Verified.
+  * about.html: [AboutPage, BreadcrumbList] — Verified.
+  * services.html: [CollectionPage, ItemList, BreadcrumbList] — Verified.
+- Result: PASS.
+
+==================================================
+13. VISUAL / FUNCTIONAL SAFETY
+==================================================
+- CSS files modified: 0
+- JavaScript logic files modified: 0
+- Visual DOM elements changed: 0
+- All modifications are strictly restricted to `<script type="application/ld+json">` inside `<head>`.
+- Zero render blocking or layout shifts introduced.
+- Result: PASS.
+
+==================================================
+14. FILES NOT CHANGED
+==================================================
+The following files were intentionally preserved and NOT touched:
+- index.html (Batch 3 production benchmark)
+- solutions.html and all 7 solutions/*.html files (Reserved for Batch 4B)
+- products.html and products/stockmitra.html (Reserved for Batch 4B)
+- portfolio.html and portfolio/*.html (Reserved for Batch 4B)
+- courses.html (Reserved for Batch 4B / 4C)
+- careers.html and careers/*.html (Reserved for Batch 4B / 4C)
+- gallery.html, request-a-quote.html (Reserved for Batch 4B)
+- privacy.html, terms.html, refund-policy.html (Reserved for Batch 4B)
+- .htaccess, robots.txt, sitemap.xml (Server foundation preserved)
+- admin/* and api/* (Backend / admin operational integrity preserved)
+
+==================================================
+15. POTENTIAL RISKS
+==================================================
+None.
+- All schema updates strictly use verified page content.
+- No unverified prices, ratings, or claims were included.
+- Schemas strictly declare clean 200 HTTP URLs that match current canonical tags.
+
+==================================================
+16. FINAL VALIDATION
+==================================================
+Summary Checklist:
+- 12 Service schemas updated with clean URLs & IDs: YES
+- 12 Service descriptions normalized: YES
+- 12 Service breadcrumbs implemented: YES
+- Contact page @id collision resolved: YES
+- Contact page LocalBusiness decoupled & linked to parent organization: YES
+- Contact page breadcrumb implemented: YES
+- About page AboutPage & breadcrumb implemented: YES
+- Services hub CollectionPage & ItemList (12 items) & breadcrumb implemented: YES
+- 0 .html URLs in schema: YES
+- 0 www URLs in schema: YES
+- 0 duplicate blocks: YES
+- Exactly 15 website files modified: YES
+
+==================================================
+17. BATCH 4A STATUS
+==================================================
+PASS
+==================================================

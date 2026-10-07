@@ -1,0 +1,733 @@
+================================================================================
+VYOMANTRA TECHNOLOGIES
+BATCH 4 — STRUCTURED DATA AUDIT REPORT
+================================================================================
+Generated: 2026-10-07
+Target Production Domain: https://vyomantratech.com/
+Repository: vyomantratech/vyomantratech-webiste
+Batch: 4 (Audit Phase — Read-Only)
+Status: AUDIT ONLY — READY FOR REVIEW
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+This audit establishes a complete architectural blueprint for structured data
+(JSON-LD) across the Vyomantra Technologies production website.
+
+In Batches 1, 2, and 3, the following core SEO foundations were established:
+- Batch 1: Strict HTTPS, canonical origin, clean extensionless server routing,
+  and synchronized sitemap.xml / robots.txt.
+- Batch 2: 100% harmonization of canonical tags and internal links to clean URLs;
+  elimination of intentional .html references.
+- Batch 3: Authoritative homepage brand entity signals established with clean
+  Organization and WebSite JSON-LD schemas anchored to:
+  https://vyomantratech.com/#organization
+  https://vyomantratech.com/#website
+
+The objective of Batch 4 is an exhaustive, page-by-page audit of the entire public
+website's structured data architecture to identify existing schemas, bugs,
+conflicts, missing entity relationships, and genuine rich result opportunities.
+
+Key Audit Findings:
+1. Exactly 14 files currently contain JSON-LD structured data.
+2. 23 public indexable pages currently contain NO structured data whatsoever.
+3. Critical Schema Defects in Existing Files:
+   - All 11 individual service pages contain Service schemas with .html URLs
+     in both the `url` and `@id` properties (e.g. /services/web-development.html),
+     directly contradicting the Batch 1/2 clean URL strategy.
+   - All 11 individual service pages use all-caps "VYOMANTRA TECHNOLOGIES" in
+     their descriptions.
+   - The Contact page contains a LocalBusiness schema that shares the exact same
+     entity @id ("https://vyomantratech.com/#organization") as the homepage
+     Organization schema, creating an entity definition collision.
+   - The Contact page schema points `url` to the homepage ("https://vyomantratech.com/")
+     instead of the contact page URL ("https://vyomantratech.com/contact").
+   - ZERO pages currently implement BreadcrumbList schema.
+4. Schema Expansion Opportunities:
+   - 11 Service pages + 7 Solution pages can safely support clean Service schemas.
+   - All 36 public subpages can safely support clean BreadcrumbList schemas.
+   - Products (StockMitra) supports SoftwareApplication schema.
+   - Portfolio Case Studies support CreativeWork schema.
+   - Hub pages support CollectionPage / ItemList schemas.
+   - Course and JobPosting schemas are identified as future opportunities
+     requiring structured data feed integration.
+
+Crucial Compliance Note:
+This audit strictly adheres to the "No Unsupported Claims" rule. No ratings,
+reviews, prices, offers, employee counts, founding dates, or fake social profiles
+are recommended.
+
+Website Files Modified in this Step: EXACTLY ZERO (0).
+
+================================================================================
+2. PUBLIC INDEXABLE PAGE INVENTORY
+================================================================================
+The following inventory comprises all 37 unique public pages that represent
+canonical endpoints listed in sitemap.xml, plus legacy alias pages:
+
+------------------------------------------------------------------------------------------------------------------------
+FILE                               CURRENT CANONICAL URL                           PAGE TYPE          INDEXABLE  CURRENT SCHEMA
+------------------------------------------------------------------------------------------------------------------------
+index.html                         https://vyomantratech.com/                      Homepage           YES        Organization, WebSite
+about.html                         https://vyomantratech.com/about                 About Hub          YES        NONE
+services.html                      https://vyomantratech.com/services              Services Hub       YES        NONE
+services/ai-machine-learning.html  https://vyomantratech.com/services/ai-mach..    Service Detail     YES        Service (.html bug)
+services/automation.html           https://vyomantratech.com/services/automation   Service Detail     YES        Service (.html bug)
+services/branding.html             https://vyomantratech.com/services/branding     Service Detail     YES        Service (.html bug)
+services/cloud-devops.html         https://vyomantratech.com/services/cloud-devops Service Detail     YES        Service (.html bug)
+services/digital-marketing.html    https://vyomantratech.com/services/digital-mar..Service Detail     YES        Service (.html bug)
+services/erp-crm.html              https://vyomantratech.com/services/erp-crm      Service Detail     YES        Service (.html bug)
+services/it-consulting.html        https://vyomantratech.com/services/it-consul..  Service Detail     YES        Service (.html bug)
+services/mobile-app-dev..html      https://vyomantratech.com/services/mobile-app.. Service Detail     YES        Service (.html bug)
+services/seo.html                  https://vyomantratech.com/services/seo          Service Detail     YES        Service (.html bug)
+services/software-dev..html        https://vyomantratech.com/services/software-dev Service Detail     YES        Service (.html bug)
+services/ui-ux-design.html         https://vyomantratech.com/services/ui-ux-design Service Detail     YES        Service (.html bug)
+services/web-development.html      https://vyomantratech.com/services/web-devel..  Service Detail     YES        Service (.html bug)
+solutions.html                     https://vyomantratech.com/solutions             Solutions Hub      YES        NONE
+solutions/ai-solutions.html        https://vyomantratech.com/solutions/ai-solut..  Solution Detail    YES        NONE
+solutions/automation.html          https://vyomantratech.com/solutions/automation  Solution Detail    YES        NONE
+solutions/business-websites.html   https://vyomantratech.com/solutions/business.. Solution Detail    YES        NONE
+solutions/custom-software.html     https://vyomantratech.com/solutions/custom-so.. Solution Detail    YES        NONE
+solutions/ecommerce.html           https://vyomantratech.com/solutions/ecommerce   Solution Detail    YES        NONE
+solutions/erp-crm.html             https://vyomantratech.com/solutions/erp-crm     Solution Detail    YES        NONE
+solutions/saas.html                https://vyomantratech.com/solutions/saas        Solution Detail    YES        NONE
+products.html                      https://vyomantratech.com/products              Products Hub       YES        NONE
+products/stockmitra.html           https://vyomantratech.com/products/stockmitra   Product Detail     YES        NONE
+portfolio.html                     https://vyomantratech.com/portfolio             Portfolio Hub      YES        NONE
+portfolio/ai-crm.html              https://vyomantratech.com/portfolio/ai-crm      Case Study Detail  YES        NONE
+portfolio/home-bakers.html         https://vyomantratech.com/portfolio/home-bakers Case Study Detail  YES        NONE
+courses.html                       https://vyomantratech.com/courses               Courses Hub        YES        NONE
+careers.html                       https://vyomantratech.com/careers               Careers Hub        YES        NONE
+contact.html                       https://vyomantratech.com/contact               Contact Page       YES        LocalBusiness (Collision)
+gallery.html                       https://vyomantratech.com/gallery               Gallery Hub        YES        NONE
+request-a-quote.html               https://vyomantratech.com/request-a-quote       Quote Inquiry      YES        NONE
+privacy.html                       https://vyomantratech.com/privacy               Legal Notice       YES        NONE
+terms.html                         https://vyomantratech.com/terms                 Legal Terms        YES        NONE
+refund-policy.html                 https://vyomantratech.com/refund-policy         Legal Policy       YES        NONE
+------------------------------------------------------------------------------------------------------------------------
+
+Excluded Non-Indexable / Utility Files:
+- admin/index.html (Administrative authentication dashboard; robots: noindex, nofollow)
+- verify/index.html (Certificate verification utility tool; robots: noindex, nofollow)
+- api/*.php (REST API endpoints; backend server scripts)
+- careers/index.html (Batch 1 root-redirect stub to /careers)
+- services/index.html, solutions/index.html, products/index.html, portfolio/index.html
+  (Directory collision fallback stubs)
+- privacy-policy.html, terms-and-conditions.html, projects.html (Alias files
+  canonicalizing to /privacy, /terms, /portfolio respectively)
+
+================================================================================
+3. EXISTING JSON-LD INVENTORY
+================================================================================
+Full record of all 14 existing JSON-LD script blocks currently in the codebase:
+
+1. index.html
+   - @type: Organization, WebSite (enclosed within @graph)
+   - Organization @id: https://vyomantratech.com/#organization
+   - WebSite @id: https://vyomantratech.com/#website
+   - name: "Vyomantra Technologies"
+   - url: "https://vyomantratech.com/"
+   - logo: "https://vyomantratech.com/assets/icons/vyomantra_logo.png"
+   - description: "Vyomantra Technologies builds custom software, modern web platforms, and intelligent AI solutions for growing businesses."
+   - email: "vyomantratech@gmail.com"
+   - telephone: "+91 81222 88855"
+   - address: Gopal Colony, Pidamaneri, Dharmapuri, Tamil Nadu 636701, IN
+   - sameAs: Instagram, Facebook, Twitter
+   - WebSite publisher: { "@id": "https://vyomantratech.com/#organization" }
+   - Status: VALID, CLEAN (Batch 3 production benchmark)
+
+2. contact.html
+   - @type: LocalBusiness
+   - @id: https://vyomantratech.com/#organization (COLLISION WITH HOMEPAGE ORG!)
+   - name: "VYOMANTRA TECHNOLOGIES" (ALL-CAPS DEFECT)
+   - url: "https://vyomantratech.com/" (INCORRECT URL; SHOULD BE /contact)
+   - logo / image: "https://vyomantratech.com/assets/icons/vyomantra_logo.png"
+   - telephone: "+91 81222 88855"
+   - email: "vyomantratech@gmail.com"
+   - address: Gopal Colony, Pidamaneri, Dharmapuri, Tamil Nadu 636701, IN
+   - geo: 12.130147832770412, 78.1513392736566
+   - areaServed: ["Dharmapuri", "Tamil Nadu", "India"]
+   - contactPoint: Customer service (+91 81222 88855, vyomantratech@gmail.com)
+   - Status: DEFECTIVE — ENTITY ID COLLISION & INCORRECT URL
+
+3–14. services/*.html (12 files)
+   - Files:
+     * services/ai-machine-learning.html
+     * services/automation.html
+     * services/branding.html
+     * services/cloud-devops.html
+     * services/digital-marketing.html
+     * services/erp-crm.html
+     * services/it-consulting.html
+     * services/mobile-app-development.html
+     * services/seo.html
+     * services/software-development.html
+     * services/ui-ux-design.html
+     * services/web-development.html
+   - @type: Service
+   - @id: https://vyomantratech.com/services/<name>.html#service (.HTML URL DEFECT!)
+   - url: https://vyomantratech.com/services/<name>.html (.HTML URL DEFECT!)
+   - name: "<Service Name>"
+   - serviceType: "<Service Name>"
+   - description: Contains all-caps "VYOMANTRA TECHNOLOGIES" in 11 files
+   - provider: { "@id": "https://vyomantratech.com/#organization" } (VALID LINKAGE)
+   - areaServed: ["Dharmapuri", "Tamil Nadu", "India"]
+   - Status: DEFECTIVE — .HTML URL IN @ID AND URL FIELDS
+
+================================================================================
+4. CURRENT SCHEMA TYPES
+================================================================================
+Audit of standard Schema.org types currently implemented across the project:
+
+- Organization:         YES (Present on index.html)
+- WebSite:              YES (Present on index.html)
+- LocalBusiness:        YES (Present on contact.html — contains defects)
+- Service:              YES (Present on 12 service pages — contains .html defects)
+- WebPage:              NO  (Not currently implemented)
+- AboutPage:            NO  (Not currently implemented)
+- ContactPage:          NO  (Not currently implemented)
+- CollectionPage:       NO  (Not currently implemented)
+- BreadcrumbList:       NO  (Not currently implemented on ANY page)
+- Product:              NO  (Not currently implemented)
+- SoftwareApplication:  NO  (Not currently implemented)
+- Course:               NO  (Not currently implemented)
+- CreativeWork:         NO  (Not currently implemented)
+- Article:              NO  (Not currently implemented)
+- FAQPage:              NO  (Not currently implemented)
+- Person:               NO  (Not currently implemented)
+- ItemList:             NO  (Not currently implemented)
+
+================================================================================
+5. DUPLICATE / CONFLICT AUDIT
+================================================================================
+1. Duplicate Schema Blocks on Same Page:
+   Result: PASS (0 duplicate blocks found; all pages with schema have exactly 1 block).
+2. Entity ID Collision between index.html and contact.html:
+   Result: FAIL / DEFECT.
+   On index.html:
+   `"@id": "https://vyomantratech.com/#organization"` represents the global Organization.
+   On contact.html:
+   `"@id": "https://vyomantratech.com/#organization"` is reused on a LocalBusiness object!
+   Impact: Search engines treat the same URI as having two conflicting types
+   (Organization vs LocalBusiness) with conflicting URLs (https://vyomantratech.com/
+   vs https://vyomantratech.com/contact).
+   Fix Required: contact.html must use `@id: "https://vyomantratech.com/#contactpage"`
+   or `@id: "https://vyomantratech.com/#localbusiness"` and connect to the parent
+   organization via `parentOrganization: { "@id": "https://vyomantratech.com/#organization" }`.
+3. Outdated .html URL References:
+   Result: FAIL / DEFECT.
+   All 12 Service schemas contain `.html` in `@id` and `url`.
+   Impact: Google is instructed that the canonical entity exists at a legacy .html
+   URL, contradicting the 200 clean URLs and Batch 1/2 redirects.
+   Fix Required: Update `@id` and `url` on all 12 service pages to clean URLs.
+4. All-Caps Brand Name in Schema:
+   Result: DEFECT.
+   11 Service schemas and the contact schema use "VYOMANTRA TECHNOLOGIES" instead of
+   the natural brand entity "Vyomantra Technologies".
+
+================================================================================
+6. PAGE-BY-PAGE SCHEMA AUDIT
+================================================================================
+
+1. Homepage (index.html)
+   - Current Schema: Organization, WebSite (via @graph)
+   - Recommended Schema: Preserve existing Organization and WebSite schema.
+   - Priority: MAINTAIN.
+   - Safe to Implement: YES (Already complete in Batch 3).
+
+2. About Page (about.html)
+   - Current Schema: NONE
+   - Recommended Schema: AboutPage + BreadcrumbList
+   - Properties Supported by Page:
+     * @id: https://vyomantratech.com/about#webpage
+     * url: https://vyomantratech.com/about
+     * name: "About Us | Vyomantra Technologies"
+     * description: Verified from page meta description
+     * isPartOf: { "@id": "https://vyomantratech.com/#website" }
+     * about: { "@id": "https://vyomantratech.com/#organization" }
+     * BreadcrumbList: Home > About Us
+   - Priority: HIGH (Batch 4A).
+   - Safe to Implement: YES.
+
+3. Contact Page (contact.html)
+   - Current Schema: LocalBusiness (with @id collision defect)
+   - Recommended Schema: ContactPage + LocalBusiness + BreadcrumbList
+   - Properties Supported by Page:
+     * ContactPage @id: https://vyomantratech.com/contact#webpage
+     * LocalBusiness @id: https://vyomantratech.com/#localbusiness
+     * name: "Vyomantra Technologies"
+     * url: https://vyomantratech.com/contact
+     * address: Gopal Colony, Pidamaneri, Dharmapuri, Tamil Nadu 636701, IN
+     * telephone: "+91 81222 88855"
+     * email: "vyomantratech@gmail.com"
+     * geo: 12.130147832770412, 78.1513392736566
+     * parentOrganization: { "@id": "https://vyomantratech.com/#organization" }
+     * BreadcrumbList: Home > Contact
+   - Priority: HIGH (Batch 4A — Fixes critical entity collision).
+   - Safe to Implement: YES.
+
+4. Services Hub (services.html)
+   - Current Schema: NONE
+   - Recommended Schema: CollectionPage + ItemList + BreadcrumbList
+   - Properties Supported by Page:
+     * ItemList contains 11 service leaf URLs
+     * isPartOf: { "@id": "https://vyomantratech.com/#website" }
+     * BreadcrumbList: Home > Services
+   - Priority: HIGH (Batch 4A).
+   - Safe to Implement: YES.
+
+5–15. Individual Service Pages (11 pages)
+   - Current Schema: Service (with .html bugs in @id and url)
+   - Recommended Schema: Service (CLEANED) + BreadcrumbList
+   - Properties Supported by Page:
+     * @id: https://vyomantratech.com/services/<slug>#service (Clean)
+     * url: https://vyomantratech.com/services/<slug> (Clean)
+     * name: Service title from H1
+     * serviceType: Core technical domain
+     * provider: { "@id": "https://vyomantratech.com/#organization" }
+     * areaServed: ["Dharmapuri", "Tamil Nadu", "India"]
+     * BreadcrumbList: Home > Services > <Service Name>
+   - Priority: HIGH (Batch 4A — Remediates existing .html defects).
+   - Safe to Implement: YES.
+
+16. Solutions Hub (solutions.html)
+   - Current Schema: NONE
+   - Recommended Schema: CollectionPage + ItemList + BreadcrumbList
+   - Properties Supported by Page:
+     * ItemList contains 7 solution leaf URLs
+     * BreadcrumbList: Home > Solutions
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+17–23. Individual Solution Pages (7 pages)
+   - Current Schema: NONE
+   - Recommended Schema: Service + BreadcrumbList
+   - Rationale: Each solution page represents a specialized technology engineering
+     service delivered to clients (Business Websites, Custom Software, ERP & CRM,
+     AI Solutions, Automation, SaaS, E-commerce).
+   - Properties Supported by Page:
+     * @id: https://vyomantratech.com/solutions/<slug>#service
+     * url: https://vyomantratech.com/solutions/<slug>
+     * name: Solution Title from H1
+     * provider: { "@id": "https://vyomantratech.com/#organization" }
+     * BreadcrumbList: Home > Solutions > <Solution Name>
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+24. Products Hub (products.html)
+   - Current Schema: NONE
+   - Recommended Schema: CollectionPage + ItemList + BreadcrumbList
+   - Properties Supported by Page:
+     * ItemList references StockMitra (/products/stockmitra)
+     * BreadcrumbList: Home > Products
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+25. Individual Product Page (products/stockmitra.html)
+   - Current Schema: NONE
+   - Recommended Schema: SoftwareApplication + BreadcrumbList
+   - Rationale: StockMitra is a proprietary POS billing and inventory platform.
+     It is genuinely a SoftwareApplication.
+   - Properties Supported by Page:
+     * name: "StockMitra"
+     * applicationCategory: "BusinessApplication"
+     * operatingSystem: "Web / Desktop / Windows"
+     * description: Verified from hero description
+     * author / publisher: { "@id": "https://vyomantratech.com/#organization" }
+     * BreadcrumbList: Home > Products > StockMitra
+     * NOTE: Price, ratings, and reviews are NOT present on page; MUST BE OMITTED.
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+26. Portfolio Hub (portfolio.html)
+   - Current Schema: NONE
+   - Recommended Schema: CollectionPage + ItemList + BreadcrumbList
+   - Properties Supported by Page:
+     * ItemList references AI-CRM (/portfolio/ai-crm) and Home Bakers (/portfolio/home-bakers)
+     * BreadcrumbList: Home > Portfolio
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+27–28. Portfolio Case Study Pages (portfolio/ai-crm.html, portfolio/home-bakers.html)
+   - Current Schema: NONE
+   - Recommended Schema: CreativeWork + BreadcrumbList
+   - Rationale: These are software case studies demonstrating custom engineering.
+     They are not dated blog articles.
+   - Properties Supported by Page:
+     * @id: https://vyomantratech.com/portfolio/<slug>#creativework
+     * url: https://vyomantratech.com/portfolio/<slug>
+     * name: Case Study title
+     * author: { "@id": "https://vyomantratech.com/#organization" }
+     * BreadcrumbList: Home > Portfolio > <Project Name>
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+29. Courses Page (courses.html)
+   - Current Schema: NONE
+   - Recommended Schema: CollectionPage + BreadcrumbList
+   - Future Opportunity: Dynamic Course schema via API feed (Batch 4C).
+   - Rationale: Course enrollment and dynamic modules are rendered client-side on
+     /courses. Adding a single static Course entity without dynamic catalog
+     synchronization risks serving stale syllabus/price data.
+   - Priority: MEDIUM (Batch 4B for CollectionPage / Breadcrumbs; Batch 4C for Course).
+   - Safe to Implement: YES (CollectionPage & Breadcrumbs only).
+
+30. Careers Page (careers.html)
+   - Current Schema: NONE
+   - Recommended Schema: CollectionPage + BreadcrumbList
+   - Future Opportunity: JobPosting schema on dynamically generated job subpages
+     (/careers/<slug>) once validThrough and hiringOrganization fields are integrated.
+   - Priority: MEDIUM (Batch 4B for CollectionPage; Batch 4C for JobPosting).
+   - Safe to Implement: YES.
+
+31. Gallery Page (gallery.html)
+   - Current Schema: NONE
+   - Recommended Schema: ImageGallery (or CollectionPage) + BreadcrumbList
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+32. Request a Quote (request-a-quote.html)
+   - Current Schema: NONE
+   - Recommended Schema: ContactPage + BreadcrumbList
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+33–35. Legal Policy Pages (privacy.html, terms.html, refund-policy.html)
+   - Current Schema: NONE
+   - Recommended Schema: WebPage + BreadcrumbList
+   - Priority: MEDIUM (Batch 4B).
+   - Safe to Implement: YES.
+
+==================================================
+7. BREADCRUMB ARCHITECTURE
+==================================================
+Google Search requires BreadcrumbList structured data to contain sequential
+`ListItem` elements with `position`, `name`, and `item` (clean canonical URL).
+
+Recommended Breadcrumb Hierarchies for All Public Pages:
+
+1. Level 2 Hub Pages:
+   - About Us:
+     1. Home (https://vyomantratech.com/)
+     2. About Us (https://vyomantratech.com/about)
+   - Services:
+     1. Home (https://vyomantratech.com/)
+     2. Services (https://vyomantratech.com/services)
+   - Solutions:
+     1. Home (https://vyomantratech.com/)
+     2. Solutions (https://vyomantratech.com/solutions)
+   - Products:
+     1. Home (https://vyomantratech.com/)
+     2. Products (https://vyomantratech.com/products)
+   - Portfolio:
+     1. Home (https://vyomantratech.com/)
+     2. Portfolio (https://vyomantratech.com/portfolio)
+   - Courses:
+     1. Home (https://vyomantratech.com/)
+     2. Courses (https://vyomantratech.com/courses)
+   - Careers:
+     1. Home (https://vyomantratech.com/)
+     2. Careers (https://vyomantratech.com/careers)
+   - Contact:
+     1. Home (https://vyomantratech.com/)
+     2. Contact (https://vyomantratech.com/contact)
+   - Gallery:
+     1. Home (https://vyomantratech.com/)
+     2. Gallery (https://vyomantratech.com/gallery)
+   - Request a Quote:
+     1. Home (https://vyomantratech.com/)
+     2. Request a Quote (https://vyomantratech.com/request-a-quote)
+   - Privacy Policy:
+     1. Home (https://vyomantratech.com/)
+     2. Privacy Policy (https://vyomantratech.com/privacy)
+   - Terms & Conditions:
+     1. Home (https://vyomantratech.com/)
+     2. Terms & Conditions (https://vyomantratech.com/terms)
+   - Refund Policy:
+     1. Home (https://vyomantratech.com/)
+     2. Refund Policy (https://vyomantratech.com/refund-policy)
+
+2. Level 3 Leaf Pages:
+   - Services (11 pages):
+     1. Home (https://vyomantratech.com/)
+     2. Services (https://vyomantratech.com/services)
+     3. <Service Name> (https://vyomantratech.com/services/<slug>)
+   - Solutions (7 pages):
+     1. Home (https://vyomantratech.com/)
+     2. Solutions (https://vyomantratech.com/solutions)
+     3. <Solution Name> (https://vyomantratech.com/solutions/<slug>)
+   - Products (StockMitra):
+     1. Home (https://vyomantratech.com/)
+     2. Products (https://vyomantratech.com/products)
+     3. StockMitra (https://vyomantratech.com/products/stockmitra)
+   - Portfolio (2 Case Studies):
+     1. Home (https://vyomantratech.com/)
+     2. Portfolio (https://vyomantratech.com/portfolio)
+     3. <Case Study Title> (https://vyomantratech.com/portfolio/<slug>)
+   - Careers (Dynamic Subpages — Future):
+     1. Home (https://vyomantratech.com/)
+     2. Careers (https://vyomantratech.com/careers)
+     3. <Job Role> (https://vyomantratech.com/careers/<slug>)
+
+Critical Requirement:
+All breadcrumb `item` URLs MUST strictly use clean, non-www HTTPS URLs.
+ZERO .html extensions. ZERO www hostnames.
+
+==================================================
+8. ORGANIZATION ENTITY RELATIONSHIPS
+==================================================
+A key objective of modern structured data is connecting site-wide objects back
+to the primary authoritative entity.
+
+The primary brand entity was defined on index.html in Batch 3:
+URI: https://vyomantratech.com/#organization
+
+Where and how subpage schemas must reference this entity:
+1. Service & Solution pages:
+   "provider": { "@id": "https://vyomantratech.com/#organization" }
+2. SoftwareApplication (StockMitra):
+   "author": { "@id": "https://vyomantratech.com/#organization" },
+   "publisher": { "@id": "https://vyomantratech.com/#organization" }
+3. CreativeWork (Case Studies):
+   "author": { "@id": "https://vyomantratech.com/#organization" }
+4. AboutPage:
+   "about": { "@id": "https://vyomantratech.com/#organization" }
+5. LocalBusiness (Contact):
+   "parentOrganization": { "@id": "https://vyomantratech.com/#organization" }
+6. WebPage / CollectionPage:
+   "publisher": { "@id": "https://vyomantratech.com/#organization" }
+
+Benefit:
+This prevents search engines from fragmenting "Vyomantra Technologies" into
+dozens of disconnected entities, consolidating site-wide authority into the
+primary Knowledge Graph node.
+
+==================================================
+9. SCHEMA CONSISTENCY AUDIT
+==================================================
+Verification of brand and URL consistency across existing and recommended schemas:
+
+- Canonical Origin: https://vyomantratech.com/
+- Brand Entity: "Vyomantra Technologies"
+- Organization ID: https://vyomantratech.com/#organization
+- WebSite ID: https://vyomantratech.com/#website
+
+Existing Inconsistencies Detected in Audit:
+- 12 Service schemas contain `.html` in `@id` and `url`.
+- 11 Service schemas use all-caps "VYOMANTRA TECHNOLOGIES" in description.
+- Contact schema uses all-caps "VYOMANTRA TECHNOLOGIES" in `name`.
+- Contact schema uses `@id: https://vyomantratech.com/#organization` instead of
+  distinct ID.
+- Contact schema uses homepage URL instead of `/contact`.
+
+Compliance Check:
+- References to www.vyomantratech.com in existing schemas: 0
+- References to "Vyomastra Technologies" in existing schemas: 0
+
+==================================================
+10. GOOGLE RICH RESULT ELIGIBILITY
+==================================================
+Evaluation against Google Search Central guidelines:
+
+1. Organization / WebSite:
+   Status: A. Strong candidate (Knowledge Panel & Brand disambiguation).
+   Eligibility: Validated.
+2. BreadcrumbList:
+   Status: A. Strong candidate (Breadcrumb trail in SERPs).
+   Eligibility: 100% eligible across all 36 public subpages.
+3. Service:
+   Status: A. Strong candidate (Knowledge Graph entity classification).
+   Eligibility: Validated for 11 Service pages + 7 Solution pages.
+4. SoftwareApplication:
+   Status: B. Possible candidate (Product/app listing in SERPs).
+   Eligibility: Validated for StockMitra (/products/stockmitra).
+   Safety Note: Must NOT include unverified price or rating properties.
+5. LocalBusiness:
+   Status: B. Possible candidate (Local pack / map integration).
+   Eligibility: Validated for /contact once @id collision is decoupled.
+6. Course:
+   Status: D. Requires additional data.
+   Eligibility: Dynamic rendering architecture requires automated API sync
+   before adding Course markup.
+7. JobPosting:
+   Status: E. Better handled in future batch.
+   Eligibility: Requires ISO validThrough, employmentType, and structured
+   address fields in job generation scripts.
+8. FAQPage:
+   Status: C. Not appropriate at this time (Google restricted FAQ rich results;
+   no formal Q&A markup needed).
+9. Product (with Merchant Offers):
+   Status: C. Not appropriate (No standard retail shopping cart/prices exist).
+
+==================================================
+11. COMPLETE PAGE SCHEMA MATRIX
+==================================================
+Complete inventory of all 37 public canonical pages:
+
+---------------------------------------------------------------------------------------------------------------------------------------
+PAGE                    URL                               CURRENT SCHEMA         RECOMMENDED SCHEMA           PRIORITY  DATA   SAFE?
+---------------------------------------------------------------------------------------------------------------------------------------
+Home                    /                                 Organization, WebSite  Organization, WebSite        MAINTAIN  YES    YES
+About Us                /about                            NONE                   AboutPage, BreadcrumbList    HIGH      YES    YES
+Services Hub            /services                         NONE                   CollectionPage, Breadcrumb   HIGH      YES    YES
+Web Development         /services/web-development         Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+Mobile App Dev          /services/mobile-app-development  Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+Software Dev            /services/software-development    Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+AI & ML                 /services/ai-machine-learning     Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+Automation              /services/automation              Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+ERP & CRM               /services/erp-crm                 Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+UI/UX Design            /services/ui-ux-design            Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+Cloud & DevOps          /services/cloud-devops            Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+Digital Marketing       /services/digital-marketing       Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+SEO                     /services/seo                     Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+Branding                /services/branding                Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+IT Consulting           /services/it-consulting           Service (.html bug)    Service (clean), Breadcrumb  HIGH      YES    YES
+Solutions Hub           /solutions                        NONE                   CollectionPage, Breadcrumb   MEDIUM    YES    YES
+Business Websites       /solutions/business-websites      NONE                   Service, BreadcrumbList      MEDIUM    YES    YES
+Custom Software         /solutions/custom-software        NONE                   Service, BreadcrumbList      MEDIUM    YES    YES
+ERP & CRM Solution      /solutions/erp-crm                NONE                   Service, BreadcrumbList      MEDIUM    YES    YES
+AI Solutions            /solutions/ai-solutions           NONE                   Service, BreadcrumbList      MEDIUM    YES    YES
+Automation Solution     /solutions/automation             NONE                   Service, BreadcrumbList      MEDIUM    YES    YES
+SaaS Products           /solutions/saas                   NONE                   Service, BreadcrumbList      MEDIUM    YES    YES
+E-commerce              /solutions/ecommerce              NONE                   Service, BreadcrumbList      MEDIUM    YES    YES
+Products Hub            /products                         NONE                   CollectionPage, Breadcrumb   MEDIUM    YES    YES
+StockMitra              /products/stockmitra              NONE                   SoftwareApp, BreadcrumbList  MEDIUM    YES    YES
+Portfolio Hub           /portfolio                        NONE                   CollectionPage, Breadcrumb   MEDIUM    YES    YES
+AI-CRM Case Study       /portfolio/ai-crm                 NONE                   CreativeWork, BreadcrumbList MEDIUM    YES    YES
+Home Bakers Case Study  /portfolio/home-bakers            NONE                   CreativeWork, BreadcrumbList MEDIUM    YES    YES
+Courses Hub             /courses                          NONE                   CollectionPage, Breadcrumb   MEDIUM    YES    YES
+Careers Hub             /careers                          NONE                   CollectionPage, Breadcrumb   MEDIUM    YES    YES
+Contact Us              /contact                          LocalBusiness (Defect) ContactPage, LocalBus, Bread HIGH      YES    YES
+Gallery                 /gallery                          NONE                   ImageGallery, BreadcrumbList MEDIUM    YES    YES
+Request a Quote         /request-a-quote                  NONE                   ContactPage, BreadcrumbList  MEDIUM    YES    YES
+Privacy Policy          /privacy                          NONE                   WebPage, BreadcrumbList      MEDIUM    YES    YES
+Terms & Conditions      /terms                            NONE                   WebPage, BreadcrumbList      MEDIUM    YES    YES
+Refund Policy           /refund-policy                    NONE                   WebPage, BreadcrumbList      MEDIUM    YES    YES
+---------------------------------------------------------------------------------------------------------------------------------------
+
+==================================================
+12. BATCH 4A — HIGH CONFIDENCE RECOMMENDATIONS
+==================================================
+Scope: Immediate defect remediation & core structural enrichment.
+Files Involved: 14 files (12 services + contact + about).
+
+1. Fix 12 Existing Service Pages:
+   - Clean `@id`: replace `.html#service` with `#service` on clean canonical URL.
+   - Clean `url`: replace `.html` with clean canonical URL.
+   - Standardize description: replace all-caps "VYOMANTRA TECHNOLOGIES" with
+     "Vyomantra Technologies".
+   - Add `BreadcrumbList` schema to all 12 pages.
+2. Remediate Contact Page (contact.html):
+   - Resolve entity collision: Change `@id` to `https://vyomantratech.com/#contactpage`.
+   - Add distinct `LocalBusiness` entity with `@id: "https://vyomantratech.com/#localbusiness"`
+     linked via `parentOrganization: { "@id": "https://vyomantratech.com/#organization" }`.
+   - Update `url` to `https://vyomantratech.com/contact`.
+   - Update `name` to "Vyomantra Technologies".
+   - Add `BreadcrumbList` schema.
+3. Add About Page Schema (about.html):
+   - Add `AboutPage` schema referencing the central Organization entity.
+   - Add `BreadcrumbList` schema.
+4. Add Services Hub Schema (services.html):
+   - Add `CollectionPage` + `ItemList` + `BreadcrumbList`.
+
+==================================================
+13. BATCH 4B — MEDIUM CONFIDENCE RECOMMENDATIONS
+==================================================
+Scope: Secondary hub and leaf page expansion.
+Files Involved: 19 files.
+
+1. Solutions Section:
+   - Hub (`solutions.html`): `CollectionPage` + `ItemList` + `BreadcrumbList`.
+   - 7 Leaf Pages (`solutions/*.html`): `Service` schema + `BreadcrumbList`.
+2. Products Section:
+   - Hub (`products.html`): `CollectionPage` + `ItemList` + `BreadcrumbList`.
+   - Detail (`products/stockmitra.html`): `SoftwareApplication` + `BreadcrumbList`.
+3. Portfolio Section:
+   - Hub (`portfolio.html`): `CollectionPage` + `ItemList` + `BreadcrumbList`.
+   - 2 Case Studies: `CreativeWork` + `BreadcrumbList`.
+4. Inquiry & Utility Pages:
+   - `gallery.html`: `ImageGallery` + `BreadcrumbList`.
+   - `request-a-quote.html`: `ContactPage` + `BreadcrumbList`.
+   - `courses.html`: `CollectionPage` + `BreadcrumbList`.
+   - `careers.html`: `CollectionPage` + `BreadcrumbList`.
+   - `privacy.html`, `terms.html`, `refund-policy.html`: `WebPage` + `BreadcrumbList`.
+
+==================================================
+14. BATCH 4C — FUTURE OPPORTUNITIES
+==================================================
+Scope: Dynamic data feeds requiring backend script additions.
+
+1. `JobPosting` Structured Data:
+   - Location: Individual career detail pages (`careers/<slug>.html`).
+   - Prerequisite: Update `api/admin/job-builder.php` to include:
+     * `datePosted` (ISO 8601)
+     * `validThrough` (expiry timestamp)
+     * `employmentType` (FULL_TIME, INTERN, etc.)
+     * `hiringOrganization` (@id reference to Organization)
+     * `jobLocation` (structured PostalAddress)
+2. `Course` Structured Data:
+   - Location: Dedicated dynamic feed or expanded courses.html catalog.
+   - Prerequisite: Standardize course syllabus, duration, prerequisites,
+     and certificate credentials in `courses` database table.
+
+==================================================
+15. UNSUPPORTED DATA / INFORMATION GAPS
+==================================================
+To ensure 100% compliance with Google Structured Data policies, the following
+properties MUST NOT be added at this stage because the underlying verified data
+does not exist:
+
+1. `offers / price`: StockMitra does not publish a standard consumer price (pricing
+   is customized based on branch count; CTA is "Schedule Demo").
+2. `aggregateRating / ratingValue`: No third-party verified review widget exists
+   on product or service detail pages.
+3. `review / reviewCount`: Testimonials exist on the homepage but are client quotes
+   rather than structured product review markup.
+4. `Course instructor`: Instructors are not statically bound to individual modules.
+5. `JobPosting baseSalary`: Salary ranges are not publicly disclosed ("Competitive CTC").
+
+==================================================
+16. FILES MODIFIED
+==================================================
+ZERO (0) website files were modified during this audit.
+
+Modified Files:
+NONE
+
+==================================================
+17. IMPLEMENTATION PLAN
+==================================================
+When approved to implement, the work will proceed in two controlled phases:
+
+Phase 1 (Batch 4A):
+- Remediate existing Service schemas (strip .html, clean URLs).
+- Remediate Contact page schema (fix @id collision, fix URL).
+- Add AboutPage schema and BreadcrumbList to about.html.
+- Add CollectionPage and BreadcrumbList to services.html.
+- Run validator to confirm 0 errors.
+
+Phase 2 (Batch 4B):
+- Add Service schemas to solutions/*.html.
+- Add SoftwareApplication schema to stockmitra.html.
+- Add CreativeWork schemas to portfolio/*.html.
+- Add CollectionPage / WebPage schemas and BreadcrumbList to all remaining pages.
+- Project-wide rich results validation.
+
+==================================================
+18. RISKS & MITIGATIONS
+==================================================
+1. Risk: Schema Validation Errors (Missing required properties).
+   Mitigation: Only use properties that are genuinely present. Keep schemas
+   focused and lean.
+2. Risk: Entity Duplication.
+   Mitigation: Connect all subpage schemas to the central Organization via @id
+   rather than declaring full nested Organization objects on every page.
+3. Risk: Breaking Visual Layouts.
+   Mitigation: JSON-LD is injected entirely inside `<head>` via `<script type="application/ld+json">`.
+   Zero visual or DOM impact occurs.
+
+==================================================
+19. FINAL STATUS
+==================================================
+AUDIT ONLY — READY FOR REVIEW
+==================================================

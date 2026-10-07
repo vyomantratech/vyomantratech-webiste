@@ -33,22 +33,50 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
-    <script type="application/ld+json">
+      <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "@id": "https://vyomantratech.com/services/cloud-devops.html#service",
-  "name": "Cloud & DevOps",
-  "serviceType": "Cloud & DevOps",
-  "url": "https://vyomantratech.com/services/cloud-devops.html",
-  "description": "AWS and GCP infrastructure, Docker, Kubernetes and CI/CD deployment pipelines by VYOMANTRA TECHNOLOGIES.",
-  "provider": {
-    "@id": "https://vyomantratech.com/#organization"
-  },
-  "areaServed": [
-    "Dharmapuri",
-    "Tamil Nadu",
-    "India"
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://vyomantratech.com/services/cloud-devops#service",
+      "name": "Cloud & DevOps",
+      "serviceType": "Cloud & DevOps",
+      "url": "https://vyomantratech.com/services/cloud-devops",
+      "description": "AWS and GCP infrastructure, Docker, Kubernetes and CI/CD deployment pipelines by Vyomantra Technologies.",
+      "provider": {
+        "@id": "https://vyomantratech.com/#organization"
+      },
+      "areaServed": [
+        "Dharmapuri",
+        "Tamil Nadu",
+        "India"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/services/cloud-devops#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Services",
+          "item": "https://vyomantratech.com/services"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Cloud & DevOps",
+          "item": "https://vyomantratech.com/services/cloud-devops"
+        }
+      ]
+    }
   ]
 }
   </script>

@@ -33,22 +33,50 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
-    <script type="application/ld+json">
+      <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "@id": "https://vyomantratech.com/services/ui-ux-design.html#service",
-  "name": "UI/UX Design",
-  "serviceType": "UI/UX Design",
-  "url": "https://vyomantratech.com/services/ui-ux-design.html",
-  "description": "Human-centered UI/UX design, Figma design systems, interactive prototypes, and usability testing by VYOMANTRA TECHNOLOGIES.",
-  "provider": {
-    "@id": "https://vyomantratech.com/#organization"
-  },
-  "areaServed": [
-    "Dharmapuri",
-    "Tamil Nadu",
-    "India"
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://vyomantratech.com/services/ui-ux-design#service",
+      "name": "UI/UX Design",
+      "serviceType": "UI/UX Design",
+      "url": "https://vyomantratech.com/services/ui-ux-design",
+      "description": "Human-centered UI/UX design, Figma design systems, interactive prototypes, and usability testing by Vyomantra Technologies.",
+      "provider": {
+        "@id": "https://vyomantratech.com/#organization"
+      },
+      "areaServed": [
+        "Dharmapuri",
+        "Tamil Nadu",
+        "India"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/services/ui-ux-design#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Services",
+          "item": "https://vyomantratech.com/services"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "UI/UX Design",
+          "item": "https://vyomantratech.com/services/ui-ux-design"
+        }
+      ]
+    }
   ]
 }
   </script>

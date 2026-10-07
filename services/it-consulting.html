@@ -33,22 +33,50 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
-    <script type="application/ld+json">
+      <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "@id": "https://vyomantratech.com/services/it-consulting.html#service",
-  "name": "IT Consulting",
-  "serviceType": "IT Consulting",
-  "url": "https://vyomantratech.com/services/it-consulting.html",
-  "description": "Technology consulting, software architecture reviews, digital transformation and cloud modernization advice from VYOMANTRA TECHNOLOGIES.",
-  "provider": {
-    "@id": "https://vyomantratech.com/#organization"
-  },
-  "areaServed": [
-    "Dharmapuri",
-    "Tamil Nadu",
-    "India"
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://vyomantratech.com/services/it-consulting#service",
+      "name": "IT Consulting",
+      "serviceType": "IT Consulting",
+      "url": "https://vyomantratech.com/services/it-consulting",
+      "description": "Technology consulting, software architecture reviews, digital transformation and cloud modernization advice from Vyomantra Technologies.",
+      "provider": {
+        "@id": "https://vyomantratech.com/#organization"
+      },
+      "areaServed": [
+        "Dharmapuri",
+        "Tamil Nadu",
+        "India"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/services/it-consulting#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Services",
+          "item": "https://vyomantratech.com/services"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "IT Consulting",
+          "item": "https://vyomantratech.com/services/it-consulting"
+        }
+      ]
+    }
   ]
 }
   </script>

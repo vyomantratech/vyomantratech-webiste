@@ -33,49 +33,82 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/animations.css">
-  <script type="application/ld+json">
+    <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "@id": "https://vyomantratech.com/#organization",
-  "name": "VYOMANTRA TECHNOLOGIES",
-  "url": "https://vyomantratech.com/",
-  "logo": "https://vyomantratech.com/assets/icons/vyomantra_logo.png",
-  "image": "https://vyomantratech.com/assets/icons/vyomantra_logo.png",
-  "description": "VYOMANTRA TECHNOLOGIES is based in Dharmapuri, Tamil Nadu.",
-  "telephone": "+91 81222 88855",
-  "email": "vyomantratech@gmail.com",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Gopal Colony, Pidamaneri",
-    "addressLocality": "Dharmapuri",
-    "addressRegion": "Tamil Nadu",
-    "postalCode": "636701",
-    "addressCountry": "IN"
-  },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": 12.130147832770412,
-    "longitude": 78.1513392736566
-  },
-  "areaServed": [
-    "Dharmapuri",
-    "Tamil Nadu",
-    "India"
-  ],
-  "sameAs": [
-    "https://www.instagram.com/vyomantratech",
-    "https://www.facebook.com/profile.php?id=61593276075676",
-    "https://twitter.com/vyomantratech"
-  ],
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "contactType": "customer service",
-    "telephone": "+91 81222 88855",
-    "email": "vyomantratech@gmail.com",
-    "areaServed": "IN",
-    "availableLanguage": "English"
-  }
+  "@graph": [
+    {
+      "@type": "ContactPage",
+      "@id": "https://vyomantratech.com/contact#contactpage",
+      "url": "https://vyomantratech.com/contact",
+      "name": "Contact Us | Vyomantra Technologies",
+      "description": "Contact Vyomantra Technologies in Dharmapuri, Tamil Nadu for web development, software engineering, AI solutions, internships, and project consultations.",
+      "isPartOf": {
+        "@id": "https://vyomantratech.com/#website"
+      },
+      "about": {
+        "@id": "https://vyomantratech.com/#organization"
+      },
+      "mainEntity": {
+        "@id": "https://vyomantratech.com/#localbusiness"
+      }
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://vyomantratech.com/#localbusiness",
+      "name": "Vyomantra Technologies",
+      "url": "https://vyomantratech.com/contact",
+      "logo": "https://vyomantratech.com/assets/icons/vyomantra_logo.png",
+      "image": "https://vyomantratech.com/assets/icons/vyomantra_logo.png",
+      "description": "Vyomantra Technologies office location in Dharmapuri, Tamil Nadu.",
+      "telephone": "+91 81222 88855",
+      "email": "vyomantratech@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Gopal Colony, Pidamaneri",
+        "addressLocality": "Dharmapuri",
+        "addressRegion": "Tamil Nadu",
+        "postalCode": "636701",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 12.130147832770412,
+        "longitude": 78.1513392736566
+      },
+      "areaServed": [
+        "Dharmapuri",
+        "Tamil Nadu",
+        "India"
+      ],
+      "sameAs": [
+        "https://www.instagram.com/vyomantratech",
+        "https://www.facebook.com/profile.php?id=61593276075676",
+        "https://twitter.com/vyomantratech"
+      ],
+      "parentOrganization": {
+        "@id": "https://vyomantratech.com/#organization"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/contact#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Contact",
+          "item": "https://vyomantratech.com/contact"
+        }
+      ]
+    }
+  ]
 }
   </script>
 </head>

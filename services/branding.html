@@ -33,22 +33,50 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
-    <script type="application/ld+json">
+      <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "@id": "https://vyomantratech.com/services/branding.html#service",
-  "name": "Branding & Creative",
-  "serviceType": "Branding & Creative",
-  "url": "https://vyomantratech.com/services/branding.html",
-  "description": "Distinctive corporate brand identity, vector logos, typography systems, marketing collateral, and brand style guides by VYOMANTRA TECHNOLOGIES.",
-  "provider": {
-    "@id": "https://vyomantratech.com/#organization"
-  },
-  "areaServed": [
-    "Dharmapuri",
-    "Tamil Nadu",
-    "India"
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://vyomantratech.com/services/branding#service",
+      "name": "Branding & Creative",
+      "serviceType": "Branding & Creative",
+      "url": "https://vyomantratech.com/services/branding",
+      "description": "Distinctive corporate brand identity, vector logos, typography systems, marketing collateral, and brand style guides by Vyomantra Technologies.",
+      "provider": {
+        "@id": "https://vyomantratech.com/#organization"
+      },
+      "areaServed": [
+        "Dharmapuri",
+        "Tamil Nadu",
+        "India"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/services/branding#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Services",
+          "item": "https://vyomantratech.com/services"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Branding & Creative",
+          "item": "https://vyomantratech.com/services/branding"
+        }
+      ]
+    }
   ]
 }
   </script>

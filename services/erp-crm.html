@@ -33,22 +33,50 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
-    <script type="application/ld+json">
+      <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "@id": "https://vyomantratech.com/services/erp-crm.html#service",
-  "name": "ERP & CRM",
-  "serviceType": "ERP & CRM",
-  "url": "https://vyomantratech.com/services/erp-crm.html",
-  "description": "Custom ERP and CRM platforms from VYOMANTRA TECHNOLOGIES for centralizing data and supporting business operations.",
-  "provider": {
-    "@id": "https://vyomantratech.com/#organization"
-  },
-  "areaServed": [
-    "Dharmapuri",
-    "Tamil Nadu",
-    "India"
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://vyomantratech.com/services/erp-crm#service",
+      "name": "ERP & CRM",
+      "serviceType": "ERP & CRM",
+      "url": "https://vyomantratech.com/services/erp-crm",
+      "description": "Custom ERP and CRM platforms from Vyomantra Technologies for centralizing data and supporting business operations.",
+      "provider": {
+        "@id": "https://vyomantratech.com/#organization"
+      },
+      "areaServed": [
+        "Dharmapuri",
+        "Tamil Nadu",
+        "India"
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/services/erp-crm#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Services",
+          "item": "https://vyomantratech.com/services"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "ERP & CRM",
+          "item": "https://vyomantratech.com/services/erp-crm"
+        }
+      ]
+    }
   ]
 }
   </script>
