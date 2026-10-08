@@ -1,0 +1,48 @@
+{
+  "ga4": [
+    {
+      "file": "admin/dashboard.html",
+      "id": "g-bottom"
+    },
+    {
+      "file": "gallery.html",
+      "id": "g-card"
+    },
+    {
+      "file": "index.html",
+      "id": "g-fast"
+    },
+    {
+      "file": "portfolio.html",
+      "id": "G-certified"
+    },
+    {
+      "file": "privacy-policy.html",
+      "id": "g-card"
+    },
+    {
+      "file": "privacy.html",
+      "id": "g-card"
+    },
+    {
+      "file": "refund-policy.html",
+      "id": "g-card"
+    },
+    {
+      "file": "services/ui-ux-design.html",
+      "id": "g-compass"
+    },
+    {
+      "file": "terms-and-conditions.html",
+      "id": "g-card"
+    },
+    {
+      "file": "terms.html",
+      "id": "g-card"
+    }
+  ],
+  "gtm": [],
+  "gscVerification": [],
+  "metaPixel": [],
+  "other": []
+}

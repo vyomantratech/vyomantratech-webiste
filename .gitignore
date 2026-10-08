@@ -8,3 +8,9 @@ logs/*
 uploads/certificates/*.pdf
 uploads/payments/*
 uploads/resumes/*
+
+# Untracked database and environment credentials
+api/db-config.local.php
+*.local.php
+.env
+.env.*

@@ -66,11 +66,43 @@ function generateJobSubpage($jobData) {
   <link rel="canonical" href="https://vyomantratech.com/careers/{$slug}">
   <meta property="og:title" content="{$title} | Vyomantra Technologies">
   <meta property="og:description" content="{$summary}">
+  <meta property="og:url" content="https://vyomantratech.com/careers/{$slug}">
   <link rel="icon" type="image/png" href="../assets/icons/vyomantra_logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/animations.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vyomantratech.com/careers/{$slug}#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vyomantratech.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Careers",
+          "item": "https://vyomantratech.com/careers"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "{$title}",
+          "item": "https://vyomantratech.com/careers/{$slug}"
+        }
+      ]
+    }
+  ]
+}
+  </script>
 </head>
 
 <body>
@@ -426,7 +458,7 @@ function generateJobSubpage($jobData) {
       </div>
       <div class="footer-bottom">
         <p>&copy; 2026 Vyomantra Technologies. All rights reserved.</p>
-        <p><a href="/privacy-policy" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a href="/terms-and-conditions" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a> <a href="/refund-policy" style="color:var(--text-dim);">Refund Policy</a></p>
+        <p><a href="/privacy" style="color:var(--text-dim); margin-right:1rem;">Privacy Policy</a> <a href="/terms" style="color:var(--text-dim); margin-right:1rem;">Terms & Conditions</a> <a href="/refund-policy" style="color:var(--text-dim);">Refund Policy</a></p>
       </div>
     </div>
   </footer>

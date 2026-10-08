@@ -1,0 +1,631 @@
+{
+  "canonicalAudit": [
+    {
+      "file": "about.html",
+      "canonical": "https://vyomantratech.com/about",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "admin/dashboard.html",
+      "canonical": null,
+      "status": "FAIL",
+      "issues": [
+        "Missing canonical tag"
+      ]
+    },
+    {
+      "file": "admin/index.html",
+      "canonical": null,
+      "status": "FAIL",
+      "issues": [
+        "Missing canonical tag"
+      ]
+    },
+    {
+      "file": "careers/index.html",
+      "canonical": "https://vyomantratech.com/careers",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "careers.html",
+      "canonical": "https://vyomantratech.com/careers",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "contact.html",
+      "canonical": "https://vyomantratech.com/contact",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "courses.html",
+      "canonical": "https://vyomantratech.com/courses",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "gallery.html",
+      "canonical": "https://vyomantratech.com/gallery",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "index.html",
+      "canonical": "https://vyomantratech.com/",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "portfolio/ai-crm.html",
+      "canonical": "https://vyomantratech.com/portfolio/ai-crm",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "portfolio/home-bakers.html",
+      "canonical": "https://vyomantratech.com/portfolio/home-bakers",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "portfolio/index.html",
+      "canonical": "https://vyomantratech.com/portfolio",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "portfolio.html",
+      "canonical": "https://vyomantratech.com/portfolio",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "privacy-policy.html",
+      "canonical": "https://vyomantratech.com/privacy",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "privacy.html",
+      "canonical": "https://vyomantratech.com/privacy",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "products/index.html",
+      "canonical": "https://vyomantratech.com/products",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "products/stockmitra.html",
+      "canonical": "https://vyomantratech.com/products/stockmitra",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "products.html",
+      "canonical": "https://vyomantratech.com/products",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "projects.html",
+      "canonical": "https://vyomantratech.com/portfolio",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "refund-policy.html",
+      "canonical": "https://vyomantratech.com/refund-policy",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "request-a-quote.html",
+      "canonical": "https://vyomantratech.com/request-a-quote",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/ai-machine-learning.html",
+      "canonical": "https://vyomantratech.com/services/ai-machine-learning",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/automation.html",
+      "canonical": "https://vyomantratech.com/services/automation",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/branding.html",
+      "canonical": "https://vyomantratech.com/services/branding",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/cloud-devops.html",
+      "canonical": "https://vyomantratech.com/services/cloud-devops",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/digital-marketing.html",
+      "canonical": "https://vyomantratech.com/services/digital-marketing",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/erp-crm.html",
+      "canonical": "https://vyomantratech.com/services/erp-crm",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/index.html",
+      "canonical": "https://vyomantratech.com/services",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/it-consulting.html",
+      "canonical": "https://vyomantratech.com/services/it-consulting",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/mobile-app-development.html",
+      "canonical": "https://vyomantratech.com/services/mobile-app-development",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/seo.html",
+      "canonical": "https://vyomantratech.com/services/seo",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/software-development.html",
+      "canonical": "https://vyomantratech.com/services/software-development",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/ui-ux-design.html",
+      "canonical": "https://vyomantratech.com/services/ui-ux-design",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services/web-development.html",
+      "canonical": "https://vyomantratech.com/services/web-development",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "services.html",
+      "canonical": "https://vyomantratech.com/services",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/ai-solutions.html",
+      "canonical": "https://vyomantratech.com/solutions/ai-solutions",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/automation.html",
+      "canonical": "https://vyomantratech.com/solutions/automation",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/business-websites.html",
+      "canonical": "https://vyomantratech.com/solutions/business-websites",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/custom-software.html",
+      "canonical": "https://vyomantratech.com/solutions/custom-software",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/ecommerce.html",
+      "canonical": "https://vyomantratech.com/solutions/ecommerce",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/erp-crm.html",
+      "canonical": "https://vyomantratech.com/solutions/erp-crm",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/index.html",
+      "canonical": "https://vyomantratech.com/solutions",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions/saas.html",
+      "canonical": "https://vyomantratech.com/solutions/saas",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "solutions.html",
+      "canonical": "https://vyomantratech.com/solutions",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "terms-and-conditions.html",
+      "canonical": "https://vyomantratech.com/terms",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "terms.html",
+      "canonical": "https://vyomantratech.com/terms",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "verify/index.html",
+      "canonical": null,
+      "status": "FAIL",
+      "issues": [
+        "Missing canonical tag"
+      ]
+    }
+  ],
+  "sitemapIssues": [],
+  "missingFromSitemap": [],
+  "titleDescIssues": [
+    {
+      "file": "admin/dashboard.html",
+      "issues": [
+        "Missing Meta Description"
+      ],
+      "title": "Admin Dashboard &amp; CMS | VYOMANTRA TECHNOLOGIES",
+      "descLen": 0
+    },
+    {
+      "file": "admin/index.html",
+      "issues": [
+        "Missing Meta Description"
+      ],
+      "title": "Admin Login | VYOMANTRA TECHNOLOGIES Control Center",
+      "descLen": 0
+    },
+    {
+      "file": "careers/index.html",
+      "issues": [
+        "Missing Meta Description"
+      ],
+      "title": "Careers | VYOMANTRA TECHNOLOGIES",
+      "descLen": 0
+    },
+    {
+      "file": "solutions/ai-solutions.html",
+      "issues": [
+        "Long Title (74 chars)"
+      ],
+      "title": "Enterprise AI Solutions &amp; Intelligent Systems | VYOMANTRA TECHNOLOGIES",
+      "descLen": 165
+    }
+  ],
+  "headingIssues": [
+    {
+      "file": "admin/index.html",
+      "issues": [
+        "Missing H1"
+      ],
+      "h1s": []
+    },
+    {
+      "file": "careers/index.html",
+      "issues": [
+        "Missing H1"
+      ],
+      "h1s": []
+    }
+  ],
+  "schemaAudit": [
+    {
+      "file": "about.html",
+      "count": 1,
+      "types": [
+        "AboutPage",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "admin/dashboard.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "admin/index.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "careers/index.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "careers.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "contact.html",
+      "count": 1,
+      "types": [
+        "ContactPage",
+        "LocalBusiness",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "courses.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "gallery.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "index.html",
+      "count": 1,
+      "types": [
+        "Organization",
+        "WebSite"
+      ]
+    },
+    {
+      "file": "portfolio/ai-crm.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "portfolio/home-bakers.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "portfolio/index.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "portfolio.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "privacy-policy.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "privacy.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "products/index.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "products/stockmitra.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "products.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "projects.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "refund-policy.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "request-a-quote.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "services/ai-machine-learning.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/automation.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/branding.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/cloud-devops.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/digital-marketing.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/erp-crm.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/index.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "services/it-consulting.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/mobile-app-development.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/seo.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/software-development.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/ui-ux-design.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services/web-development.html",
+      "count": 1,
+      "types": [
+        "Service",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "services.html",
+      "count": 1,
+      "types": [
+        "CollectionPage",
+        "ItemList",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "file": "solutions/ai-solutions.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions/automation.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions/business-websites.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions/custom-software.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions/ecommerce.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions/erp-crm.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions/index.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions/saas.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "solutions.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "terms-and-conditions.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "terms.html",
+      "count": 0,
+      "types": []
+    },
+    {
+      "file": "verify/index.html",
+      "count": 0,
+      "types": []
+    }
+  ]
+}

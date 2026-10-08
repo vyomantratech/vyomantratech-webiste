@@ -1,0 +1,11 @@
+# Block private records (certificates contain emails/notes; admin_session holds a login token).
+# courses.json and jobs.json stay public because courses.html / careers.html read them.
+<FilesMatch "^(certificates|certificate_logs|admin_session)\.json$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>

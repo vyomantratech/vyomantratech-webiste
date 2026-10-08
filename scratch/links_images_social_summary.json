@@ -1,0 +1,422 @@
+{
+  "linkIssues": [
+    {
+      "file": "careers.html",
+      "href": "admin/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "contact.html",
+      "href": "admin/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "courses.html",
+      "href": "admin/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "index.html",
+      "href": "verify/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "index.html",
+      "href": "verify/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "index.html",
+      "href": "admin/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "request-a-quote.html",
+      "href": "admin/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "services/index.html",
+      "href": "../admin/index.html",
+      "type": "Internal link contains .html"
+    },
+    {
+      "file": "services.html",
+      "href": "admin/index.html",
+      "type": "Internal link contains .html"
+    }
+  ],
+  "externalImages": [
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?q=80&w=800"
+    },
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=800"
+    },
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800"
+    },
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=800"
+    },
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800"
+    },
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1505373877841-8d25f771d0b7?q=80&w=800"
+    },
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800"
+    },
+    {
+      "file": "gallery.html",
+      "src": "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800"
+    },
+    {
+      "file": "index.html",
+      "src": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80"
+    },
+    {
+      "file": "index.html",
+      "src": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80"
+    },
+    {
+      "file": "index.html",
+      "src": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80"
+    },
+    {
+      "file": "index.html",
+      "src": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80"
+    },
+    {
+      "file": "index.html",
+      "src": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80"
+    },
+    {
+      "file": "index.html",
+      "src": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop&q=80"
+    },
+    {
+      "file": "products/index.html",
+      "src": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "file": "products/index.html",
+      "src": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "file": "products.html",
+      "src": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "file": "products.html",
+      "src": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop"
+    }
+  ],
+  "socialIssues": [
+    {
+      "file": "about.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "admin/dashboard.html",
+      "issues": [
+        "Missing og:title",
+        "Missing og:description",
+        "Missing og:url",
+        "Missing og:image",
+        "Missing twitter:card"
+      ]
+    },
+    {
+      "file": "admin/index.html",
+      "issues": [
+        "Missing og:title",
+        "Missing og:description",
+        "Missing og:url",
+        "Missing og:image",
+        "Missing twitter:card"
+      ]
+    },
+    {
+      "file": "careers/index.html",
+      "issues": [
+        "Missing og:title",
+        "Missing og:description",
+        "Missing og:url",
+        "Missing og:image",
+        "Missing twitter:card"
+      ]
+    },
+    {
+      "file": "careers.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "contact.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "courses.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "gallery.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "portfolio/ai-crm.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "portfolio/home-bakers.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "portfolio/index.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "portfolio.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "privacy-policy.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "privacy.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "products/index.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "products/stockmitra.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "products.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "projects.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "refund-policy.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "request-a-quote.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/ai-machine-learning.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/automation.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/branding.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/cloud-devops.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/digital-marketing.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/erp-crm.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/index.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/it-consulting.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/mobile-app-development.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/seo.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/software-development.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/ui-ux-design.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services/web-development.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "services.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/ai-solutions.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/automation.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/business-websites.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/custom-software.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/ecommerce.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/erp-crm.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/index.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions/saas.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "solutions.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "terms-and-conditions.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "terms.html",
+      "issues": [
+        "og:url contains .html"
+      ]
+    },
+    {
+      "file": "verify/index.html",
+      "issues": [
+        "Missing og:title",
+        "Missing og:description",
+        "Missing og:url",
+        "Missing og:image",
+        "Missing twitter:card"
+      ]
+    }
+  ],
+  "totalImages": 329,
+  "missingAltCount": 0,
+  "emptyAltCount": 1,
+  "missingLazyCount": 95,
+  "missingDimensionsCount": 14
+}

@@ -1,0 +1,239 @@
+{
+  "assets/icons/vyomantra_logo.webp": [
+    "about.html",
+    "admin/dashboard.html",
+    "admin/index.html",
+    "careers.html",
+    "contact.html",
+    "courses.html",
+    "gallery.html",
+    "index.html",
+    "portfolio/ai-crm.html",
+    "portfolio/home-bakers.html",
+    "portfolio.html",
+    "privacy.html",
+    "products/stockmitra.html",
+    "products.html",
+    "refund-policy.html",
+    "request-a-quote.html",
+    "services/ai-machine-learning.html",
+    "services/automation.html",
+    "services/branding.html",
+    "services/cloud-devops.html",
+    "services/digital-marketing.html",
+    "services/erp-crm.html",
+    "services/it-consulting.html",
+    "services/mobile-app-development.html",
+    "services/seo.html",
+    "services/software-development.html",
+    "services/ui-ux-design.html",
+    "services/web-development.html",
+    "services.html",
+    "solutions/ai-solutions.html",
+    "solutions/automation.html",
+    "solutions/business-websites.html",
+    "solutions/custom-software.html",
+    "solutions/ecommerce.html",
+    "solutions/erp-crm.html",
+    "solutions/saas.html",
+    "solutions.html",
+    "terms.html",
+    "verify/index.html"
+  ],
+  "assets/photos/team_squad.webp": [
+    "about.html"
+  ],
+  "assets/icons/msme_logo.svg": [
+    "about.html",
+    "careers.html",
+    "contact.html",
+    "courses.html",
+    "index.html",
+    "portfolio.html",
+    "privacy.html",
+    "products.html",
+    "request-a-quote.html",
+    "services.html",
+    "solutions.html",
+    "verify/index.html"
+  ],
+  "assets/ai/vyomantra_ai_sentinel.webp": [
+    "about.html",
+    "index.html"
+  ],
+  "assets/Team/sachin.webp": [
+    "about.html"
+  ],
+  "assets/Team/santhosh.webp": [
+    "about.html"
+  ],
+  "assets/Team/sivaperumal.webp": [
+    "about.html"
+  ],
+  "assets/Team/rishi.webp": [
+    "about.html"
+  ],
+  "assets/Team/punith.webp": [
+    "about.html"
+  ],
+  "assets/Team/naveen.webp": [
+    "about.html"
+  ],
+  "assets/icons/whatsapp.webp": [
+    "about.html",
+    "careers.html",
+    "contact.html",
+    "courses.html",
+    "gallery.html",
+    "index.html",
+    "portfolio/ai-crm.html",
+    "portfolio/home-bakers.html",
+    "portfolio.html",
+    "privacy.html",
+    "products/stockmitra.html",
+    "products.html",
+    "refund-policy.html",
+    "request-a-quote.html",
+    "services/ai-machine-learning.html",
+    "services/automation.html",
+    "services/branding.html",
+    "services/cloud-devops.html",
+    "services/digital-marketing.html",
+    "services/erp-crm.html",
+    "services/it-consulting.html",
+    "services/mobile-app-development.html",
+    "services/seo.html",
+    "services/software-development.html",
+    "services/ui-ux-design.html",
+    "services/web-development.html",
+    "services.html",
+    "solutions/ai-solutions.html",
+    "solutions/automation.html",
+    "solutions/business-websites.html",
+    "solutions/custom-software.html",
+    "solutions/ecommerce.html",
+    "solutions/erp-crm.html",
+    "solutions/saas.html",
+    "solutions.html",
+    "terms.html"
+  ],
+  "assets/icons/instagram.webp": [
+    "about.html",
+    "contact.html",
+    "gallery.html",
+    "index.html",
+    "privacy.html",
+    "services.html",
+    "terms.html"
+  ],
+  "assets/icons/facebook.webp": [
+    "about.html",
+    "contact.html",
+    "gallery.html",
+    "index.html",
+    "privacy.html",
+    "services.html",
+    "terms.html"
+  ],
+  "assets/icons/twitter.webp": [
+    "about.html",
+    "contact.html",
+    "gallery.html",
+    "index.html",
+    "privacy.html",
+    "services.html",
+    "terms.html"
+  ],
+  "assets/GooglePay_QR (1).webp": [
+    "courses.html"
+  ],
+  "assets/ai/vyomantra_ai_nexus.webp": [
+    "courses.html",
+    "index.html",
+    "products.html",
+    "services.html"
+  ],
+  "assets/ai/vyomantra_ai_core.webp": [
+    "index.html"
+  ],
+  "assets/photos/crm/crm_1.webp": [
+    "index.html",
+    "portfolio/ai-crm.html",
+    "portfolio.html"
+  ],
+  "assets/photos/crm/crm_2.webp": [
+    "index.html",
+    "portfolio/ai-crm.html",
+    "portfolio.html"
+  ],
+  "assets/photos/crm/crm_3.webp": [
+    "index.html",
+    "portfolio/ai-crm.html",
+    "portfolio.html"
+  ],
+  "assets/photos/crm/crm_4.webp": [
+    "index.html",
+    "portfolio/ai-crm.html",
+    "portfolio.html"
+  ],
+  "assets/photos/garden_woods/garden_woods_1.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/garden_woods/garden_woods_2.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/vintage_hides/vintage_hides_1.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/vintage_hides/vintage_hides_2.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/vevaha/vevaha_1.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/vevaha/vevaha_2.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/yarm_sports/yarm_1.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/yarm_sports/yarm_2.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/h2h_packers/h2h_1.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/h2h_packers/h2h_2.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/ecl/ecl_1.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/ecl/ecl_2.webp": [
+    "index.html",
+    "portfolio.html"
+  ],
+  "assets/photos/home_bakers/home_bakers_1.webp": [
+    "portfolio/home-bakers.html"
+  ],
+  "assets/photos/home_bakers/home_bakers_2.webp": [
+    "portfolio/home-bakers.html"
+  ],
+  "assets/photos/home_bakers/home_bakers_3.webp": [
+    "portfolio/home-bakers.html"
+  ],
+  "assets/ai/vyomantra_ai_lattice.webp": [
+    "products.html"
+  ]
+}

@@ -340,6 +340,20 @@ if ($action === 'update_status') {
         syncJobsJsonFile($all);
     }
 
+    // If job closed, safely remove the compiled public HTML subpage to prevent stale 200 serving
+    if ($status === 'closed') {
+        $cleanSlug = preg_replace('/[^a-z0-9_-]/', '', strtolower($slug));
+        if (!empty($cleanSlug)) {
+            $careersDir = realpath(__DIR__ . '/../../careers');
+            if ($careersDir) {
+                $targetSubpage = $careersDir . DIRECTORY_SEPARATOR . $cleanSlug . '.html';
+                if (file_exists($targetSubpage) && is_file($targetSubpage)) {
+                    @unlink($targetSubpage);
+                }
+            }
+        }
+    }
+
     sendResponse(true, "Job status changed to $status.");
 }
 
@@ -350,6 +364,31 @@ if ($action === 'delete') {
 
     if (!$id && !$slug) {
         sendResponse(false, 'Valid ID or slug required.', [], 400);
+    }
+
+    // If slug not provided, find it from DB or JSON before deleting
+    if (empty($slug) && $pdo && $id) {
+        try {
+            $stmt = $pdo->prepare("SELECT slug FROM job_postings WHERE id = :id LIMIT 1");
+            $stmt->execute([':id' => $id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row && !empty($row['slug'])) {
+                $slug = $row['slug'];
+            }
+        } catch (\PDOException $e) {}
+    }
+
+    if (empty($slug) && $id) {
+        $jsonFile = __DIR__ . '/../../data/jobs.json';
+        if (file_exists($jsonFile)) {
+            $all = json_decode(file_get_contents($jsonFile), true) ?: [];
+            foreach ($all as $item) {
+                if (($item['id'] ?? 0) === $id && !empty($item['slug'])) {
+                    $slug = $item['slug'];
+                    break;
+                }
+            }
+        }
     }
 
     if ($pdo) {
@@ -369,7 +408,19 @@ if ($action === 'delete') {
         syncJobsJsonFile($all);
     }
 
-    sendResponse(true, "Job removed successfully.");
+    // Safely remove compiled static subpage
+    $cleanSlug = preg_replace('/[^a-z0-9_-]/', '', strtolower($slug));
+    if (!empty($cleanSlug)) {
+        $careersDir = realpath(__DIR__ . '/../../careers');
+        if ($careersDir) {
+            $targetSubpage = $careersDir . DIRECTORY_SEPARATOR . $cleanSlug . '.html';
+            if (file_exists($targetSubpage) && is_file($targetSubpage)) {
+                @unlink($targetSubpage);
+            }
+        }
+    }
+
+    sendResponse(true, "Job removed successfully and public page unlinked.");
 }
 
 sendResponse(false, 'Invalid jobs action', [], 400);

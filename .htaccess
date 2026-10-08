@@ -33,6 +33,11 @@ AddCharset UTF-8 .html .css .js .json .php
   RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+index(?:\.html)?[\s?] [NC]
   RewriteRule ^(.*)index(?:\.html)?$ / [R=301,L]
 
+  # 2b. Permanent 301 Redirects for Legacy URL Aliases
+  RewriteRule ^privacy-policy(?:\.html)?$ /privacy [R=301,L]
+  RewriteRule ^terms-and-conditions(?:\.html)?$ /terms [R=301,L]
+  RewriteRule ^projects(?:\.html)?$ /portfolio [R=301,L]
+
   # 3. Clean Hub Directories: redirect /hub/ or /hub/index.html -> /hub
   # E.g. /services/ or /services/index.html -> /services
   RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+(services|solutions|products|portfolio|careers)(?:/index(?:\.html)?|/)[\s?] [NC]
@@ -45,6 +50,7 @@ AddCharset UTF-8 .html .css .js .json .php
 
   # 5. Clean QR Certificate Verification: /verify/VYM-... -> /verify/index.html?id=VYM-...
   RewriteRule ^verify/([A-Za-z0-9_-]+)/?$ verify/index.html?id=$1 [L,QSA]
+  RewriteRule ^verify/?$ verify/index.html [L]
 
   # 6. Hub Sections Internal Rewrite: map /hub -> hub.html (bypasses Apache mod_dir folder slash)
   RewriteRule ^(services|solutions|products|portfolio|careers)$ $1.html [L]
@@ -66,7 +72,7 @@ AddCharset UTF-8 .html .css .js .json .php
 
 # Block private files that must never be downloaded directly
 # (data/, logs/, uploads/certificates/, scratch/, scripts/, templates/ also have their own .htaccess)
-<FilesMatch "(?i)(\.(sql|md|mjs|log)$|^custom_template_downloaded\.docx$)">
+<FilesMatch "(?i)(\.(sql|md|mjs|log|local\.php)$|^custom_template_downloaded\.docx$)">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

@@ -1,0 +1,82 @@
+# =======================================================================
+# VYOMANTRA TECHNOLOGIES - HOSTINGER PRODUCTION CONFIG
+# Clean Extensionless URLs (.html Removal), HTTPS, Caching & Security
+# =======================================================================
+
+Options -MultiViews
+DirectoryIndex index.html index.php
+
+# Enforce UTF-8 charset on all responses to prevent font/character encoding corruption
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html .css .js .json .php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # FastCGI / PHP-FPM Authorization Header Forwarding (Crucial for Hostinger API Auth)
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+  RewriteCond %{HTTP:Authorization} ^(.*)
+  RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+  # 0. Never serve the .git folder
+  RewriteRule ^\.git - [F,L]
+
+  # 1. Force HTTPS and Non-WWW in ONE permanent 301 redirect (exclude local dev)
+  RewriteCond %{HTTP_HOST} !^localhost(:\d+)?$
+  RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(:\d+)?$
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\.vyomantratech\.com$ [NC]
+  RewriteRule ^(.*)$ https://vyomantratech.com/$1 [R=301,L]
+
+  # 2. Clean Root /index.html -> /
+  RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+index(?:\.html)?[\s?] [NC]
+  RewriteRule ^(.*)index(?:\.html)?$ / [R=301,L]
+
+  # 3. Clean Hub Directories: redirect /hub/ or /hub/index.html -> /hub
+  # E.g. /services/ or /services/index.html -> /services
+  RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+(services|solutions|products|portfolio|careers)(?:/index(?:\.html)?|/)[\s?] [NC]
+  RewriteRule ^(services|solutions|products|portfolio|careers)(?:/index(?:\.html)?|/)?$ /$1 [R=301,L]
+
+  # 4. External 301 Redirect: Strip .html extension from browser address bar
+  # E.g. https://vyomantratech.com/about.html -> https://vyomantratech.com/about
+  RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+(.*?)\.html[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # 5. Clean QR Certificate Verification: /verify/VYM-... -> /verify/index.html?id=VYM-...
+  RewriteRule ^verify/([A-Za-z0-9_-]+)/?$ verify/index.html?id=$1 [L,QSA]
+
+  # 6. Hub Sections Internal Rewrite: map /hub -> hub.html (bypasses Apache mod_dir folder slash)
+  RewriteRule ^(services|solutions|products|portfolio|careers)$ $1.html [L]
+
+  # 7. Generic Internal Rewrite: Map extensionless URL to existing .html file
+  # E.g. /about -> about.html, /services/web-development -> services/web-development.html
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Block private files that must never be downloaded directly
+# (data/, logs/, uploads/certificates/, scratch/, scripts/, templates/ also have their own .htaccess)
+<FilesMatch "(?i)(\.(sql|md|mjs|log)$|^custom_template_downloaded\.docx$)">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+<FilesMatch "^\.git">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>
